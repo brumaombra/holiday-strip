@@ -1,0 +1,162 @@
+{
+    "app": {
+        "title": "Holiday Strip",
+        "loadError": "An error occurred while loading the data"
+    },
+    "common": {
+        "close": "Close",
+        "cancel": "Cancel",
+        "refreshing": "Refreshing...",
+        "controlPanel": "Control Panel",
+        "genericError": "An error occurred",
+        "syncingDevice": "Syncing device...",
+        "saveError": "An error occurred while saving the settings",
+        "loadErrorTitle": "Couldn't read the device",
+        "loadErrorDescription": "The device didn't answer. Check that it's on and on the same network, then try again.",
+        "loadRetryAction": "Try again"
+    },
+    "nav": {
+        "home": {
+            "label": "Home",
+            "description": "Preview the matrix and pick a scene"
+        },
+        "message": {
+            "label": "Message",
+            "description": "Edit the scrolling greeting and the countdown"
+        },
+        "settings": {
+            "label": "Settings",
+            "description": "Power limit, language and device info"
+        },
+        "wifi": {
+            "label": "WiFi",
+            "description": "Scan networks and connect the device"
+        }
+    },
+    "dialogs": {
+        "errorTitle": "Error",
+        "successTitle": "Success"
+    },
+    "errors": {
+        "pageNotFound": "Page not found",
+        "pageNotFoundMessage": "The page you requested does not exist or is no longer available on this device.",
+        "genericTitle": "Something went wrong",
+        "genericMessage": "An unexpected error interrupted the web interface.",
+        "backToHome": "Back to home",
+        "label": "Error"
+    },
+    "api": {
+        "wifiWrongCredentials": "The Wi-Fi credentials are wrong or the network is unavailable.",
+        "wifiUnknownStatus": "The device returned an unknown Wi-Fi connection status.",
+        "wifiTimeout": "The device did not finish connecting to Wi-Fi in time.",
+        "wifiFailed": "Failed to connect to WiFi",
+        "wifiConnectError": "An error occurred while connecting to the Wi-Fi network",
+        "backendErrors": {
+            "missing_required_fields": "Some information is missing. Please check the form and try again.",
+            "request_body_read_failed": "The device could not process the request. Please try again.",
+            "invalid_json": "The device received data in an unexpected format. Please try again.",
+            "invalid_connection_field": "The network name or password is too long, or not valid. Network names are up to 32 characters and passwords up to 64.",
+            "invalid_settings_field": "One of the settings has a value the device does not accept. Please check them and try again.",
+            "request_body_too_large": "The request is too large for the device.",
+            "cors_origin_not_allowed": "The device only accepts requests from its own page.",
+            "wifi_scan_failed": "The device could not scan the Wi-Fi networks. Please try again.",
+            "settings_save_failed": "The device could not save the settings. Please try again."
+        }
+    },
+    "pages": {
+        "home": {
+            "title": "Holiday Strip",
+            "previewTitle": "Live preview",
+            "previewLabel": "Live preview of the LED matrix",
+            "power": {
+                "label": "Display on"
+            },
+            "brightness": {
+                "label": "Brightness",
+                "note": "How bright the LEDs shine. Lower it for a dark room, or to draw less current."
+            },
+            "current": {
+                "title": "Current draw",
+                "estimated": "About {milliamps} mA now",
+                "limit": "Limit {milliamps} mA",
+                "limitedTitle": "Power limit reached",
+                "limitedDescription": "The device is dimming the LEDs to stay under the limit. Lower the brightness, or raise the limit in Settings if your power supply can take it."
+            },
+            "scenesTitle": "Scenes",
+            "scenesDescription": "Pick one scene to keep, or let the strip rotate through all of them.",
+            "rotateAll": "Rotate all scenes",
+            "rotateAllDescription": "Cycle through every scene, one after the other",
+            "onScreen": "On screen",
+            "sceneNames": {
+                "0": "Greeting",
+                "1": "Snowfall",
+                "2": "Christmas trees",
+                "3": "Santa's sleigh",
+                "4": "Fireplace",
+                "5": "Fairy lights",
+                "6": "Gifts",
+                "7": "Candy cane",
+                "8": "Fireworks"
+            }
+        },
+        "message": {
+            "title": "Message",
+            "label": "Scrolling message",
+            "placeholder": "Type your greeting",
+            "counter": "{length} / {max}",
+            "allowedHint": "The matrix can draw {letters}, spaces and {punctuation}. Type {heart} for a heart. Lowercase is shown in capitals.",
+            "unsupportedTitle": "Some characters can't be drawn",
+            "unsupportedDescription": "The matrix font has no {characters}. The matrix shows each of them as a question mark (accented letters as two).",
+            "saveAction": "Save message",
+            "saveSuccess": "The message has been saved!",
+            "countdown": {
+                "title": "Countdown",
+                "label": "Christmas countdown",
+                "note": "In the {days} days before Christmas the strip also scrolls \"MANCANO N GIORNI A NATALE!\" (N is the number of days left). The countdown is always in Italian."
+            }
+        },
+        "settings": {
+            "title": "Settings",
+            "powerTitle": "Power",
+            "maxMilliamps": {
+                "label": "Power limit",
+                "note": "The most current the LEDs may draw; the device dims them to stay under it. Set it to about 80% of what your 5 V power supply can deliver."
+            },
+            "languageTitle": "Language",
+            "language": {
+                "label": "Language",
+                "note": "The language of this web interface."
+            },
+            "deviceTitle": "Device",
+            "uptime": "Uptime",
+            "uptimeValue": "{days}d {hours}h {minutes}m",
+            "network": "Saved network"
+        },
+        "wifi": {
+            "title": "Connect to WiFi",
+            "currentNetworkLabel": "Current network",
+            "notConnected": "Not connected",
+            "availableNetworks": "Available networks",
+            "password": "Password",
+            "passwordPlaceholder": "Enter the WiFi password",
+            "note": "The device will try the credentials immediately and disable its temporary hotspot after a successful connection.",
+            "connectAction": "Connect device",
+            "connectedTitle": "Device connected",
+            "connectedMessage": "The microcontroller connected to {ssid} and is available at {hostname} and {ip}.",
+            "connectError": "An error occurred while connecting to the Wi-Fi network",
+            "refreshError": "An error occurred while refreshing the SSID list",
+            "connectConfirmTitle": "Connect device to WiFi",
+            "connectConfirmMessage": "Send the selected credentials for {ssid} to the device and switch it to that network?",
+            "noNetworksTitle": "No networks found yet",
+            "noNetworksDescription": "The device is still scanning, or no network is in range. Scan again in a few seconds.",
+            "scanAgain": "Scan again",
+            "passwordDialogTitle": "Join {ssid}",
+            "passwordDialogDescription": "Enter the password of this network."
+        },
+        "apSetup": {
+            "title": "Connect to WiFi",
+            "connectConfirmTitle": "Connect and leave AP mode",
+            "connectConfirmMessage": "Send the selected credentials for {ssid} to the device, connect to that network, and disable the temporary hotspot?"
+        }
+    }
+}
