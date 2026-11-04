@@ -2,9 +2,9 @@
 
 # 🎄 Holiday Strip
 
-### An ESP32-powered Christmas show for a 72x12 LED matrix
+### An ESP32-powered holiday show for a 72x12 LED matrix
 
-Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into an animated Christmas display. It rotates through nine hand-drawn scenes with smooth crossfades, scrolls your own greeting with a countdown to Christmas, and comes with a phone-friendly dashboard, built into the firmware, to control it all.
+Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into an animated holiday display. It starts with Christmas: nine hand-drawn scenes that rotate with smooth crossfades, and your own greeting scrolling with a countdown to Christmas. A phone-friendly dashboard, built into the firmware, controls it all.
 
 <p>
   <img alt="ESP32" src="https://img.shields.io/badge/esp32-ESP32-E7352C?logo=espressif&logoColor=white">
@@ -37,7 +37,7 @@ Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into 
 <a id="overview"></a>
 ## 📘 Overview
 
-This project started from a 72x12 LED matrix pulled from a truck sign. Its protocol was worked out by driving it from an ESP32 and watching it with an ESP32-CAM (see [docs/protocol.md](docs/protocol.md)), and now it shows Christmas scenes.
+This project started from a 72x12 LED matrix pulled from a truck sign. Its protocol was worked out by driving it from an ESP32 and watching it with an ESP32-CAM (see [docs/protocol.md](docs/protocol.md)), and now it shows holiday scenes. Christmas is the first holiday, and more will follow.
 
 The firmware runs on an ESP32 and:
 
@@ -46,7 +46,7 @@ The firmware runs on an ESP32 and:
 - Serves a dashboard on your network to switch it on and off, set the brightness, watch a live preview, pick a scene, and edit the message.
 - Estimates the current of every frame and dims it before it goes over your power supply's limit.
 
-### 🎬 Scenes
+### 🎄 Christmas scenes
 
 1. **Greeting**: your message scrolls between two chasing garlands. In the 60 days before Christmas it adds a countdown (`MANCANO N GIORNI A NATALE!`), and on December 25 it shows `OGGI E' NATALE!`.
 2. **Snowfall**: snow falls and piles up next to a little house with warm windows.
@@ -141,11 +141,11 @@ pio run -e matrix --target upload
 
 5. **Connect the matrix to your Wi-Fi.**
 
-On the first boot there's no saved network, so the matrix opens an open hotspot called `Christmas-Matrix`. Join it with your phone, and the setup page opens by itself: pick your network and type its password.
+On the first boot there's no saved network, so the matrix opens an open hotspot called `Holiday-Strip`. Join it with your phone, and the setup page opens by itself: pick your network and type its password.
 
 6. **Open the dashboard.**
 
-Once the matrix joins your network, open `http://christmas-matrix.local/`, or the IP address of the board.
+Once the matrix joins your network, open `http://holiday-strip.local/`, or the IP address of the board.
 
 7. **Update over the air afterward.**
 
@@ -298,8 +298,8 @@ The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the
 - Nothing lights up: check the data wire on `GPIO13`, and that the ESP32 and the matrix share the same ground.
 - Wrong colors or flickering pixels: the data signal is probably too weak or too long. Keep the data wire short, or add a 3.3 V to 5 V level shifter.
 - The picture looks dim with bright scenes: the power limiter is dimming it. Raise the limit on the dashboard only if your power supply can deliver it.
-- The `Christmas-Matrix` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Check the serial monitor.
-- `christmas-matrix.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects.
+- The `Holiday-Strip` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Check the serial monitor.
+- `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects.
 - The dashboard shows an old version: rebuild the web app with `npm run build:embedded` before building the firmware.
 - No countdown: the clock is set from NTP, so the countdown only appears once the board is online, and only in the 60 days before Christmas.
 - OTA upload fails with an authentication error: the password in `upload_flags` must match `PIO_OTA_PASSWORD` in the firmware on the board.

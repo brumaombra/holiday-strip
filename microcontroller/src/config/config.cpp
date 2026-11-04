@@ -6,8 +6,8 @@
 
 namespace config {
 	// Network names and the Wi-Fi setup
-	const char HOSTNAME[] = "christmas-matrix"; // http://christmas-matrix.local
-	const char ACCESS_POINT_NAME[] = "Christmas-Matrix"; // Open hotspot for the Wi-Fi setup, when no saved network works
+	const char HOSTNAME[] = "holiday-strip"; // http://holiday-strip.local
+	const char ACCESS_POINT_NAME[] = "Holiday-Strip"; // Open hotspot for the Wi-Fi setup, when no saved network works
 	const char SETUP_PAGE_PATH[] = "/ap-setup"; // Page of the web app the hotspot clients are sent to
 	const char ASSET_PATH_PREFIX[] = "/_nuxt/"; // Files of the web app, never redirected by the hotspot
 
