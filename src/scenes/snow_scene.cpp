@@ -27,7 +27,7 @@ namespace {
 		void draw(Frame &f, float t, float dt) override {
 			// Fill the sky with a vertical gradient, lighter near the ground
 			for (int y = 0; y < HEIGHT; y++) {
-				Color c = blendColor({0, 0, 12}, {0, 6, 35}, y / float(HEIGHT - 1));
+				Color c = blendColor({ 0, 0, 12 }, { 0, 6, 35 }, y / float(HEIGHT - 1));
 				for (int x = 0; x < WIDTH; x++) {
 					f[y][x] = c;
 				}
@@ -93,11 +93,11 @@ namespace {
 		// Draw the house with its chimney, roof, walls, door and windows
 		static void drawHouse(Frame &f, float t) {
 			const int cx = 57; // Center column of the house
-			const Color wall = {110, 45, 15};
-			const Color roof = {150, 15, 15};
+			const Color wall = { 110, 45, 15 };
+			const Color roof = { 150, 15, 15 };
 			// Chimney
 			for (int y = 2; y <= 4; y++) {
-				setPixel(f, 61, y, {120, 40, 30});
+				setPixel(f, 61, y, { 120, 40, 30 });
 			}
 			setPixel(f, 61, 1, SNOW);
 			// Roof with snow on its top edge
@@ -120,12 +120,12 @@ namespace {
 			}
 			// Door and warm flickering windows
 			for (int y = 9; y < HEIGHT; y++) {
-				setPixel(f, cx, y, {50, 20, 5});
+				setPixel(f, cx, y, { 50, 20, 5 });
 			}
 
 			// Make the light of the windows flicker
 			float flicker = 0.8f + 0.2f * sinf(t * 7.0f) * sinf(t * 2.3f);
-			Color light = scaleColor({255, 170, 50}, flicker);
+			Color light = scaleColor({ 255, 170, 50 }, flicker);
 
 			// Draw the two windows, two pixels wide and tall
 			for (int y = 8; y <= 9; y++) {

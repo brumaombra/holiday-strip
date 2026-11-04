@@ -23,18 +23,18 @@ namespace {
 		// Draw the scrolling text between the two chasing garlands
 		void draw(Frame &f, float t, float dt) override {
 			// Draw the starry background
-			fillFrame(f, {0, 0, 0});
+			fillFrame(f, { 0, 0, 0 });
 			stars.draw(f, t);
 
 			// Black out the rows around the text so it stands out from the stars
-			for (int y : {1, 9, 10}) {
+			for (int y : { 1, 9, 10 }) {
 				for (int x = 0; x < WIDTH; x++) {
-					f[y][x] = {0, 0, 0};
+					f[y][x] = { 0, 0, 0 };
 				}
 			}
 
 			// Define the colors the letters take in turn
-			const Color palette[] = {RED, GREEN, GOLD};
+			const Color palette[] = { RED, GREEN, GOLD };
 
 			// Scroll the text left and restart it once it has left the screen
 			// Each pass picks up the latest message and countdown
@@ -80,8 +80,8 @@ namespace {
 
 	private:
 		static constexpr float SPEED = 16.0f; // Scroll speed in columns per second
-		String text;                          // Message being scrolled
-		float scroll = 0;                     // Columns scrolled so far in this pass
+		String text; // Message being scrolled
+		float scroll = 0; // Columns scrolled so far in this pass
 		Stars stars;
 
 		// Build the scrolling text: the message, then the Christmas countdown when it's enabled and the clock is set

@@ -22,7 +22,7 @@ namespace {
 		// Draw the sky, the pile and the falling gift (a full pile sinks away)
 		void draw(Frame &f, float t, float dt) override {
 			// Draw the night sky with its stars
-			fillFrame(f, {0, 0, 12});
+			fillFrame(f, { 0, 0, 12 });
 			stars.draw(f, t);
 
 			// Count down the sinking of a full pile and empty it when done
@@ -85,17 +85,17 @@ namespace {
 	private:
 		// A wrapped gift
 		struct Gift {
-			int x, w, h;    // Left column, width and height
+			int x, w, h; // Left column, width and height
 			float y, speed; // Top row and fall speed (rows per second)
 			Color box, ribbon;
 			bool active; // Whether the gift is falling
 		};
 		static constexpr float SINK_SECONDS = 1.2f; // Seconds a full pile takes to sink away
-		Color pile[HEIGHT][WIDTH];             // Colors of the landed gifts
-		bool pileUsed[HEIGHT][WIDTH];          // Which pixels of the pile are filled
-		int top[WIDTH];                        // Top row of the boxes in each column (HEIGHT when empty)
-		Gift falling;                          // The gift that is falling now
-		float sinking = 0;                          // Seconds left before the pile has sunk (0 when it isn't sinking)
+		Color pile[HEIGHT][WIDTH]; // Colors of the landed gifts
+		bool pileUsed[HEIGHT][WIDTH]; // Which pixels of the pile are filled
+		int top[WIDTH]; // Top row of the boxes in each column (HEIGHT when empty)
+		Gift falling; // The gift that is falling now
+		float sinking = 0; // Seconds left before the pile has sunk (0 when it isn't sinking)
 		Stars stars;
 
 		// Remove all the gifts from the pile
@@ -126,8 +126,8 @@ namespace {
 		// Create a gift with a random size, colors and position above the screen
 		void spawn() {
 			// Define the colors of the boxes and the ribbons
-			static const Color boxes[] = {{210, 0, 0}, {0, 150, 30}, {20, 60, 230}, {150, 0, 160}, {230, 120, 0}};
-			static const Color ribbons[] = {GOLD, WHITE, {255, 40, 40}};
+			static const Color boxes[] = { { 210, 0, 0 }, { 0, 150, 30 }, { 20, 60, 230 }, { 150, 0, 160 }, { 230, 120, 0 } };
+			static const Color ribbons[] = { GOLD, WHITE, { 255, 40, 40 } };
 
 			// Pick a random size (5 to 7 wide, 3 to 4 tall)
 			falling.w = 5 + esp_random() % 3;

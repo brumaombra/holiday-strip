@@ -26,12 +26,12 @@ namespace {
 					float w = constrain(s * 2.5f * 0.5f + 0.5f, 0.0f, 1.0f);
 
 					// Blend from white to red along the stripe and apply the row shade
-					f[y][x] = scaleColor(blendColor({255, 235, 235}, {230, 0, 0}, w), shade);
+					f[y][x] = scaleColor(blendColor({ 255, 235, 235 }, { 230, 0, 0 }, w), shade);
 				}
 			}
 
 			// Add a few white sparkles at random places
-			for (int i = 0; i < 3; i++) {      // Three tries per frame
+			for (int i = 0; i < 3; i++) { // Three tries per frame
 				if (esp_random() % 100 < 15) { // 15% chance per try
 					addPixel(f, esp_random() % WIDTH, esp_random() % HEIGHT, WHITE);
 				}

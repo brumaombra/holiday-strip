@@ -22,7 +22,7 @@ namespace {
 		// Draw two strings of lights hanging in swags, with the current light effect
 		void draw(Frame &f, float t, float dt) override {
 			// Clear the frame
-			fillFrame(f, {0, 0, 0});
+			fillFrame(f, { 0, 0, 0 });
 
 			// Switch the light effect every 6 seconds (twinkle, chase, color cycle)
 			int mode = ((int)(t / 6.0f)) % 3;
@@ -41,7 +41,7 @@ namespace {
 					int wy = base + (int)lroundf(3.0f * (1.0f - (u * u) / (SWAG * SWAG / 4)));
 
 					// Draw the dark green wire
-					setPixel(f, x, wy, {0, 35, 5});
+					setPixel(f, x, wy, { 0, 35, 5 });
 
 					// Skip the columns without a bulb (there's one every 4 columns)
 					if (((int)(x + offset)) % 4 != 2) {
@@ -79,7 +79,7 @@ namespace {
 
 	private:
 		static constexpr float SWAG = 24.0f; // Width in columns of one swag of the wire
-		float phases[40];                    // Twinkle phase of each bulb
+		float phases[40]; // Twinkle phase of each bulb
 	};
 
 } // namespace

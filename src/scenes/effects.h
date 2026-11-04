@@ -6,17 +6,17 @@
 
 // Colors, sprites and effects shared by the scenes
 
-constexpr Color RED = {255, 0, 0};
-constexpr Color GREEN = {0, 200, 30};
-constexpr Color GOLD = {255, 150, 0};
-constexpr Color WHITE = {255, 255, 255};
-constexpr Color WARM_WHITE = {255, 190, 110};
-constexpr Color BLUE = {20, 60, 255};
-constexpr Color PINK = {255, 40, 120};
-constexpr Color SNOW = {200, 205, 225};
+constexpr Color RED = { 255, 0, 0 };
+constexpr Color GREEN = { 0, 200, 30 };
+constexpr Color GOLD = { 255, 150, 0 };
+constexpr Color WHITE = { 255, 255, 255 };
+constexpr Color WARM_WHITE = { 255, 190, 110 };
+constexpr Color BLUE = { 20, 60, 255 };
+constexpr Color PINK = { 255, 40, 120 };
+constexpr Color SNOW = { 200, 205, 225 };
 
 // Colors the lights and ornaments cycle through
-constexpr Color LIGHT_COLORS[] = {RED, GREEN, BLUE, GOLD, PINK, WARM_WHITE};
+constexpr Color LIGHT_COLORS[] = { RED, GREEN, BLUE, GOLD, PINK, WARM_WHITE };
 constexpr int LIGHT_COLOR_COUNT = sizeof(LIGHT_COLORS) / sizeof(LIGHT_COLORS[0]); // Number of light colors
 
 // Get a random float between lo and hi
@@ -29,15 +29,15 @@ inline float twinkle(float t, float speed, float phase) { return 0.5f + 0.5f * s
 inline Color spriteColor(char c, float t) {
 	switch (c) {
 		case 'r':
-			return {210, 0, 0}; // Red
+			return { 210, 0, 0 }; // Red
 		case 'w':
 			return WHITE;
 		case 's':
-			return {255, 160, 110}; // Skin
+			return { 255, 160, 110 }; // Skin
 		case 'b':
-			return {130, 60, 15}; // Dark brown
+			return { 130, 60, 15 }; // Dark brown
 		case 'a':
-			return {200, 150, 70}; // Light brown (antlers)
+			return { 200, 150, 70 }; // Light brown (antlers)
 		case 'y':
 			return GOLD;
 		case 'g':
@@ -45,7 +45,7 @@ inline Color spriteColor(char c, float t) {
 		case 'n':
 			return scaleColor(RED, 0.3f + 0.7f * twinkle(t, 6.0f, 0)); // Rudolph's nose
 		default:
-			return {0, 0, 0};
+			return { 0, 0, 0 };
 	}
 }
 
@@ -87,8 +87,8 @@ struct Snowfall {
 	void respawn(Flake &fl, bool anywhere) {
 		fl.x = frand(0, WIDTH);
 		fl.y = anywhere ? frand(-HEIGHT, HEIGHT) : frand(-4, -0.5f); // Start above the screen so the flakes don't all appear at once
-		fl.speed = frand(1.5f, 4.5f);                                // Rows per second
-		fl.phase = frand(0, 6.28f);                                  // Up to a full turn of the sway
+		fl.speed = frand(1.5f, 4.5f); // Rows per second
+		fl.phase = frand(0, 6.28f); // Up to a full turn of the sway
 	}
 
 	// Get the column of a flake, swaying left and right as it falls
@@ -132,7 +132,7 @@ struct Snowfall {
 			uint8_t v = 120 + (fl.speed - 1.5f) / 3.0f * 135;
 
 			// Draw the flake
-			addPixel(f, columnOf(fl, t), (int)fl.y, {v, v, v});
+			addPixel(f, columnOf(fl, t), (int)fl.y, { v, v, v });
 		}
 	}
 };
@@ -141,7 +141,7 @@ struct Snowfall {
 struct Stars {
 	// A single star
 	struct Star {
-		uint8_t x, y;       // Position
+		uint8_t x, y; // Position
 		float speed, phase; // Twinkle speed and phase
 	};
 	static constexpr int COUNT = 30; // Number of stars
@@ -167,7 +167,7 @@ struct Stars {
 			float v = twinkle(t, s.speed, s.phase);
 
 			// Draw the star in pale blue (squared so it stays dim most of the time)
-			addPixel(f, s.x, s.y, scaleColor({180, 180, 255}, v * v * 0.8f));
+			addPixel(f, s.x, s.y, scaleColor({ 180, 180, 255 }, v * v * 0.8f));
 		}
 	}
 };

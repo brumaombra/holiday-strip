@@ -17,7 +17,7 @@ namespace {
 		// Clear the sky and reset the rockets and sparks
 		void begin() override {
 			// Clear the canvas
-			fillFrame(canvas, {0, 0, 0});
+			fillFrame(canvas, { 0, 0, 0 });
 
 			// Stop all the rockets
 			for (auto &r : rockets) {
@@ -57,7 +57,7 @@ namespace {
 			updateParticles(dt);
 
 			// Fill the sky with a very dark blue
-			fillFrame(f, {0, 0, 6});
+			fillFrame(f, { 0, 0, 6 });
 
 			// Draw the year in dim gold when it's known
 			if (year > 0) {
@@ -67,8 +67,7 @@ namespace {
 
 				// Draw each digit with a slow shimmer running through it
 				for (size_t i = 0; i < text.length(); i++) {
-					drawChar(f, text[i], x0 + i * GLYPH_ADVANCE, 4,
-					         [&](int px, int py) { return scaleColor(GOLD, 0.35f + 0.1f * sinf(t * 2 + px * 0.3f)); });
+					drawChar(f, text[i], x0 + i * GLYPH_ADVANCE, 4, [&](int px, int py) { return scaleColor(GOLD, 0.35f + 0.1f * sinf(t * 2 + px * 0.3f)); });
 				}
 			}
 
@@ -84,7 +83,7 @@ namespace {
 		// A rocket flying up to its burst height
 		struct Rocket {
 			float x, y, vy, burstY; // Position, vertical speed (negative is up) and the row where it bursts
-			bool active;            // Whether the rocket is flying
+			bool active; // Whether the rocket is flying
 		};
 
 		// A spark of a burst
@@ -95,9 +94,9 @@ namespace {
 		static constexpr int MAX_ROCKETS = 4, MAX_PARTICLES = 160; // Sizes of the rocket and spark pools
 		Rocket rockets[MAX_ROCKETS];
 		Particle particles[MAX_PARTICLES];
-		Frame canvas;    // Picture of the trails, faded a bit every frame
+		Frame canvas; // Picture of the trails, faded a bit every frame
 		float nextLaunch = 0; // Seconds until the next rocket
-		int year = 0;         // Year shown over the fireworks (0 when unknown)
+		int year = 0; // Year shown over the fireworks (0 when unknown)
 
 		// Read the year to show over the fireworks (0 before the clock is set)
 		static int upcomingYear() {
@@ -120,7 +119,7 @@ namespace {
 				}
 
 				// Start the rocket at a random column, flying up at 12 to 16 rows per second to a random burst height
-				r = {frand(4, WIDTH - 4), (float)HEIGHT, frand(-16.0f, -12.0f), frand(1.5f, 4.5f), true};
+				r = { frand(4, WIDTH - 4), (float)HEIGHT, frand(-16.0f, -12.0f), frand(1.5f, 4.5f), true };
 				return; // Launch only one rocket
 			}
 		}
@@ -137,7 +136,7 @@ namespace {
 				r.y += r.vy * dt;
 
 				// Leave a glowing dot on the canvas (it fades into a trail)
-				addPixel(canvas, (int)r.x, (int)r.y, {255, 180, 80});
+				addPixel(canvas, (int)r.x, (int)r.y, { 255, 180, 80 });
 
 				// Burst the rocket when it reaches its height
 				if (r.y <= r.burstY) {
@@ -166,7 +165,7 @@ namespace {
 				float speed = frand(4.0f, 11.0f);
 				float life = frand(0.8f, 1.6f);
 				// Squash vertically: the matrix is much wider than it is tall
-				p = {x, y, cosf(angle) * speed, sinf(angle) * speed * 0.6f, life, life, count % 3 ? color : second};
+				p = { x, y, cosf(angle) * speed, sinf(angle) * speed * 0.6f, life, life, count % 3 ? color : second };
 
 				// Stop once the burst has 36 sparks
 				if (++count >= 36) {

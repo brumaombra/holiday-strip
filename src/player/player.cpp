@@ -41,7 +41,7 @@ namespace {
 
 		// Display off: send a black frame
 		if (!settings.on) {
-			fillFrame(outputFrame, {0, 0, 0});
+			fillFrame(outputFrame, { 0, 0, 0 });
 			showFrame(outputFrame, 0, settings.maxMilliamps);
 			return;
 		}
@@ -98,7 +98,7 @@ void updatePlayer(const Settings &settings) {
 
 // Turn every LED off (before an OTA update)
 void showBlackFrame(uint32_t maxMilliamps) {
-	fillFrame(outputFrame, {0, 0, 0});
+	fillFrame(outputFrame, { 0, 0, 0 });
 	showFrame(outputFrame, 0, maxMilliamps);
 }
 

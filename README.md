@@ -12,6 +12,7 @@ Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into 
   <img alt="Arduino" src="https://img.shields.io/badge/framework-Arduino-00979D?logo=arduino&logoColor=white">
   <img alt="WS2812B" src="https://img.shields.io/badge/leds-864%20WS2812B-16A34A">
   <img alt="Matrix 72x12" src="https://img.shields.io/badge/display-72x12%20matrix-0F766E">
+  <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-2563EB">
 </p>
 
 <p>
@@ -274,4 +275,4 @@ The main shared constants live in [src/config/config.h](src/config/config.h) and
 <a id="license"></a>
 ## 📄 License
 
-No license has been chosen for this project yet.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

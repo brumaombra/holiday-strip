@@ -23,7 +23,7 @@ namespace {
 // Start each test with a black frame and the gamma table built
 void setUp() {
 	initLedOutput();
-	fillWith({0, 0, 0});
+	fillWith({ 0, 0, 0 });
 	memset(output, 0, sizeof(output));
 }
 
@@ -65,7 +65,7 @@ void test_columns_run_in_opposite_directions() {
 
 // The LEDs read green, red, blue
 void test_bytes_are_in_grb_order() {
-	setPixel(frame, 0, 6, {255, 0, 0});
+	setPixel(frame, 0, 6, { 255, 0, 0 });
 	buildLedOutput(frame, 255, config::MAX_MAX_MILLIAMPS, output);
 	TEST_ASSERT_EQUAL_UINT8(0, getPixelBytes(0, 6)[0]);
 	TEST_ASSERT_EQUAL_UINT8(255, getPixelBytes(0, 6)[1]);
@@ -74,14 +74,14 @@ void test_bytes_are_in_grb_order() {
 
 // Gamma 2: half the value gives about a quarter of the light
 void test_gamma_darkens_the_mid_tones() {
-	setPixel(frame, 5, 2, {128, 128, 128});
+	setPixel(frame, 5, 2, { 128, 128, 128 });
 	buildLedOutput(frame, 255, config::MAX_MAX_MILLIAMPS, output);
 	TEST_ASSERT_UINT8_WITHIN(1, 64, getPixelBytes(5, 2)[0]);
 }
 
 // Brightness 0 turns every LED off
 void test_brightness_zero_is_black() {
-	fillWith({255, 255, 255});
+	fillWith({ 255, 255, 255 });
 	buildLedOutput(frame, 0, config::MAX_MAX_MILLIAMPS, output);
 	for (size_t i = 0; i < LED_BYTES; i++) {
 		TEST_ASSERT_EQUAL_UINT8(0, output[i]);
@@ -97,7 +97,7 @@ void test_black_frame_draws_the_idle_current() {
 
 // Full white would draw far more than the limit, so the frame is dimmed to fit it
 void test_bright_frame_is_dimmed_to_the_limit() {
-	fillWith({255, 255, 255});
+	fillWith({ 255, 255, 255 });
 
 	// Build with the default 3 A limit
 	const uint32_t milliamps = buildLedOutput(frame, 255, config::DEFAULT_MAX_MILLIAMPS, output);
@@ -109,7 +109,7 @@ void test_bright_frame_is_dimmed_to_the_limit() {
 
 // A frame under the limit is sent as it is
 void test_frame_under_the_limit_is_not_dimmed() {
-	setPixel(frame, 20, 3, {255, 255, 255});
+	setPixel(frame, 20, 3, { 255, 255, 255 });
 	const uint32_t milliamps = buildLedOutput(frame, 255, config::DEFAULT_MAX_MILLIAMPS, output);
 	TEST_ASSERT_EQUAL_UINT8(255, getPixelBytes(20, 3)[0]);
 	TEST_ASSERT_EQUAL_UINT32(LED_COUNT * config::IDLE_MILLIAMPS_PER_LED + 3 * config::MILLIAMPS_PER_CHANNEL, milliamps);

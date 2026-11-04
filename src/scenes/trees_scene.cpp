@@ -28,8 +28,8 @@ namespace {
 					for (int x = tree.cx - half; x <= tree.cx + half; x++) {
 						// Add an ornament on 30% of the pixels (until the pool is full)
 						if (ornamentCount < MAX_ORNAMENTS && (esp_random() % 100) < 30) {
-							ornaments[ornamentCount++] = {(int8_t)x, (int8_t)y, LIGHT_COLORS[esp_random() % LIGHT_COLOR_COUNT],
-							                              frand(1.5f, 5.0f), frand(0, 6.28f)};
+							ornaments[ornamentCount++] = { (int8_t)x, (int8_t)y, LIGHT_COLORS[esp_random() % LIGHT_COLOR_COUNT],
+								frand(1.5f, 5.0f), frand(0, 6.28f) };
 						}
 					}
 				}
@@ -39,10 +39,10 @@ namespace {
 		// Draw the trees with their stars and ornaments, and the snow falling in front
 		void draw(Frame &f, float t, float dt) override {
 			// Fill the night sky
-			fillFrame(f, {0, 0, 20});
+			fillFrame(f, { 0, 0, 20 });
 			for (int x = 0; x < WIDTH; x++) {
 				// Draw the snowy ground on the bottom row
-				f[HEIGHT - 1][x] = {120, 125, 140};
+				f[HEIGHT - 1][x] = { 120, 125, 140 };
 			}
 
 			// Draw each tree
@@ -53,20 +53,20 @@ namespace {
 					for (int x = tree.cx - half; x <= tree.cx + half; x++) {
 						// Vary the green from pixel to pixel for a leafy look
 						uint8_t shade = 90 + ((x * 7 + y * 5) % 3) * 30;
-						setPixel(f, x, y, {0, shade, 20});
+						setPixel(f, x, y, { 0, shade, 20 });
 					}
 				}
 
 				// Draw the trunk
-				setPixel(f, tree.cx, HEIGHT - 1, {100, 45, 10});
+				setPixel(f, tree.cx, HEIGHT - 1, { 100, 45, 10 });
 
 				// Make the star on the tip twinkle
 				float s = 0.6f + 0.4f * twinkle(t, 3.0f, tree.cx);
-				setPixel(f, tree.cx, tree.top - 1, scaleColor({255, 220, 60}, s));
+				setPixel(f, tree.cx, tree.top - 1, scaleColor({ 255, 220, 60 }, s));
 
 				// Add a faint halo above the star when there's room
 				if (tree.top >= 2) {
-					addPixel(f, tree.cx, tree.top - 2, scaleColor({255, 220, 60}, s * 0.25f));
+					addPixel(f, tree.cx, tree.top - 2, scaleColor({ 255, 220, 60 }, s * 0.25f));
 				}
 			}
 
@@ -95,8 +95,8 @@ namespace {
 			Color color;
 			float speed, phase; // Twinkle speed and phase
 		};
-		static constexpr Tree TREES[] = {{6, 5}, {18, 1}, {31, 4}, {44, 1}, {57, 5}, {67, 2}}; // Center column and tip row of each tree
-		static constexpr int MAX_ORNAMENTS = 120;                                              // Size of the ornament pool
+		static constexpr Tree TREES[] = { { 6, 5 }, { 18, 1 }, { 31, 4 }, { 44, 1 }, { 57, 5 }, { 67, 2 } }; // Center column and tip row of each tree
+		static constexpr int MAX_ORNAMENTS = 120; // Size of the ornament pool
 		Ornament ornaments[MAX_ORNAMENTS];
 		int ornamentCount = 0; // Number of ornaments in use
 		Snowfall snow;

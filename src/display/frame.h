@@ -18,14 +18,14 @@ typedef Color Frame[HEIGHT][WIDTH];
 // Scale a color, 0 is black and 1 the color itself
 inline Color scaleColor(Color c, float amount) {
 	amount = constrain(amount, 0.0f, 1.0f);
-	return {(uint8_t)(c.r * amount), (uint8_t)(c.g * amount), (uint8_t)(c.b * amount)};
+	return { (uint8_t)(c.r * amount), (uint8_t)(c.g * amount), (uint8_t)(c.b * amount) };
 }
 
 // Blend two colors: amount 0 returns a, 1 returns b
 inline Color blendColor(Color a, Color b, float amount) {
 	amount = constrain(amount, 0.0f, 1.0f);
-	return {(uint8_t)(a.r + (b.r - a.r) * amount), (uint8_t)(a.g + (b.g - a.g) * amount),
-	        (uint8_t)(a.b + (b.b - a.b) * amount)};
+	return { (uint8_t)(a.r + (b.r - a.r) * amount), (uint8_t)(a.g + (b.g - a.g) * amount),
+		(uint8_t)(a.b + (b.b - a.b) * amount) };
 }
 
 // Set a pixel (ignored outside the matrix)
@@ -64,16 +64,16 @@ inline Color hsvColor(uint8_t h, uint8_t s, uint8_t v) {
 	uint8_t t = (v * (255 - ((s * (255 - rem)) >> 8))) >> 8;
 	switch (region) {
 		case 0:
-			return {v, t, p};
+			return { v, t, p };
 		case 1:
-			return {q, v, p};
+			return { q, v, p };
 		case 2:
-			return {p, v, t};
+			return { p, v, t };
 		case 3:
-			return {p, q, v};
+			return { p, q, v };
 		case 4:
-			return {t, p, v};
+			return { t, p, v };
 		default:
-			return {v, p, q};
+			return { v, p, q };
 	}
 }

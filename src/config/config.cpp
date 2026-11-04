@@ -23,9 +23,9 @@ namespace config {
 	const uint8_t DATA_PIN = 13; // Data line of the LED matrix, on its left edge
 
 	// Animation timing
-	const uint32_t FRAME_MS = 33;      // About 30 frames per second (a full frame takes 26 ms to send)
+	const uint32_t FRAME_MS = 33; // About 30 frames per second (a full frame takes 26 ms to send)
 	const float SCENE_SECONDS = 20.0f; // Time each scene shows when they rotate
-	const float FADE_SECONDS = 1.0f;   // Crossfade between two scenes
+	const float FADE_SECONDS = 1.0f; // Crossfade between two scenes
 
 	// LED current estimate (WS2812B): about 20 mA per color channel at full drive, and 1 mA per LED at rest
 	const uint32_t MILLIAMPS_PER_CHANNEL = 20;

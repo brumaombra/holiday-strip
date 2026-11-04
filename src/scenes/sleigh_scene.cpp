@@ -25,12 +25,12 @@ namespace {
 		// Draw the sleigh and the two reindeer flying over the sky, with a sparkle trail
 		void draw(Frame &f, float t, float dt) override {
 			// Draw the night sky with its stars and the moon
-			fillFrame(f, {0, 0, 12});
+			fillFrame(f, { 0, 0, 12 });
 			stars.draw(f, t);
 			drawMoon(f);
 
 			// Move the whole team to the right and wrap it around the matrix
-			const int total = 38;                                     // Width of the sleigh and the reindeer in columns
+			const int total = 38; // Width of the sleigh and the reindeer in columns
 			float x0 = -total + fmodf(t * 14.0f, WIDTH + total + 12); // 14 columns per second, with a gap before the next pass
 			int sx = (int)x0;
 
@@ -72,31 +72,31 @@ namespace {
 
 		// Sprite of the sleigh with Santa on the left
 		static constexpr const char *SLEIGH[10] = {
-		    "....w........",
-		    "...rr........",
-		    "..rrrr.......",
-		    "..wwww.......",
-		    "..sss........",
-		    "r.wwww......y",
-		    "rrrrrrrrrrr.y",
-		    "rryyyyyyyyrr.",
-		    ".rrrrrrrrrr..",
-		    "yyyyyyyyyyyyy",
+			"....w........",
+			"...rr........",
+			"..rrrr.......",
+			"..wwww.......",
+			"..sss........",
+			"r.wwww......y",
+			"rrrrrrrrrrr.y",
+			"rryyyyyyyyrr.",
+			".rrrrrrrrrr..",
+			"yyyyyyyyyyyyy",
 		};
 
 		// Sprite of a reindeer body with its head on the right (the nose is red only for Rudolph)
 		static constexpr const char *DEER_BODY[6] = {
-		    "......a.a.",
-		    ".......a..",
-		    "......bbbn",
-		    "w.....bb..",
-		    "bbbbbbbb..",
-		    "bbbbbbb...",
+			"......a.a.",
+			".......a..",
+			"......bbbn",
+			"w.....bb..",
+			"bbbbbbbb..",
+			"bbbbbbb...",
 		};
 
 		// Sprites of the two leg poses, drawn under the body
-		static constexpr const char *LEGS_A[2] = {".b....b.b.", "b......b.b"};
-		static constexpr const char *LEGS_B[2] = {"..b...b...", "..b...b..."};
+		static constexpr const char *LEGS_A[2] = { ".b....b.b.", "b......b.b" };
+		static constexpr const char *LEGS_B[2] = { "..b...b...", "..b...b..." };
 
 		// Draw a reindeer (Rudolph gets a glowing red nose)
 		void drawDeer(Frame &f, int x, int y, bool legPose, bool rudolph, float t) {
@@ -132,7 +132,7 @@ namespace {
 
 					// Draw the pixels inside the big disc and outside the small one
 					if (d1 <= 2.8f && d2 > 2.4f) {
-						setPixel(f, x, y, {255, 235, 170});
+						setPixel(f, x, y, { 255, 235, 170 });
 					}
 				}
 			}
@@ -156,7 +156,7 @@ namespace {
 				for (auto &p : trail) {
 					if (p.life <= 0) {
 						// Put the sparkle at the back of the sleigh with a random life
-						p = {sx + frand(-2.0f, 1.0f), sleighY + frand(5.0f, 9.0f), frand(0.6f, 1.4f)};
+						p = { sx + frand(-2.0f, 1.0f), sleighY + frand(5.0f, 9.0f), frand(0.6f, 1.4f) };
 						break;
 					}
 				}

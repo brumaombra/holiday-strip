@@ -9,7 +9,7 @@ namespace {
 	bool countdownEnabled = config::DEFAULT_COUNTDOWN;
 
 	// The scenes, in the order they rotate
-	Scene *const SCENES[] = {&getGreetingScene(), &getSnowScene(), &getTreesScene(), &getSleighScene(), &getFireplaceScene(), &getGarlandScene(), &getGiftsScene(), &getCandyCaneScene(), &getFireworksScene()};
+	Scene *const SCENES[] = { &getGreetingScene(), &getSnowScene(), &getTreesScene(), &getSleighScene(), &getFireplaceScene(), &getGarlandScene(), &getGiftsScene(), &getCandyCaneScene(), &getFireworksScene() };
 }
 
 // Get the number of scenes

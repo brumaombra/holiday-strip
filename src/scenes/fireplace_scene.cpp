@@ -23,7 +23,7 @@ namespace {
 			// Darken the opening of the fireplace (one pixel wider than the fire on each side)
 			for (int y = FIRE_TOP - 1; y < HEIGHT; y++) {
 				for (int x = FIRE_X - 1; x < FIRE_X + FIRE_W + 1; x++) {
-					setPixel(f, x, y, {8, 3, 2});
+					setPixel(f, x, y, { 8, 3, 2 });
 				}
 			}
 
@@ -45,21 +45,21 @@ namespace {
 
 			// Mantel
 			for (int x = 0; x < WIDTH; x++) {
-				setPixel(f, x, 0, {90, 45, 20});
-				setPixel(f, x, 1, {60, 28, 10});
+				setPixel(f, x, 0, { 90, 45, 20 });
+				setPixel(f, x, 1, { 60, 28, 10 });
 			}
 
 			// Hang four stockings from the mantel, alternating red and green
-			const int stockingsX[] = {3, 10, 57, 64}; // Left column of each stocking
+			const int stockingsX[] = { 3, 10, 57, 64 }; // Left column of each stocking
 			for (int i = 0; i < 4; i++) {
-				drawStocking(f, stockingsX[i], i % 2 ? GREEN : Color{210, 0, 0}, t, i);
+				drawStocking(f, stockingsX[i], i % 2 ? GREEN : Color{ 210, 0, 0 }, t, i);
 			}
 		}
 
 	private:
 		static constexpr int FIRE_X = 19, FIRE_W = 34, FIRE_TOP = 3; // Left column, width and top row of the fire
-		static constexpr int FIRE_H = HEIGHT - 1 - FIRE_TOP;         // Rows of the fire, down to the row above the logs
-		uint8_t heat[FIRE_W][FIRE_H];                                // Heat of each cell from 0 to 255 (h = 0 is the bottom row)
+		static constexpr int FIRE_H = HEIGHT - 1 - FIRE_TOP; // Rows of the fire, down to the row above the logs
+		uint8_t heat[FIRE_W][FIRE_H]; // Heat of each cell from 0 to 255 (h = 0 is the bottom row)
 
 		// Get the color of a heat value (black, red, orange, yellow, then white)
 		static Color heatColor(uint8_t h) {
@@ -71,16 +71,16 @@ namespace {
 
 			// Hottest: yellow fading to white
 			if (t192 >= 128) {
-				return {255, 255, ramp};
+				return { 255, 255, ramp };
 			}
 
 			// Medium: red fading to yellow
 			if (t192 >= 64) {
-				return {255, ramp, 0};
+				return { 255, ramp, 0 };
 			}
 
 			// Coolest: black fading to red
-			return {ramp, 0, 0};
+			return { ramp, 0, 0 };
 		}
 
 		// Cool the cells, spread the heat upwards and ignite new sparks at the bottom
@@ -108,7 +108,7 @@ namespace {
 
 				// Ignite a new spark at the bottom (more likely in the middle)
 				if (esp_random() % 100 < 25 + center * 35) {
-					int h = esp_random() % 2;                                           // One of the two bottom rows
+					int h = esp_random() % 2; // One of the two bottom rows
 					heat[x][h] = min(255, heat[x][h] + 160 + (int)(esp_random() % 96)); // Add 160 to 255 of heat
 				}
 			}
@@ -123,10 +123,10 @@ namespace {
 					bool mortar = y % 2 == 1 || (x + (y / 2 % 2) * 3) % 6 == 0;
 
 					// Vary the brick color a little from brick to brick
-					Color brick = ((x / 6 + y) % 3 == 0) ? Color{60, 16, 8} : Color{48, 13, 6};
+					Color brick = ((x / 6 + y) % 3 == 0) ? Color{ 60, 16, 8 } : Color{ 48, 13, 6 };
 
 					// Draw the mortar or the brick
-					f[y][x] = mortar ? Color{14, 12, 11} : brick;
+					f[y][x] = mortar ? Color{ 14, 12, 11 } : brick;
 				}
 			}
 		}
@@ -139,14 +139,14 @@ namespace {
 				float ember = 0.5f + 0.5f * sinf(t * 3.0f + x * 1.7f);
 
 				// Draw the log between dark brown and glowing orange
-				setPixel(f, x, HEIGHT - 1, blendColor({70, 30, 10}, {255, 60, 0}, ember * 0.6f));
+				setPixel(f, x, HEIGHT - 1, blendColor({ 70, 30, 10 }, { 255, 60, 0 }, ember * 0.6f));
 			}
 		}
 
 		// Draw a stocking with a white cuff and a sparkle now and then
 		static void drawStocking(Frame &f, int x, Color body, float t, int index) {
 			// Define the shape of the stocking ('w' is the cuff, 'r' the body)
-			static const char *const SHAPE[] = {"www..", "rrr..", "rrr..", "rrr..", "rrrrr", ".rrrr"};
+			static const char *const SHAPE[] = { "www..", "rrr..", "rrr..", "rrr..", "rrrrr", ".rrrr" };
 
 			// Draw the shape pixel by pixel
 			for (int r = 0; r < 6; r++) {
