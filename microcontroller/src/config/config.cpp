@@ -1,10 +1,18 @@
 #include "config.h"
 
+#ifndef PIO_FIRMWARE_VERSION
+#define PIO_FIRMWARE_VERSION "dev"
+#endif
+
 #ifndef PIO_OTA_PASSWORD
 #define PIO_OTA_PASSWORD ""
 #endif
 
 namespace config {
+	// Project details shown in the web app (the release build sets the version)
+	const char PROJECT_NAME[] = "Holiday Strip";
+	const char FIRMWARE_VERSION[] = PIO_FIRMWARE_VERSION;
+
 	// Network names and the Wi-Fi setup
 	const char HOSTNAME[] = "holiday-strip"; // http://holiday-strip.local
 	const char ACCESS_POINT_NAME[] = "Holiday-Strip"; // Open hotspot for the Wi-Fi setup, when no saved network works

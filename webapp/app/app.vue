@@ -3,7 +3,6 @@ import { onMounted } from 'vue';
 import { setBusy } from '@brumaombra/ui-vintage/busy-indicator';
 import { useTheme } from '@brumaombra/ui-vintage/theme-selector';
 import { loadDeviceState } from '~/composables/useDeviceState.js';
-import { handleBackendErrors } from '~/composables/useUtils.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 
 const globalStore = useGlobalStore();

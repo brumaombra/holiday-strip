@@ -1,5 +1,5 @@
 import { getState, saveSettings } from '~/composables/useDeviceApi.js';
-import { createDebounced, handleBackendErrors, translate } from '~/composables/useUtils.js';
+import { createDebounced } from '~/composables/useUtils.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 
 // Fields the device changes by itself, and the page only reads

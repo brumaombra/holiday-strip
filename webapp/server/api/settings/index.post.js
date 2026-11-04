@@ -1,4 +1,5 @@
-import { applySettings, buildStatePayload, createSuccessResponse, getEspMockState, handleEspMockError, readMockJsonBody, validateSettings } from '~~/server/utils/esp-mock-state.js';
+import { createSuccessResponse, handleEspMockError, readMockJsonBody } from 'gizmo-common/web/server/utils/gizmo-mock.js';
+import { applySettings, buildStatePayload, getEspMockState, validateSettings } from '~~/server/utils/esp-mock-state.js';
 
 export default defineEventHandler(async event => {
     try {

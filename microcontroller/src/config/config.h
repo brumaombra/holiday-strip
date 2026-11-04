@@ -4,6 +4,10 @@
 #include <Arduino.h>
 
 namespace config {
+	// Project details shown in the web app
+	extern const char PROJECT_NAME[];
+	extern const char FIRMWARE_VERSION[];
+
 	// Network names and the Wi-Fi setup
 	extern const char HOSTNAME[];
 	extern const char ACCESS_POINT_NAME[];

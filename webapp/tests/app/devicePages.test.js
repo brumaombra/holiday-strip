@@ -36,7 +36,21 @@ const buildDeviceState = () => ({
     ssid: 'Home'
 });
 
-// The device API: its state, whether it answers, the bodies of the saves and the frames asked
+// Details of the device, as GET /api/device answers them (the device card of the gizmo-common layer reads them)
+const buildDeviceDetails = () => ({
+    name: 'Holiday Strip',
+    version: 'v2026.11.04.1',
+    uptimeSeconds: 93784,
+    freeHeap: 187432,
+    ssid: 'Home',
+    accessPointActive: false,
+    ip: '192.168.1.42',
+    hostname: 'holiday-strip.local',
+    signalQuality: 74
+});
+
+// The device API: its state, its details, whether it answers, the bodies of the saves and the frames asked
+let deviceDetails;
 let deviceState;
 let isDeviceAvailable;
 let isSaveRefused;
@@ -59,6 +73,7 @@ const registerDeviceEndpoints = () => {
             return { errorId: null, errorMessage: null, data: deviceState };
         }
     });
+    registerEndpoint('/api/device', () => ({ errorId: null, errorMessage: null, data: deviceDetails }));
     registerEndpoint('/api/frame', () => {
         frameCount += 1;
         return new Uint8Array(FRAME_BYTES);
@@ -81,6 +96,7 @@ const findButton = (wrapper, text) => wrapper.findAll('button').find(button => b
 // Start each test with the store of a page that has not loaded the state yet
 beforeEach(() => {
     deviceState = buildDeviceState();
+    deviceDetails = buildDeviceDetails();
     isDeviceAvailable = true;
     isSaveRefused = false;
     savedBodies = [];
@@ -415,20 +431,25 @@ describe('settings page', () => {
         await vi.waitFor(() => expect(savedBodies).toEqual([{ maxMilliamps: 3100 }]), { timeout: 3000 });
     });
 
-    // The device info shows the uptime and the saved network
-    it('shows the uptime and the saved network', async () => {
+    // The device rows come from the card of the gizmo-common layer, which reads GET /api/device
+    it('shows the device card with the details of the device', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(SettingsPage);
+        await vi.waitFor(() => expect(wrapper.text()).toContain('v2026.11.04.1'));
         expect(wrapper.text()).toContain('1d 2h 3m');
         expect(wrapper.text()).toContain('Home');
+        expect(wrapper.text()).toContain('192.168.1.42');
+        expect(findButton(wrapper, 'Restart')).toBeDefined();
+        expect(findButton(wrapper, 'Forget network')).toBeDefined();
     });
 
-    // Without a saved network the page says so
-    it('says when no network is saved', async () => {
-        deviceState.ssid = '';
-        await loadDeviceState();
+    // Restarting is most needed when the settings can't be read, so the card doesn't wait for them
+    it('shows the device card even when the settings cannot be read', async () => {
+        isDeviceAvailable = false;
+        await expect(loadDeviceState()).rejects.toThrow();
         const wrapper = await mountPage(SettingsPage);
-        expect(wrapper.text()).toContain('Not connected');
+        await vi.waitFor(() => expect(findButton(wrapper, 'Restart')).toBeDefined());
+        expect(wrapper.text()).toContain('Try again');
     });
 
     // The language row opens a picker with both languages

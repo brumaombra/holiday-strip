@@ -7,7 +7,6 @@ import { Button } from '@brumaombra/ui-vintage/button';
 import { EmptyStateCard } from '@brumaombra/ui-vintage/empty-state-card';
 import { LoadingStateCard } from '@brumaombra/ui-vintage/loading-state-card';
 import { loadDeviceState } from '~/composables/useDeviceState.js';
-import { handleBackendErrors } from '~/composables/useUtils.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 
 const { t } = useI18n();

@@ -1,12 +1,10 @@
-// Limits of the firmware (gizmo-common and the Holiday Strip settings), counted in bytes like the C strings on the device
-export const MAX_REQUEST_BODY_SIZE = 2048;
-export const MAX_SSID_LENGTH = 32;
-export const MAX_PASSWORD_LENGTH = 64;
+// The Wi-Fi and device mock (its state, the responses and errors of the firmware) comes from the gizmo-common layer: this file adds the settings and the frame of the strip
+import { EspMockError, byteLength, getGizmoMockState } from 'gizmo-common/web/server/utils/gizmo-mock.js';
+
+// Limits of the firmware (Holiday Strip settings), counted in bytes like the C strings on the device
 export const MAX_MESSAGE_LENGTH = 200;
 export const MIN_MAX_MILLIAMPS = 1000;
 export const MAX_MAX_MILLIAMPS = 8000;
-export const MOCK_HOSTNAME = 'holiday-strip.local';
-export const MOCK_IP = '192.168.1.42';
 
 // Size of the matrix, and of its frame (3 bytes per pixel: R, G, B)
 export const FRAME_WIDTH = 72;
@@ -19,13 +17,6 @@ export const SCENE_NAMES = ['Greeting', 'Snowfall', 'Christmas trees', 'Santa\'s
 // Time each scene stays on screen when the device rotates them all
 export const SCENE_DURATION_MS = 15000;
 
-// Wi-Fi connection status codes of gizmo-common
-export const wifiStatus = Object.freeze({
-    DISCONNECTED: 0,
-    CONNECTED: 1,
-    CONNECTING: 2
-});
-
 // Settings of the device (the firmware defaults)
 const factorySettings = () => ({
     on: true,
@@ -36,97 +27,11 @@ const factorySettings = () => ({
     message: 'BUON NATALE * MERRY CHRISTMAS'
 });
 
-// Networks found by the mock scan
-const scannedNetworks = () => ([
-    { ssid: 'BrumaLab WiFi', signal: -48, quality: 100, channel: 11, secured: true },
-    { ssid: 'Office Fiber', signal: -63, quality: 74, channel: 6, secured: true },
-    { ssid: 'Warehouse Guest', signal: -71, quality: 58, channel: 1, secured: false },
-    { ssid: 'ESP-Test-Hotspot', signal: -83, quality: 34, channel: 3, secured: true }
-]);
-
-// State of the demo device the dev server starts with (already set up on a network)
-const createState = () => ({
-    settings: factorySettings(),
-    savedSsid: 'BrumaLab WiFi',
-    startedAt: Date.now(),
-    hasScanned: false, // The first scan after boot comes back empty, like on the device
-    pendingConnection: null,
-    isFallbackPending: false, // A failed attempt goes back to the saved network on a later poll
-    connectionStatus: wifiStatus.CONNECTED
-});
-
-// Get the mock device state (kept across hot reloads)
+// Get the mock device state: the one of the layer (Wi-Fi, uptime, kept across hot reloads) plus the settings of the strip
 export const getEspMockState = () => {
-    if (!globalThis.__holidayEspMockState) {
-        globalThis.__holidayEspMockState = createState();
-    }
-
-    return globalThis.__holidayEspMockState;
-};
-
-// Return the networks found by the scan (empty on the first call, while the device is still scanning)
-export const scanNetworks = state => {
-    if (!state.hasScanned) {
-        state.hasScanned = true;
-        return [];
-    }
-
-    return scannedNetworks();
-};
-
-// Length of a string in bytes, like strlen() on the device
-export const byteLength = text => Buffer.byteLength(text, 'utf8');
-
-// Success response of the firmware ({ errorId: null, errorMessage: null, data })
-export const createSuccessResponse = (data = null) => ({
-    errorId: null,
-    errorMessage: null,
-    data
-});
-
-// Error of the mock device, turned into the firmware error response by handleEspMockError
-export class EspMockError extends Error {
-    constructor(statusCode, errorId, errorMessage) {
-        super(errorMessage);
-        this.statusCode = statusCode;
-        this.errorId = errorId;
-    }
-}
-
-// Send the firmware error response ({ errorId, errorMessage, data: null }) with its status code
-export const handleEspMockError = ({ event, error, errorId, errorMessage }) => {
-    const mockError = error instanceof EspMockError ? error : new EspMockError(500, errorId, errorMessage);
-    setResponseStatus(event, mockError.statusCode);
-    return {
-        errorId: mockError.errorId,
-        errorMessage: mockError.message,
-        data: null
-    };
-};
-
-// Read the JSON object of a request body with the same checks as the firmware
-export const readMockJsonBody = async event => {
-    const rawBody = (await readRawBody(event, 'utf8')) || '';
-
-    // The body must fit the firmware buffer
-    if (byteLength(rawBody) > MAX_REQUEST_BODY_SIZE) {
-        throw new EspMockError(413, 'request_body_too_large', 'Request body too large');
-    }
-
-    // The body must be valid JSON
-    let body;
-    try {
-        body = JSON.parse(rawBody);
-    } catch {
-        throw new EspMockError(400, 'invalid_json', 'Invalid JSON');
-    }
-
-    // The body must be an object
-    if (!body || typeof body !== 'object' || Array.isArray(body)) {
-        throw new EspMockError(400, 'invalid_json', 'Invalid JSON object');
-    }
-
-    return body;
+    const state = getGizmoMockState();
+    state.settings ??= factorySettings();
+    return state;
 };
 
 /******************************** Settings ********************************/

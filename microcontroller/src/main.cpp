@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <gizmo/device.h>
 #include <gizmo/log.h>
 
 #include "display/display.h"
@@ -49,6 +50,7 @@ void setup() {
 // Loop
 void loop() {
 	manageWiFiConnection();
+	gizmo::manageDevice(); // Restart when the web app asks
 	handleOta();
 
 	// Apply the changes made from the web app

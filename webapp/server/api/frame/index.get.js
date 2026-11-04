@@ -1,4 +1,5 @@
-import { buildMockFrame, getCurrentScene, getEspMockState, handleEspMockError } from '~~/server/utils/esp-mock-state.js';
+import { handleEspMockError } from 'gizmo-common/web/server/utils/gizmo-mock.js';
+import { buildMockFrame, getCurrentScene, getEspMockState } from '~~/server/utils/esp-mock-state.js';
 
 export default defineEventHandler(async event => {
     try {

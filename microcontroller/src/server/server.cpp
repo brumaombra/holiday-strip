@@ -1,5 +1,6 @@
 #include "server.h"
 
+#include <gizmo/device.h>
 #include <gizmo/wifi_setup.h>
 
 #include "config/config.h"
@@ -47,6 +48,7 @@ JsonDocument buildStateData() {
 
 // Register the routes and start the server (after the Wi-Fi setup registered its own)
 void setupServer() {
+	gizmo::setupDeviceApi(server, { config::PROJECT_NAME, config::FIRMWARE_VERSION });
 	setupStateGetRoute();
 	setupSettingsPostRoute();
 	setupFrameGetRoute();

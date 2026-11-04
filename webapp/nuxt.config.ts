@@ -1,6 +1,9 @@
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineNuxtConfig({
+    // Shared pages, layout, Wi-Fi setup, device card and mock device routes of the OpenGizmo projects
+    extends: ['./node_modules/gizmo-common/web'],
+
     srcDir: 'app/',
 
     ssr: false,
@@ -64,9 +67,7 @@ export default defineNuxtConfig({
             routes: [
                 '/',
                 '/message',
-                '/settings',
-                '/wifi',
-                '/ap-setup'
+                '/settings'
             ]
         }
     },

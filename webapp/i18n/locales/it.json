@@ -1,14 +1,8 @@
 {
     "app": {
-        "title": "Holiday Strip",
         "loadError": "Si è verificato un errore durante il caricamento dei dati"
     },
     "common": {
-        "close": "Chiudi",
-        "cancel": "Annulla",
-        "refreshing": "Aggiornamento...",
-        "controlPanel": "Pannello di controllo",
-        "genericError": "Si è verificato un errore",
         "syncingDevice": "Sincronizzazione del dispositivo...",
         "saveError": "Si è verificato un errore durante il salvataggio delle impostazioni",
         "loadErrorTitle": "Impossibile leggere il dispositivo",
@@ -27,39 +21,11 @@
         "settings": {
             "label": "Impostazioni",
             "description": "Limite di potenza, lingua e info sul dispositivo"
-        },
-        "wifi": {
-            "label": "WiFi",
-            "description": "Cerca le reti e connetti il dispositivo"
         }
     },
-    "dialogs": {
-        "errorTitle": "Errore",
-        "successTitle": "Successo"
-    },
-    "errors": {
-        "pageNotFound": "Pagina non trovata",
-        "pageNotFoundMessage": "La pagina richiesta non esiste o non è più disponibile su questo dispositivo.",
-        "genericTitle": "Qualcosa è andato storto",
-        "genericMessage": "Un errore imprevisto ha interrotto l'interfaccia web.",
-        "backToHome": "Torna alla home",
-        "label": "Errore"
-    },
     "api": {
-        "wifiWrongCredentials": "Le credenziali Wi-Fi sono errate oppure la rete non è disponibile.",
-        "wifiUnknownStatus": "Il dispositivo ha restituito uno stato di connessione Wi-Fi sconosciuto.",
-        "wifiTimeout": "Il dispositivo non ha completato la connessione Wi-Fi in tempo.",
-        "wifiFailed": "Connessione al WiFi non riuscita",
-        "wifiConnectError": "Si è verificato un errore durante la connessione alla rete Wi-Fi",
         "backendErrors": {
-            "missing_required_fields": "Mancano alcune informazioni. Controlla i campi e riprova.",
-            "request_body_read_failed": "Il dispositivo non e riuscito a elaborare la richiesta. Riprova.",
-            "invalid_json": "Il dispositivo ha ricevuto dati in un formato non valido. Riprova.",
-            "invalid_connection_field": "Il nome della rete o la password sono troppo lunghi o non validi. Il nome può avere al massimo 32 caratteri e la password 64.",
             "invalid_settings_field": "Una delle impostazioni ha un valore che il dispositivo non accetta. Controllale e riprova.",
-            "request_body_too_large": "La richiesta è troppo grande per il dispositivo.",
-            "cors_origin_not_allowed": "Il dispositivo accetta solo richieste dalla sua pagina.",
-            "wifi_scan_failed": "Il dispositivo non è riuscito a cercare le reti Wi-Fi. Riprova.",
             "settings_save_failed": "Il dispositivo non è riuscito a salvare le impostazioni. Riprova."
         }
     },
@@ -126,37 +92,7 @@
             "language": {
                 "label": "Lingua",
                 "note": "La lingua di questa interfaccia web."
-            },
-            "deviceTitle": "Dispositivo",
-            "uptime": "Tempo acceso",
-            "uptimeValue": "{days}g {hours}h {minutes}m",
-            "network": "Rete salvata"
-        },
-        "wifi": {
-            "title": "Connetti al WiFi",
-            "currentNetworkLabel": "Rete corrente",
-            "notConnected": "Non connesso",
-            "availableNetworks": "Reti disponibili",
-            "password": "Password",
-            "passwordPlaceholder": "Inserisci la password WiFi",
-            "note": "Il dispositivo proverà immediatamente le credenziali e disattiverà il suo hotspot temporaneo dopo una connessione riuscita.",
-            "connectAction": "Connetti dispositivo",
-            "connectedTitle": "Dispositivo connesso",
-            "connectedMessage": "Il microcontrollore si è connesso a {ssid} ed è disponibile su {hostname} e {ip}.",
-            "connectError": "Si è verificato un errore durante la connessione alla rete Wi-Fi",
-            "refreshError": "Si è verificato un errore durante l'aggiornamento dell'elenco delle reti",
-            "connectConfirmTitle": "Connetti il dispositivo al WiFi",
-            "connectConfirmMessage": "Inviare al dispositivo le credenziali selezionate per {ssid} e passare a quella rete?",
-            "noNetworksTitle": "Nessuna rete trovata",
-            "noNetworksDescription": "Il dispositivo sta ancora cercando, oppure non ci sono reti nelle vicinanze. Riprova tra qualche secondo.",
-            "scanAgain": "Cerca di nuovo",
-            "passwordDialogTitle": "Connetti a {ssid}",
-            "passwordDialogDescription": "Inserisci la password di questa rete."
-        },
-        "apSetup": {
-            "title": "Connetti al WiFi",
-            "connectConfirmTitle": "Connetti ed esci dalla modalità AP",
-            "connectConfirmMessage": "Inviare al dispositivo le credenziali selezionate per {ssid}, connetterlo a quella rete e disattivare l'hotspot temporaneo?"
+            }
         }
     }
 }

@@ -1,17 +1,13 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
-import Clock01Icon from '@hugeicons/core-free-icons/Clock01Icon';
+import { computed, onBeforeUnmount, ref } from 'vue';
 import FlashIcon from '@hugeicons/core-free-icons/FlashIcon';
 import GlobeIcon from '@hugeicons/core-free-icons/GlobeIcon';
-import WifiFullSignalIcon from '@hugeicons/core-free-icons/WifiFullSignalIcon';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 import { PageHeader } from '@brumaombra/ui-vintage/page-header';
 import { SectionTitle } from '@brumaombra/ui-vintage/section-title';
 import { SliderFormComponent } from '@brumaombra/ui-vintage/slider-form-component';
-import { createSettingsSaver, refreshLiveState } from '~/composables/useDeviceState.js';
-import { splitUptime } from '~/composables/useUtils.js';
+import { createSettingsSaver } from '~/composables/useDeviceState.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
-import OptionPickerDialog from '~/components/dialog/OptionPickerDialog.vue';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 
 const POWER_LIMIT_STEP = 100; // Milliamps
@@ -29,12 +25,6 @@ const languageOptions = computed(() => locales.value.map(language => ({ value: l
 // Name of the language in use, shown in its row
 const selectedLanguageName = computed(() => languageOptions.value.find(option => option.value === locale.value)?.label || '');
 
-// Time since the last boot, as days, hours and minutes
-const uptimeLabel = computed(() => t('pages.settings.uptimeValue', splitUptime(device.value.uptimeSeconds)));
-
-// Network the device is set up for
-const currentNetworkLabel = computed(() => device.value.ssid || t('pages.wifi.notConnected'));
-
 // Change the power limit (the device gets one request when the slider rests)
 const handleMaxMilliampsChange = maxMilliamps => {
     saveMaxMilliamps({ maxMilliamps });
@@ -44,9 +34,6 @@ const handleMaxMilliampsChange = maxMilliamps => {
 const handleSelectLanguage = async language => {
     await setLocale(language);
 };
-
-// Read the uptime again when the page opens (the state may be from when the app started)
-onMounted(() => refreshLiveState().catch(() => {}));
 
 // Send a power limit still waiting when leaving the page
 onBeforeUnmount(() => saveMaxMilliamps.flush());
@@ -82,14 +69,11 @@ definePageMeta({
                 <ListGroup :title="t('pages.settings.languageTitle')">
                     <ListRow :label="t('pages.settings.language.label')" :icon="GlobeIcon" :value="selectedLanguageName" action @click="isLanguagePickerOpen = true" />
                 </ListGroup>
-
-                <!-- Device info -->
-                <ListGroup :title="t('pages.settings.deviceTitle')">
-                    <ListRow :label="t('pages.settings.uptime')" :icon="Clock01Icon" :value="uptimeLabel" />
-                    <ListRow :label="t('pages.settings.network')" :icon="WifiFullSignalIcon" :value="currentNetworkLabel" to="/wifi" />
-                </ListGroup>
             </div>
         </DeviceStateGate>
+
+        <!-- Device info, restart and forget network (from the gizmo-common layer, it reads the device by itself) -->
+        <GizmoDeviceCard />
 
         <!-- Language picker -->
         <OptionPickerDialog :visible="isLanguagePickerOpen" :title="t('pages.settings.language.label')" :description="t('pages.settings.language.note')" :options="languageOptions" :model-value="locale" @update:model-value="handleSelectLanguage" @close="isLanguagePickerOpen = false" />
