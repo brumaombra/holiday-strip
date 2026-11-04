@@ -4,19 +4,20 @@
 
 ### An ESP32-powered Christmas show for a 72x12 LED matrix
 
-Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into an animated Christmas display. It rotates through nine hand-drawn scenes with smooth crossfades, scrolls your own greeting with a countdown to Christmas, and comes with a phone-friendly web page to control it all.
+Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into an animated Christmas display. It rotates through nine hand-drawn scenes with smooth crossfades, scrolls your own greeting with a countdown to Christmas, and comes with a phone-friendly dashboard, built into the firmware, to control it all.
 
 <p>
   <img alt="ESP32" src="https://img.shields.io/badge/esp32-ESP32-E7352C?logo=espressif&logoColor=white">
   <img alt="PlatformIO" src="https://img.shields.io/badge/platformio-PlatformIO-FF6B35?logo=platformio&logoColor=white">
   <img alt="Arduino" src="https://img.shields.io/badge/framework-Arduino-00979D?logo=arduino&logoColor=white">
+  <img alt="Nuxt 4" src="https://img.shields.io/badge/nuxt-4-00DC82?logo=nuxt&logoColor=white">
   <img alt="WS2812B" src="https://img.shields.io/badge/leds-864%20WS2812B-16A34A">
   <img alt="Matrix 72x12" src="https://img.shields.io/badge/display-72x12%20matrix-0F766E">
   <img alt="License MIT" src="https://img.shields.io/badge/license-MIT-2563EB">
 </p>
 
 <p>
-  🎅 Nine animated scenes • 💬 Scrolling greeting • ⏳ Christmas countdown • 📱 Web control • 🔌 Power limiter • 📡 OTA updates
+  🎅 Nine animated scenes • 💬 Scrolling greeting • ⏳ Christmas countdown • 📱 Web dashboard • 🔌 Power limiter • 📡 OTA updates
 </p>
 
 <p>
@@ -36,13 +37,13 @@ Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into 
 <a id="overview"></a>
 ## 📘 Overview
 
-This project started from a 72x12 LED matrix pulled from a truck sign. Its protocol was worked out by driving it from an ESP32 and watching it with an ESP32-CAM (see [PROTOCOL.md](PROTOCOL.md)), and now it shows Christmas scenes.
+This project started from a 72x12 LED matrix pulled from a truck sign. Its protocol was worked out by driving it from an ESP32 and watching it with an ESP32-CAM (see [docs/protocol.md](docs/protocol.md)), and now it shows Christmas scenes.
 
 The firmware runs on an ESP32 and:
 
 - Rotates through the scenes every 20 seconds, with a 1-second crossfade.
 - Scrolls your message, and counts the days to Christmas from late October.
-- Serves a web page on your network to switch it on and off, set the brightness, pick a scene, and edit the message.
+- Serves a dashboard on your network to switch it on and off, set the brightness, watch a live preview, pick a scene, and edit the message.
 - Estimates the current of every frame and dims it before it goes over your power supply's limit.
 
 ### 🎬 Scenes
@@ -63,30 +64,30 @@ The firmware runs on an ESP32 and:
 - Nine animated scenes at about 30 fps, rotating with crossfades, or one scene shown on its own.
 - Scrolling greeting in capitals (letters A–Z, digits, and `! ' * , - . : ?`, while `<` draws a heart).
 - Christmas countdown that follows the local timezone, daylight saving time included.
-- Web control page at `http://christmas-matrix.local/`, plus a small JSON API.
+- Web dashboard built into the firmware, with a live preview of the matrix, the scene picker, the message editor and the power limit.
+- Wi-Fi setup from your phone: with no saved network, the matrix opens a setup hotspot with a captive portal.
 - Settings saved in flash, so they survive a reboot.
-- Gamma-corrected brightness and a per-frame power limiter.
-- Wi-Fi with automatic reconnection, mDNS, and NTP time.
-- Over-the-air updates, so the matrix can stay up on the wall.
-- WiFi credentials managed through `platformio_secrets.ini`.
-- Host tests for the LED mapping, the power limiter, the countdown, and the settings rules.
+- Gamma-corrected brightness and a per-frame power limiter, capped below what the power supply can deliver.
+- A JSON API that only answers the dashboard's own page, so other websites can't change the settings from your browser.
+- Password-protected over-the-air updates, so the matrix can stay up on the wall.
+- Host tests for the LED mapping, the power limiter, the countdown and the settings, and Vitest tests for the web app.
 
 <a id="architecture"></a>
 ## 🏗️ Architecture
 
 Holiday Strip is built around three cooperating parts:
 
-- 🔌 **ESP32 firmware** draws the scenes into a frame buffer, mixes them, and sends the frames to the matrix with the RMT peripheral.
+- 🔌 **ESP32 firmware** draws the scenes into a frame buffer, mixes them, and sends the frames to the matrix with the RMT peripheral. It also serves the dashboard and its API.
 - 💡 **72x12 LED matrix** is a single chain of 864 WS2812B-compatible LEDs, made of two halves rotated 180° from each other.
-- 📱 **Web page** is served by the ESP32 itself, and talks to it through the JSON API.
+- 📱 **Nuxt web app** is the dashboard. It is built as a static site and embedded in the firmware, so the matrix needs nothing else on your network.
 
 ### 🔄 Data Flow
 
 1. Every 33 ms the player asks the current scene to draw a frame, and blends in the next scene during a crossfade.
 2. The output stage maps every pixel to its LED in the chain, applies gamma and brightness, and converts it to GRB bytes.
 3. It estimates the current of the frame, and scales the whole frame down if it would go over the power limit.
-4. The RMT peripheral sends the bytes to the matrix in the background, while the loop keeps serving the web page.
-5. When you change a setting on the web page, the firmware checks and saves it, and the player picks it up on the next frame.
+4. The RMT peripheral sends the bytes to the matrix in the background, while the web server answers in its own task.
+5. When you change a setting on the dashboard, the firmware checks every field, saves the settings, and the player picks them up on its next frame.
 
 <a id="quick-start"></a>
 ## 🚀 Quick Start
@@ -97,6 +98,7 @@ Holiday Strip is built around three cooperating parts:
 - A 72x12 WS2812B matrix, or any 864-LED chain wired the same way.
 - A 5 V power supply sized for the brightness you want (see [Power](#power)).
 - VS Code with the PlatformIO IDE extension installed, or PlatformIO Core installed locally.
+- Node.js 24.21 or newer, to build the web app.
 
 ### 🔧 Initial Setup
 
@@ -106,31 +108,30 @@ Holiday Strip is built around three cooperating parts:
 git clone https://github.com/brumaombra/holiday-strip.git
 ```
 
-2. **Create your local secrets file.**
+2. **Build the web app.**
+
+From `webapp/`, install the exact dependencies of the lockfile and build the embedded dashboard:
+
+```bash
+npm ci
+npm run build:embedded
+```
+
+This runs the Nuxt static build, then the `gizmo-embed` tool from [gizmo-common](https://github.com/open-gizmo/gizmo-common) turns it into gzipped C++ files in `microcontroller/src/webui/`. Re-run it any time you change the web app.
+
+3. **Create your local secrets file.**
+
+From `microcontroller/`:
 
 ```bash
 copy platformio_secrets.example.ini platformio_secrets.ini
 ```
 
-3. **Fill in the following values.**
+Fill in the serial port of the board, and choose a password for wireless updates (the same one in both places).
 
-- Your WiFi SSID and password.
-- The serial port of the board (`upload_port` and `monitor_port`).
-- The IP address of the board, for over-the-air updates.
+4. **Build and upload the firmware over USB.**
 
-4. **Build the firmware.**
-
-For VS Code, open the PlatformIO panel and click **Build**.
-
-For the CLI, run:
-
-```bash
-pio run
-```
-
-5. **Upload to the ESP32 over USB.**
-
-For VS Code, open the PlatformIO panel and click **Upload**.
+For VS Code, open `microcontroller/` in the PlatformIO panel and click **Upload**.
 
 For the CLI, run:
 
@@ -138,11 +139,17 @@ For the CLI, run:
 pio run -e matrix --target upload
 ```
 
-6. **Open the control page.**
+5. **Connect the matrix to your Wi-Fi.**
 
-Once the board joins your network, open `http://christmas-matrix.local/`, or the IP address of the board.
+On the first boot there's no saved network, so the matrix opens an open hotspot called `Christmas-Matrix`. Join it with your phone, and the setup page opens by itself: pick your network and type its password.
+
+6. **Open the dashboard.**
+
+Once the matrix joins your network, open `http://christmas-matrix.local/`, or the IP address of the board.
 
 7. **Update over the air afterward.**
+
+Put the IP address of the board in `platformio_secrets.ini`, then run:
 
 ```bash
 pio run -e matrix-ota --target upload
@@ -165,64 +172,82 @@ The data line enters the matrix on its left edge. Connect the ground of the ESP3
 - Protocol: WS2812B-compatible, `800 kHz`, `GRB` byte order.
 - Layout: the bottom half (rows 6–11) runs left to right, top to bottom in each column. The top half (rows 0–5) is the bottom half rotated 180°.
 
-The full protocol, the bit timing, and the chain mapping are in [PROTOCOL.md](PROTOCOL.md).
+The full protocol, the bit timing, and the chain mapping are in [docs/protocol.md](docs/protocol.md).
 
 <a id="power"></a>
 ### Power
 
 At full white, 864 LEDs can draw about 50 A. The firmware estimates the current of every frame (20 mA per color channel at full value, plus 1 mA of idle current per LED) and dims the frame when it would go over the power limit.
 
-The default limit is `3000 mA`. Set it to about 80% of what your 5 V power supply can deliver.
+The default limit is `3000 mA`, and the dashboard can set it between `1000` and `8000 mA`. Set it to about 80% of what your 5 V power supply can deliver. If your supply is smaller than 10 A, lower `MAX_MAX_MILLIAMPS` in [config.cpp](microcontroller/src/config/config.cpp) to match it, so the dashboard can't go above it.
 
 <a id="firmware-overview"></a>
 ## 🔍 Firmware Overview
 
 ### ⚙️ General
 
-The main firmware entry point is [src/main.cpp](src/main.cpp). It:
+The firmware lives in `microcontroller/`, and its entry point is [src/main.cpp](microcontroller/src/main.cpp). It:
 
-- Initializes all modules.
-- Loads the saved settings.
-- Keeps the WiFi connection, the web server, and OTA running.
+- Initializes all modules and loads the saved settings.
+- Keeps the Wi-Fi connected, and wireless updates running.
+- Applies the settings changed from the dashboard.
 - Asks the player for a new frame every 33 ms.
 
 ### 🧩 Firmware Layers
 
-The firmware is split into focused modules under `src/`:
+The firmware is split into focused modules under `microcontroller/src/`:
 
 - 💡 `display/` holds the frame buffer and colors, maps pixels to the LED chain, limits the power, and drives the RMT peripheral.
 - 🔤 `font/` is the 5x7 font of the greeting.
 - 🎬 `scenes/` holds one file per scene, the shared effects (snowfall, stars, sprites), and the list of scenes.
 - ▶️ `player/` rotates the scenes, crossfades between them, and sends the frames to the display.
 - 📅 `calendar/` works out the Christmas countdown and the year of the fireworks.
-- 💾 `settings/` loads and saves the settings in NVS, and keeps every value in its allowed range.
-- 🌐 `web/` serves the control page and the JSON API.
-- 📡 `wifi/` connects to the network, sets the clock from NTP, and announces the board with mDNS.
-- 🔄 `ota/` handles over-the-air updates, and blanks the matrix while one runs.
-- ⚙️ `config/` centralizes pins, timing values, credentials, power figures, and defaults.
+- 💾 `settings/` loads and saves the settings in NVS, shares them safely between the loop and the web server, and checks the JSON from the dashboard.
+- 🌐 `server/` serves the dashboard and its API, one file per endpoint.
+- 📡 `wifi/` runs the Wi-Fi setup and the captive portal from the shared [gizmo-common](https://github.com/open-gizmo/gizmo-common) library, and sets the clock from NTP.
+- 🔄 `ota/` handles password-protected wireless updates, and blanks the matrix while one runs.
+- ⚙️ `config/` centralizes pins, timing values, network names, power figures, and defaults.
 
 ### 🌐 Web API
 
-The control page uses a small JSON API:
+Every response has the OpenGizmo shape `{ errorId, errorMessage, data }`, and only requests from the dashboard's own page are accepted:
 
-- `GET /api/state` returns the current settings, the current scene, and the estimated current.
-- `GET /api/set?on=1&brightness=80&scene=-1&message=...&countdown=1&max_milliamps=3000` changes one or more settings. A scene of `-1` rotates all of them.
-- `GET /api/frame` returns the raw RGB bytes of the last frame (72x12, row by row, before gamma and brightness).
+- `GET /api/state` returns the settings, the scene names, the scene on screen, the estimated current, the limits, the uptime and the saved network.
+- `POST /api/settings` changes any of `on`, `brightness`, `scene`, `maxMilliamps`, `countdown` and `message`, and answers with the new state. A scene of `-1` rotates all of them. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
+- `GET /api/frame` returns the raw RGB bytes of the last frame (72x12, row by row, before gamma and brightness), for the live preview.
+- `GET /api/networks`, `POST /api/connect` and `GET /api/check-connection` are the Wi-Fi setup API of gizmo-common.
 
 ### 🧪 Tests
 
-The hardware-free logic is tested on your computer, no board needed:
+The hardware-free firmware logic is tested on your computer, no board needed. From `microcontroller/`:
 
 ```bash
 pio test -e native
 ```
 
-The tests live in [test/](test/). They build the logic modules against a small fake `Arduino.h` ([test/stubs/Arduino.h](test/stubs/Arduino.h)), and cover:
+The tests live in [microcontroller/test/](microcontroller/test/). They build the logic modules against a small fake `Arduino.h`, and cover:
 
-- The LED chain mapping, checked against the corners measured in [PROTOCOL.md](PROTOCOL.md).
+- The LED chain mapping, checked against the corners measured in [docs/protocol.md](docs/protocol.md).
 - The byte order, the gamma, and the power limiter.
 - The Christmas countdown, in the real timezone, including the day the clocks go back.
-- The range checks of the settings and the message.
+- The rules of the saved settings, and the checks of the JSON the dashboard sends.
+
+The web app has its own tests. From `webapp/`:
+
+```bash
+npm test
+```
+
+### 📱 Web App Overview
+
+The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps:
+
+- **Home**: switch the matrix on and off, set the brightness, watch the live preview, and pick a scene or the rotation.
+- **Message**: edit the scrolling message, and turn the Christmas countdown on or off.
+- **Settings**: the power limit, the language (English or Italian), and the device info.
+- **Wi-Fi**: change the network, and the setup page the hotspot opens.
+
+`npm run dev` starts it with a mock server that behaves like the matrix, so you can work on it without a board.
 
 <a id="configuration"></a>
 ## ⚙️ Configuration
@@ -241,36 +266,44 @@ Example secrets file:
 ```ini
 [env:matrix]
 build_flags =
-	-D PIO_WIFI_SSID='"your-wifi-ssid"'
-	-D PIO_WIFI_PASSWORD='"your-wifi-password"'
+	-D PIO_OTA_PASSWORD='"your-ota-password"'
 upload_port = COM5
 monitor_port = COM5
 
 [env:matrix-ota]
 upload_port = 192.168.1.100
+upload_flags =
+	--auth=your-ota-password
 ```
 
-Use [platformio_secrets.example.ini](platformio_secrets.example.ini) as the template. The real file is ignored by git.
+Use [platformio_secrets.example.ini](microcontroller/platformio_secrets.example.ini) as the template. The real file is ignored by git. Leave the OTA password empty to turn wireless updates off. The Wi-Fi credentials aren't in the firmware: they're set from the setup hotspot, and saved on the board.
 
 ### Key runtime settings
 
-The main shared constants live in [src/config/config.h](src/config/config.h) and [src/config/config.cpp](src/config/config.cpp), including:
+The main shared constants live in [config.h](microcontroller/src/config/config.h) and [config.cpp](microcontroller/src/config/config.cpp), including:
 
-- The hostname and the timezone.
+- The hostname, the name of the setup hotspot, and the timezone.
 - The data pin.
 - The frame time, the scene time, and the crossfade time.
-- The power figures of the LEDs.
-- The default settings, and the limits of the power limit and the message.
+- The power figures of the LEDs, and the highest power limit the dashboard can set.
+- The default settings, and the longest message.
+
+### Partitions
+
+The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the embedded dashboard fits and wireless updates still work. Moving from the older default table needs one USB upload. The saved settings are kept.
 
 <a id="troubleshooting"></a>
 ## 🧰 Troubleshooting
 
 - Nothing lights up: check the data wire on `GPIO13`, and that the ESP32 and the matrix share the same ground.
 - Wrong colors or flickering pixels: the data signal is probably too weak or too long. Keep the data wire short, or add a 3.3 V to 5 V level shifter.
-- The picture looks dim with bright scenes: the power limiter is dimming it. Raise the limit on the control page only if your power supply can deliver it.
+- The picture looks dim with bright scenes: the power limiter is dimming it. Raise the limit on the dashboard only if your power supply can deliver it.
+- The `Christmas-Matrix` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Check the serial monitor.
 - `christmas-matrix.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects.
+- The dashboard shows an old version: rebuild the web app with `npm run build:embedded` before building the firmware.
 - No countdown: the clock is set from NTP, so the countdown only appears once the board is online, and only in the 60 days before Christmas.
-- OTA upload fails: check the IP address in `platformio_secrets.ini`, and that your computer is on the same network as the board.
+- OTA upload fails with an authentication error: the password in `upload_flags` must match `PIO_OTA_PASSWORD` in the firmware on the board.
+- OTA upload doesn't find the board: check the IP address in `platformio_secrets.ini`, and that your computer is on the same network as the board.
 
 <a id="license"></a>
 ## 📄 License

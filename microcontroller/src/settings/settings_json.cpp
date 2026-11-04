@@ -1,0 +1,94 @@
+#include "settings_json.h"
+
+#include <string.h>
+
+#include "settings/settings_rules.h"
+
+namespace {
+	// Read an optional boolean field (false if it's there with the wrong type)
+	bool readBoolField(JsonVariantConst value, bool &output) {
+		if (value.isNull()) {
+			return true;
+		}
+		if (!value.is<bool>()) {
+			return false;
+		}
+		output = value.as<bool>();
+		return true;
+	}
+
+	// Read an optional whole number field within a range (false if it's there with the wrong type or out of range)
+	bool readIntegerField(JsonVariantConst value, long minValue, long maxValue, long &output) {
+		if (value.isNull()) {
+			return true;
+		}
+		if (!value.is<long>()) {
+			return false;
+		}
+
+		// Check the range
+		const long number = value.as<long>();
+		if (number < minValue || number > maxValue) {
+			return false;
+		}
+		output = number;
+		return true;
+	}
+}
+
+// Write the settings into a JSON object
+void writeSettingsToJson(JsonObject json, const Settings &settings) {
+	json["on"] = settings.on;
+	json["brightness"] = settings.brightness;
+	json["scene"] = settings.scene;
+	json["maxMilliamps"] = settings.maxMilliamps;
+	json["countdown"] = settings.countdown;
+	json["message"] = settings.message;
+}
+
+// Apply the fields of a JSON object to the settings, all or nothing (returns the name of the first invalid field, or nullptr)
+const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, int sceneCount) {
+	Settings updated = settings;
+
+	// Read the switches
+	if (!readBoolField(json["on"], updated.on)) {
+		return "on";
+	}
+	if (!readBoolField(json["countdown"], updated.countdown)) {
+		return "countdown";
+	}
+
+	// Read the brightness
+	long brightness = updated.brightness;
+	if (!readIntegerField(json["brightness"], 0, 255, brightness)) {
+		return "brightness";
+	}
+	updated.brightness = (uint8_t)brightness;
+
+	// Read the scene (-1 rotates through all of them)
+	long scene = updated.scene;
+	if (!readIntegerField(json["scene"], -1, sceneCount - 1, scene)) {
+		return "scene";
+	}
+	updated.scene = (int)scene;
+
+	// Read the power limit
+	long maxMilliamps = updated.maxMilliamps;
+	if (!readIntegerField(json["maxMilliamps"], config::MIN_MAX_MILLIAMPS, config::MAX_MAX_MILLIAMPS, maxMilliamps)) {
+		return "maxMilliamps";
+	}
+	updated.maxMilliamps = (uint32_t)maxMilliamps;
+
+	// Read the message, stored in capitals
+	JsonVariantConst message = json["message"];
+	if (!message.isNull()) {
+		if (!message.is<const char *>() || strlen(message.as<const char *>()) > config::MAX_MESSAGE_LENGTH) {
+			return "message";
+		}
+		sanitizeMessage(message.as<const char *>(), updated.message, sizeof(updated.message));
+	}
+
+	// Every field is valid: apply them all
+	settings = updated;
+	return nullptr;
+}
