@@ -53,7 +53,6 @@
             "scenesDescription": "Scegli una scena da tenere fissa, oppure lascia che la striscia le alterni tutte.",
             "rotateAll": "Alterna tutte le scene",
             "rotateAllDescription": "Passa da una scena all'altra, una dopo l'altra",
-            "onScreen": "In onda",
             "sceneNames": {
                 "0": "Saluto",
                 "1": "Nevicata",
@@ -64,7 +63,9 @@
                 "6": "Regali",
                 "7": "Bastoncino di zucchero",
                 "8": "Fuochi d'artificio"
-            }
+            },
+            "sceneLabel": "Scena",
+            "onScreenScene": "In onda: {scene}"
         },
         "message": {
             "title": "Messaggio",

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import FireIcon from '@hugeicons/core-free-icons/FireIcon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
 import GiftIcon from '@hugeicons/core-free-icons/GiftIcon';
@@ -10,10 +10,8 @@ import PineTreeIcon from '@hugeicons/core-free-icons/PineTreeIcon';
 import RepeatIcon from '@hugeicons/core-free-icons/RepeatIcon';
 import SnowflakeIcon from '@hugeicons/core-free-icons/SnowflakeIcon';
 import StarIcon from '@hugeicons/core-free-icons/StarIcon';
-import Tick02Icon from '@hugeicons/core-free-icons/Tick02Icon';
-import { HugeiconsIcon } from '@hugeicons/vue';
-import { Badge } from '@brumaombra/ui-vintage/badge';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
+import { OptionPickerDialog } from '@brumaombra/ui-vintage/option-picker-dialog';
 
 // Props: the scene names in the order of the device, the chosen scene (-1 rotates them all) and the one on screen now
 const props = defineProps({
@@ -42,6 +40,18 @@ const options = computed(() => [
     ...props.scenes.map((name, index) => ({ value: index, label: getSceneName({ name, index }), description: '', icon: sceneIcons[index] || StarIcon }))
 ]);
 
+// Whether the scene picker is open
+const isPickerOpen = ref(false);
+
+// The chosen option (the rotation when the chosen scene isn't in the list)
+const selectedOption = computed(() => options.value.find(option => option.value === props.modelValue) || options.value[0]);
+
+// The scene on screen now, under the row (none while the display is off)
+const onScreenText = computed(() => {
+    const option = options.value.find(item => item.value === props.currentScene && item.value >= 0);
+    return option ? t('pages.home.onScreenScene', { scene: option.label }) : '';
+});
+
 // Pick a scene (a tap on the chosen one changes nothing)
 const handleSelect = value => {
     if (value !== props.modelValue) emits('update:modelValue', value);
@@ -49,17 +59,11 @@ const handleSelect = value => {
 </script>
 
 <template>
-    <!-- The scenes are the content of the group: one row each, the chosen one ticked -->
+    <!-- The scene of the strip: one row with the chosen scene and the one on screen, opening the picker -->
     <ListGroup :title="t('pages.home.scenesTitle')" :hint="t('pages.home.scenesDescription')">
-        <!-- A button row per scene, with the description under the name -->
-        <ListRow v-for="option in options" :key="option.value" :label="option.label" :description="option.description" :icon="option.icon" action  data-testid="scene-row" @click="handleSelect(option.value)">
-            <template #trailing>
-                <!-- The scene on screen now -->
-                <Badge v-if="option.value === props.currentScene" :text="t('pages.home.onScreen')" color="green" size="sm" pulse />
-
-                <!-- The chosen scene -->
-                <HugeiconsIcon v-if="option.value === props.modelValue" :icon="Tick02Icon" class="size-4 shrink-0 text-primary" data-testid="scene-selected" />
-            </template>
-        </ListRow>
+        <ListRow :label="t('pages.home.sceneLabel')" :value="selectedOption.label" :description="onScreenText" :icon="selectedOption.icon" action data-testid="scene-row" @click="isPickerOpen = true" />
     </ListGroup>
+
+    <!-- The scenes to pick from: the rotation, then one per scene -->
+    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.home.sceneLabel')" :description="t('pages.home.scenesDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
 </template>

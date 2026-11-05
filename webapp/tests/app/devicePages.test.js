@@ -244,29 +244,34 @@ describe('home page', () => {
         expect(frameCount).toBeLessThanOrEqual(framesAtUnmount + 1);
     });
 
-    // The rotation and the nine scenes are there, with the scene on screen marked
-    it('lists the rotation and every scene, and marks the one on screen', async () => {
+    // The scene picker cards render in a portal, outside the mounted page
+    const sceneCards = () => [...document.querySelectorAll('[data-slot="radio-group-card"]')];
+
+    // The scene row shows the chosen scene and the one on screen, and opens the picker with the rotation and the nine scenes
+    it('shows the chosen scene and the one on screen, and lists every scene in the picker', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        const sceneRows = wrapper.findAll('[data-testid="scene-row"]');
-        expect(sceneRows).toHaveLength(10);
-        expect(sceneRows[0].text()).toContain('Rotate all scenes');
-        expect(sceneRows[0].find('[data-testid="scene-selected"]').exists()).toBe(true);
-        expect(sceneRows[4].text()).toContain('Santa\'s sleigh');
+        const sceneRow = wrapper.find('[data-testid="scene-row"]');
+        expect(sceneRow.text()).toContain('Rotate all scenes');
+        expect(sceneRow.text()).toContain('On screen: Christmas trees'); // The third scene (index 2) is on screen
 
-        // The third scene (index 2) is on screen
-        const onScreen = sceneRows.filter(row => row.text().includes('On screen'));
-        expect(onScreen).toHaveLength(1);
-        expect(onScreen[0].text()).toContain('Christmas trees');
+        // Open the picker
+        await sceneRow.find('button').trigger('click');
+        await flushPromises();
+        expect(sceneCards()).toHaveLength(10);
+        expect(sceneCards()[0].getAttribute('data-state')).toBe('checked');
+        expect(sceneCards()[4].textContent).toContain('Santa\'s sleigh');
     });
 
-    // Picking a scene sends it, and it becomes the chosen one
+    // Picking a scene sends it, and the row shows it as the chosen one
     it('sends the scene that is picked', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        await wrapper.findAll('[data-testid="scene-row"]')[5].find('button').trigger('click');
+        await wrapper.find('[data-testid="scene-row"] button').trigger('click');
+        await flushPromises();
+        sceneCards()[5].click();
         await vi.waitFor(() => expect(savedBodies).toEqual([{ scene: 4 }]));
-        expect(wrapper.findAll('[data-testid="scene-row"]')[5].find('[data-testid="scene-selected"]').exists()).toBe(true);
+        await vi.waitFor(() => expect(wrapper.find('[data-testid="scene-row"]').text()).toContain('Fireplace')); // Card 5 is scene 4
     });
 
     // Picking the rotation sends -1
@@ -274,7 +279,9 @@ describe('home page', () => {
         deviceState.scene = 3;
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        await wrapper.findAll('[data-testid="scene-row"]')[0].find('button').trigger('click');
+        await wrapper.find('[data-testid="scene-row"] button').trigger('click');
+        await flushPromises();
+        sceneCards()[0].click();
         await vi.waitFor(() => expect(savedBodies).toEqual([{ scene: -1 }]));
     });
 

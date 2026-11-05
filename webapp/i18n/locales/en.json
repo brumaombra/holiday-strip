@@ -53,7 +53,6 @@
             "scenesDescription": "Pick one scene to keep, or let the strip rotate through all of them.",
             "rotateAll": "Rotate all scenes",
             "rotateAllDescription": "Cycle through every scene, one after the other",
-            "onScreen": "On screen",
             "sceneNames": {
                 "0": "Greeting",
                 "1": "Snowfall",
@@ -64,7 +63,9 @@
                 "6": "Gifts",
                 "7": "Candy cane",
                 "8": "Fireworks"
-            }
+            },
+            "sceneLabel": "Scene",
+            "onScreenScene": "On screen: {scene}"
         },
         "message": {
             "title": "Message",
