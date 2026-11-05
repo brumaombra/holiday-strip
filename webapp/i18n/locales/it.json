@@ -32,7 +32,7 @@
     "pages": {
         "home": {
             "title": "Holiday Strip",
-            "previewTitle": "Anteprima dal vivo",
+            "displayTitle": "Display",
             "previewLabel": "Anteprima dal vivo della matrice LED",
             "power": {
                 "label": "Display acceso"
@@ -43,10 +43,11 @@
             },
             "current": {
                 "title": "Corrente assorbita",
-                "estimated": "Circa {milliamps} mA ora",
                 "limit": "Limite {milliamps} mA",
                 "limitedTitle": "Limite di potenza raggiunto",
-                "limitedDescription": "Il dispositivo sta abbassando i LED per restare sotto il limite. Riduci la luminosità, oppure alza il limite nelle Impostazioni se il tuo alimentatore lo regge."
+                "limitedDescription": "Il dispositivo sta abbassando i LED per restare sotto il limite. Riduci la luminosità, oppure alza il limite nelle Impostazioni se il tuo alimentatore lo regge.",
+                "label": "Corrente stimata",
+                "value": "{milliamps} / {limit} mA"
             },
             "scenesTitle": "Scene",
             "scenesDescription": "Scegli una scena da tenere fissa, oppure lascia che la striscia le alterni tutte.",
@@ -67,6 +68,7 @@
         },
         "message": {
             "title": "Messaggio",
+            "textTitle": "Testo",
             "label": "Messaggio scorrevole",
             "placeholder": "Scrivi il tuo saluto",
             "counter": "{length} / {max}",

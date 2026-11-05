@@ -4,10 +4,9 @@ import FlashIcon from '@hugeicons/core-free-icons/FlashIcon';
 import GlobeIcon from '@hugeicons/core-free-icons/GlobeIcon';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 import { PageHeader } from '@brumaombra/ui-vintage/page-header';
-import { SectionTitle } from '@brumaombra/ui-vintage/section-title';
-import { SliderFormComponent } from '@brumaombra/ui-vintage/slider-form-component';
 import { createSettingsSaver } from '~/composables/useDeviceState.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
+import SliderRow from '~/components/common/SliderRow.vue';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 
 const POWER_LIMIT_STEP = 100; // Milliamps
@@ -52,18 +51,17 @@ definePageMeta({
         <DeviceStateGate>
             <div class="space-y-6">
                 <!-- Power supply -->
-                <section>
-                    <SectionTitle :title="t('pages.settings.powerTitle')" :icon="FlashIcon" />
-                    <SliderFormComponent id="maxMilliamps"
+                <ListGroup :title="t('pages.settings.powerTitle')" :hint="t('pages.settings.maxMilliamps.note')">
+                    <SliderRow id="maxMilliamps"
                         :model-value="device.maxMilliamps"
                         :label="t('pages.settings.maxMilliamps.label')"
-                        :description="t('pages.settings.maxMilliamps.note')"
+                        :icon="FlashIcon"
                         :min="device.minMaxMilliamps"
                         :max="device.maxMaxMilliamps"
                         :step="POWER_LIMIT_STEP"
                         :value-text="`${device.maxMilliamps}mA`"
                         @update:model-value="handleMaxMilliampsChange" />
-                </section>
+                </ListGroup>
 
                 <!-- Language -->
                 <ListGroup :title="t('pages.settings.languageTitle')">

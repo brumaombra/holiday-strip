@@ -32,7 +32,7 @@
     "pages": {
         "home": {
             "title": "Holiday Strip",
-            "previewTitle": "Live preview",
+            "displayTitle": "Display",
             "previewLabel": "Live preview of the LED matrix",
             "power": {
                 "label": "Display on"
@@ -43,10 +43,11 @@
             },
             "current": {
                 "title": "Current draw",
-                "estimated": "About {milliamps} mA now",
                 "limit": "Limit {milliamps} mA",
                 "limitedTitle": "Power limit reached",
-                "limitedDescription": "The device is dimming the LEDs to stay under the limit. Lower the brightness, or raise the limit in Settings if your power supply can take it."
+                "limitedDescription": "The device is dimming the LEDs to stay under the limit. Lower the brightness, or raise the limit in Settings if your power supply can take it.",
+                "label": "Estimated current",
+                "value": "{milliamps} / {limit} mA"
             },
             "scenesTitle": "Scenes",
             "scenesDescription": "Pick one scene to keep, or let the strip rotate through all of them.",
@@ -67,6 +68,7 @@
         },
         "message": {
             "title": "Message",
+            "textTitle": "Text",
             "label": "Scrolling message",
             "placeholder": "Type your greeting",
             "counter": "{length} / {max}",

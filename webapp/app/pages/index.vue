@@ -2,18 +2,18 @@
 import { computed, onBeforeUnmount } from 'vue';
 import FlashIcon from '@hugeicons/core-free-icons/FlashIcon';
 import PowerIcon from '@hugeicons/core-free-icons/PowerIcon';
-import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon';
+import SunIcon from '@hugeicons/core-free-icons/Sun01Icon';
 import { HugeiconsIcon } from '@hugeicons/vue';
 import { Alert, AlertDescription, AlertTitle } from '@brumaombra/ui-vintage/alert';
+import { Card } from '@brumaombra/ui-vintage/card';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 import { PageHeader } from '@brumaombra/ui-vintage/page-header';
-import { ProgressComponent } from '@brumaombra/ui-vintage/progress-component';
-import { SectionTitle } from '@brumaombra/ui-vintage/section-title';
-import { SliderFormComponent } from '@brumaombra/ui-vintage/slider-form-component';
 import { Switch } from '@brumaombra/ui-vintage/switch';
 import { applyDeviceSettings, createSettingsSaver, refreshLiveState } from '~/composables/useDeviceState.js';
 import { usePolling } from '~/composables/usePolling.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
+import MeterRow from '~/components/common/MeterRow.vue';
+import SliderRow from '~/components/common/SliderRow.vue';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 import MatrixPreview from '~/components/matrix/MatrixPreview.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
@@ -66,40 +66,43 @@ definePageMeta({
 
         <DeviceStateGate>
             <div class="space-y-6">
-                <!-- Live preview of the matrix -->
-                <section>
-                    <SectionTitle :title="t('pages.home.previewTitle')" :icon="SparklesIcon" />
-                    <div class="rounded border border-border bg-card p-2">
-                        <MatrixPreview />
-                    </div>
-                </section>
+                <!-- Live preview of the matrix, on one card like the header of a profile -->
+                <Card padding="none" class="p-2">
+                    <MatrixPreview />
+                </Card>
 
                 <!-- Power and brightness -->
-                <div class="space-y-4">
-                    <ListGroup>
-                        <ListRow :label="t('pages.home.power.label')" :icon="PowerIcon" label-for="power">
-                            <template #trailing>
-                                <Switch id="power" :model-value="device.on" @update:model-value="handlePowerChange" />
-                            </template>
-                        </ListRow>
-                    </ListGroup>
-                    <SliderFormComponent id="brightness"
+                <ListGroup :title="t('pages.home.displayTitle')" :hint="t('pages.home.brightness.note')">
+                    <!-- Display on or off -->
+                    <ListRow :label="t('pages.home.power.label')" :icon="PowerIcon" label-for="power">
+                        <template #trailing>
+                            <Switch id="power" :model-value="device.on" @update:model-value="handlePowerChange" />
+                        </template>
+                    </ListRow>
+
+                    <!-- Brightness, with the slider under its label -->
+                    <SliderRow id="brightness"
                         :model-value="device.brightness"
                         :label="t('pages.home.brightness.label')"
-                        :description="t('pages.home.brightness.note')"
+                        :icon="SunIcon"
                         :min="0"
                         :max="255"
                         :value-text="`${brightnessPercentage}%`"
                         @update:model-value="handleBrightnessChange" />
-                </div>
+                </ListGroup>
 
                 <!-- Current drawn by the LEDs, against the limit -->
                 <div class="space-y-3">
-                    <ProgressComponent :title="t('pages.home.current.title')"
-                        :value="device.estimatedMilliamps"
-                        :max="device.maxMilliamps"
-                        :bottom-left-label="t('pages.home.current.estimated', { milliamps: device.estimatedMilliamps })"
-                        :bottom-right-label="t('pages.home.current.limit', { milliamps: device.maxMilliamps })" />
+                    <ListGroup :title="t('pages.home.current.title')">
+                        <MeterRow :label="t('pages.home.current.label')"
+                            :icon="FlashIcon"
+                            :value="device.estimatedMilliamps"
+                            :max="device.maxMilliamps"
+                            :value-text="t('pages.home.current.value', { milliamps: device.estimatedMilliamps, limit: device.maxMilliamps })"
+                            :end-label="t('pages.home.current.limit', { milliamps: device.maxMilliamps })" />
+                    </ListGroup>
+
+                    <!-- The device is dimming the LEDs -->
                     <Alert v-if="isPowerLimited" color="yellow">
                         <HugeiconsIcon :icon="FlashIcon" />
                         <AlertTitle>{{ t('pages.home.current.limitedTitle') }}</AlertTitle>
@@ -108,10 +111,7 @@ definePageMeta({
                 </div>
 
                 <!-- Scenes -->
-                <section>
-                    <SectionTitle :title="t('pages.home.scenesTitle')" :description="t('pages.home.scenesDescription')" />
-                    <ScenePicker :scenes="device.scenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
-                </section>
+                <ScenePicker :scenes="device.scenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
             </div>
         </DeviceStateGate>
     </div>

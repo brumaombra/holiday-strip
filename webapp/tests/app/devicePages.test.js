@@ -290,7 +290,7 @@ describe('home page', () => {
     it('shows the estimated current against the limit', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        expect(wrapper.text()).toContain('About 1200 mA now');
+        expect(wrapper.text()).toContain('1200 / 3000 mA');
         expect(wrapper.text()).toContain('Limit 3000 mA');
         expect(wrapper.text()).not.toContain('Power limit reached');
     });
