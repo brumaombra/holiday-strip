@@ -7,7 +7,7 @@ import SaveIcon from '@hugeicons/core-free-icons/SaveIcon';
 import { HugeiconsIcon } from '@hugeicons/vue';
 import { Alert, AlertDescription, AlertTitle } from '@brumaombra/ui-vintage/alert';
 import { Button } from '@brumaombra/ui-vintage/button';
-import { ListGroup } from '@brumaombra/ui-vintage/list';
+import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 import { showMessageToast } from '@brumaombra/ui-vintage/message-toast';
 import { Textarea } from '@brumaombra/ui-vintage/textarea';
 import { applyDeviceSettings } from '~/composables/useDeviceState.js';
@@ -58,21 +58,15 @@ const handleSave = async () => {
     <form class="space-y-6" @submit.prevent="handleSave">
         <!-- The message, with the characters the matrix can draw under the group -->
         <ListGroup :title="t('pages.message.textTitle')" :hint="t('pages.message.allowedHint', { letters: MESSAGE_LETTERS_AND_DIGITS, punctuation: MESSAGE_PUNCTUATION, heart: MESSAGE_HEART })">
-            <li data-slot="list-row" class="px-4 py-3 md:px-5">
-                <!-- Icon and label -->
-                <div class="flex min-h-7 items-center gap-2 md:gap-3">
-                    <HugeiconsIcon :icon="MessageSquareTextIcon" class="size-4 shrink-0 text-muted-foreground" />
-                    <label for="message" class="min-w-0 flex-1 text-[0.8125rem] font-semibold text-foreground md:text-sm">{{ t('pages.message.label') }}</label>
-                </div>
-
+            <ListRow :label="t('pages.message.label')" :icon="MessageSquareTextIcon" label-for="message">
                 <!-- Message -->
-                <Textarea id="message" v-model="draft" rows="3" class="mt-2" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.message.placeholder')" :aria-invalid="isTooLong || undefined" />
+                <Textarea id="message" v-model="draft" rows="3" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.message.placeholder')" :aria-invalid="isTooLong || undefined" />
 
                 <!-- Counter against the limit of the device -->
                 <p class="mt-2 text-right text-xs tabular-nums" :class="isTooLong ? 'font-semibold text-destructive' : 'text-muted-foreground'" data-testid="message-counter">
                     {{ t('pages.message.counter', { length: draftLength, max: device.maxMessageLength }) }}
                 </p>
-            </li>
+            </ListRow>
         </ListGroup>
 
         <!-- Characters the font can't draw -->

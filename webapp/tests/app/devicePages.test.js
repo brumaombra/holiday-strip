@@ -248,14 +248,14 @@ describe('home page', () => {
     it('lists the rotation and every scene, and marks the one on screen', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        const sceneButtons = wrapper.findAll('button[aria-pressed]');
-        expect(sceneButtons).toHaveLength(10);
-        expect(sceneButtons[0].text()).toContain('Rotate all scenes');
-        expect(sceneButtons[0].attributes('aria-pressed')).toBe('true');
-        expect(sceneButtons[4].text()).toContain('Santa\'s sleigh');
+        const sceneRows = wrapper.findAll('[data-testid="scene-row"]');
+        expect(sceneRows).toHaveLength(10);
+        expect(sceneRows[0].text()).toContain('Rotate all scenes');
+        expect(sceneRows[0].find('[data-testid="scene-selected"]').exists()).toBe(true);
+        expect(sceneRows[4].text()).toContain('Santa\'s sleigh');
 
         // The third scene (index 2) is on screen
-        const onScreen = sceneButtons.filter(button => button.text().includes('On screen'));
+        const onScreen = sceneRows.filter(row => row.text().includes('On screen'));
         expect(onScreen).toHaveLength(1);
         expect(onScreen[0].text()).toContain('Christmas trees');
     });
@@ -264,9 +264,9 @@ describe('home page', () => {
     it('sends the scene that is picked', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        await wrapper.findAll('button[aria-pressed]')[5].trigger('click');
+        await wrapper.findAll('[data-testid="scene-row"]')[5].find('button').trigger('click');
         await vi.waitFor(() => expect(savedBodies).toEqual([{ scene: 4 }]));
-        expect(wrapper.findAll('button[aria-pressed]')[5].attributes('aria-pressed')).toBe('true');
+        expect(wrapper.findAll('[data-testid="scene-row"]')[5].find('[data-testid="scene-selected"]').exists()).toBe(true);
     });
 
     // Picking the rotation sends -1
@@ -274,7 +274,7 @@ describe('home page', () => {
         deviceState.scene = 3;
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        await wrapper.findAll('button[aria-pressed]')[0].trigger('click');
+        await wrapper.findAll('[data-testid="scene-row"]')[0].find('button').trigger('click');
         await vi.waitFor(() => expect(savedBodies).toEqual([{ scene: -1 }]));
     });
 

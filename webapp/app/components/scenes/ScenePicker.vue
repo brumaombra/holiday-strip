@@ -13,7 +13,7 @@ import StarIcon from '@hugeicons/core-free-icons/StarIcon';
 import Tick02Icon from '@hugeicons/core-free-icons/Tick02Icon';
 import { HugeiconsIcon } from '@hugeicons/vue';
 import { Badge } from '@brumaombra/ui-vintage/badge';
-import { ListGroup } from '@brumaombra/ui-vintage/list';
+import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 
 // Props: the scene names in the order of the device, the chosen scene (-1 rotates them all) and the one on screen now
 const props = defineProps({
@@ -51,23 +51,15 @@ const handleSelect = value => {
 <template>
     <!-- The scenes are the content of the group: one row each, the chosen one ticked -->
     <ListGroup :title="t('pages.home.scenesTitle')" :hint="t('pages.home.scenesDescription')">
-        <li v-for="option in options" :key="option.value" data-slot="list-row">
-            <button type="button" class="flex min-h-13 w-full cursor-pointer items-center gap-2 px-4 py-2 text-left text-foreground transition-colors hover:bg-accent focus-visible:bg-accent focus-visible:outline-none md:gap-3 md:px-5" :class="{ 'bg-accent': option.value === props.modelValue }" :aria-pressed="option.value === props.modelValue" @click="handleSelect(option.value)">
-                <!-- Icon of the scene -->
-                <HugeiconsIcon :icon="option.icon" class="size-4 shrink-0 text-muted-foreground" />
-
-                <!-- Name -->
-                <span class="min-w-0 flex-1">
-                    <span class="block text-[0.8125rem] font-semibold md:text-sm">{{ option.label }}</span>
-                    <span v-if="option.description" class="mt-0.5 block text-[0.6875rem] text-muted-foreground md:text-xs">{{ option.description }}</span>
-                </span>
-
+        <!-- A button row per scene, with the description under the name -->
+        <ListRow v-for="option in options" :key="option.value" :label="option.label" :description="option.description" :icon="option.icon" action  data-testid="scene-row" @click="handleSelect(option.value)">
+            <template #trailing>
                 <!-- The scene on screen now -->
                 <Badge v-if="option.value === props.currentScene" :text="t('pages.home.onScreen')" color="green" size="sm" pulse />
 
                 <!-- The chosen scene -->
-                <HugeiconsIcon v-if="option.value === props.modelValue" :icon="Tick02Icon" class="size-4 shrink-0 text-primary" />
-            </button>
-        </li>
+                <HugeiconsIcon v-if="option.value === props.modelValue" :icon="Tick02Icon" class="size-4 shrink-0 text-primary" data-testid="scene-selected" />
+            </template>
+        </ListRow>
     </ListGroup>
 </template>

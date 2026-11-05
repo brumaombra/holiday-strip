@@ -7,11 +7,12 @@ import { HugeiconsIcon } from '@hugeicons/vue';
 import { Alert, AlertDescription, AlertTitle } from '@brumaombra/ui-vintage/alert';
 import { Card } from '@brumaombra/ui-vintage/card';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
+import { Progress } from '@brumaombra/ui-vintage/progress';
+import { Slider } from '@brumaombra/ui-vintage/slider';
 import { Switch } from '@brumaombra/ui-vintage/switch';
 import { applyDeviceSettings, createSettingsSaver, refreshLiveState } from '~/composables/useDeviceState.js';
 import { usePolling } from '~/composables/usePolling.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
-import MeterRow from '~/components/common/MeterRow.vue';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 import MatrixPreview from '~/components/matrix/MatrixPreview.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
@@ -36,7 +37,7 @@ const handlePowerChange = isOn => {
 };
 
 // Change the brightness (the device gets one request when the slider rests)
-const handleBrightnessChange = brightness => {
+const handleBrightnessChange = ([brightness]) => {
     saveBrightness({ brightness });
 };
 
@@ -76,24 +77,17 @@ definePageMeta({
                     </ListRow>
 
                     <!-- Brightness, with the slider under its label -->
-                    <GizmoSliderRow :model-value="device.brightness"
-                        :label="t('pages.home.brightness.label')"
-                        :icon="SunIcon"
-                        :min="0"
-                        :max="255"
-                        :value-text="`${brightnessPercentage}%`"
-                        @update:model-value="handleBrightnessChange" />
+                    <ListRow :label="t('pages.home.brightness.label')" :icon="SunIcon" :value="`${brightnessPercentage}%`">
+                        <Slider :model-value="[device.brightness]" :min="0" :max="255" :thumb-label="t('pages.home.brightness.label')" @update:model-value="handleBrightnessChange" />
+                    </ListRow>
                 </ListGroup>
 
                 <!-- Current drawn by the LEDs, against the limit -->
                 <div class="space-y-3">
                     <ListGroup :title="t('pages.home.current.title')">
-                        <MeterRow :label="t('pages.home.current.label')"
-                            :icon="FlashIcon"
-                            :value="device.estimatedMilliamps"
-                            :max="device.maxMilliamps"
-                            :value-text="t('pages.home.current.value', { milliamps: device.estimatedMilliamps, limit: device.maxMilliamps })"
-                            :end-label="t('pages.home.current.limit', { milliamps: device.maxMilliamps })" />
+                        <ListRow :label="t('pages.home.current.label')" :description="t('pages.home.current.limit', { milliamps: device.maxMilliamps })" :icon="FlashIcon" :value="t('pages.home.current.value', { milliamps: device.estimatedMilliamps, limit: device.maxMilliamps })">
+                            <Progress :model-value="device.estimatedMilliamps" :max="device.maxMilliamps" :aria-label="t('pages.home.current.label')" />
+                        </ListRow>
                     </ListGroup>
 
                     <!-- The device is dimming the LEDs -->
