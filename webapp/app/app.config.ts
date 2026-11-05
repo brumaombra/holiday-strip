@@ -6,6 +6,10 @@ import Settings01Icon from '@hugeicons/core-free-icons/Settings01Icon';
 export default defineAppConfig({
     gizmo: {
         name: 'Holiday Strip',
+
+        // mDNS name of the firmware (http://holiday-strip.local)
+        hostname: 'holiday-strip',
+
         logo: '/logo.svg',
         homePath: '/',
 

@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <Preferences.h>
+#include <gizmo/text.h>
 
 #include "settings/settings_rules.h"
 
@@ -35,7 +36,7 @@ void loadSettings(int sceneCount) {
 	currentSettings.maxMilliamps = sanitizeMaxMilliamps(preferences.getUInt(MAX_MILLIAMPS_KEY, config::DEFAULT_MAX_MILLIAMPS));
 	currentSettings.countdown = preferences.getBool(COUNTDOWN_KEY, config::DEFAULT_COUNTDOWN);
 	if (preferences.getString(MESSAGE_KEY, savedMessage, sizeof(savedMessage)) == 0) {
-		strlcpy(savedMessage, config::DEFAULT_MESSAGE, sizeof(savedMessage));
+		gizmo::copyString(savedMessage, config::DEFAULT_MESSAGE, sizeof(savedMessage));
 	}
 	preferences.end();
 
