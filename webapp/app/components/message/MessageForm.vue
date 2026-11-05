@@ -69,7 +69,7 @@ const handleSave = async () => {
                 <Textarea id="message" v-model="draft" rows="3" class="mt-2" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.message.placeholder')" :aria-invalid="isTooLong || undefined" />
 
                 <!-- Counter against the limit of the device -->
-                <p class="mt-2 text-right text-xs tabular-nums" :class="isTooLong ? 'font-semibold text-red-500' : 'text-muted-foreground'" data-testid="message-counter">
+                <p class="mt-2 text-right text-xs tabular-nums" :class="isTooLong ? 'font-semibold text-destructive' : 'text-muted-foreground'" data-testid="message-counter">
                     {{ t('pages.message.counter', { length: draftLength, max: device.maxMessageLength }) }}
                 </p>
             </li>

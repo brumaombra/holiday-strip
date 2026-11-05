@@ -1,9 +1,0 @@
-/* Christmas accent of the web app (:root:root outranks the library palette, whatever the order of the style sheets): only the palette is overridden, the library derives its semantic tokens (primary, ring, sidebar) from it in light and dark mode */
-:root:root {
-	--button-primary-light: #c62d3a;
-	--button-primary-hover-light: #ad2230;
-	--button-primary-dark: #ef5b67;
-	--button-primary-hover-dark: #f47d86;
-	--button-primary-foreground-light: #ffffff;
-	--button-primary-foreground-dark: #260609;
-}
