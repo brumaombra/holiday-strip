@@ -7,13 +7,11 @@ import { HugeiconsIcon } from '@hugeicons/vue';
 import { Alert, AlertDescription, AlertTitle } from '@brumaombra/ui-vintage/alert';
 import { Card } from '@brumaombra/ui-vintage/card';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
-import { PageHeader } from '@brumaombra/ui-vintage/page-header';
 import { Switch } from '@brumaombra/ui-vintage/switch';
 import { applyDeviceSettings, createSettingsSaver, refreshLiveState } from '~/composables/useDeviceState.js';
 import { usePolling } from '~/composables/usePolling.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 import MeterRow from '~/components/common/MeterRow.vue';
-import SliderRow from '~/components/common/SliderRow.vue';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 import MatrixPreview from '~/components/matrix/MatrixPreview.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
@@ -60,10 +58,7 @@ definePageMeta({
 </script>
 
 <template>
-    <div class="mx-auto w-full max-w-2xl space-y-6">
-        <!-- Title -->
-        <PageHeader :title="t('pages.home.title')" size="medium" />
-
+    <GizmoPage :title="t('pages.home.title')">
         <DeviceStateGate>
             <div class="space-y-6">
                 <!-- Live preview of the matrix, on one card like the header of a profile -->
@@ -81,8 +76,7 @@ definePageMeta({
                     </ListRow>
 
                     <!-- Brightness, with the slider under its label -->
-                    <SliderRow id="brightness"
-                        :model-value="device.brightness"
+                    <GizmoSliderRow :model-value="device.brightness"
                         :label="t('pages.home.brightness.label')"
                         :icon="SunIcon"
                         :min="0"
@@ -114,5 +108,5 @@ definePageMeta({
                 <ScenePicker :scenes="device.scenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
             </div>
         </DeviceStateGate>
-    </div>
+    </GizmoPage>
 </template>

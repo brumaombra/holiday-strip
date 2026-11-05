@@ -3,10 +3,8 @@ import { computed, onBeforeUnmount, ref } from 'vue';
 import FlashIcon from '@hugeicons/core-free-icons/FlashIcon';
 import GlobeIcon from '@hugeicons/core-free-icons/GlobeIcon';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
-import { PageHeader } from '@brumaombra/ui-vintage/page-header';
 import { createSettingsSaver } from '~/composables/useDeviceState.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
-import SliderRow from '~/components/common/SliderRow.vue';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 
 const POWER_LIMIT_STEP = 100; // Milliamps
@@ -44,16 +42,12 @@ definePageMeta({
 </script>
 
 <template>
-    <div class="mx-auto w-full max-w-2xl space-y-6">
-        <!-- Title -->
-        <PageHeader :title="t('pages.settings.title')" size="medium" />
-
+    <GizmoPage :title="t('pages.settings.title')">
         <DeviceStateGate>
             <div class="space-y-6">
                 <!-- Power supply -->
                 <ListGroup :title="t('pages.settings.powerTitle')" :hint="t('pages.settings.maxMilliamps.note')">
-                    <SliderRow id="maxMilliamps"
-                        :model-value="device.maxMilliamps"
+                    <GizmoSliderRow :model-value="device.maxMilliamps"
                         :label="t('pages.settings.maxMilliamps.label')"
                         :icon="FlashIcon"
                         :min="device.minMaxMilliamps"
@@ -75,5 +69,5 @@ definePageMeta({
 
         <!-- Language picker -->
         <OptionPickerDialog :visible="isLanguagePickerOpen" :title="t('pages.settings.language.label')" :description="t('pages.settings.language.note')" :options="languageOptions" :model-value="locale" @update:model-value="handleSelectLanguage" @close="isLanguagePickerOpen = false" />
-    </div>
+    </GizmoPage>
 </template>

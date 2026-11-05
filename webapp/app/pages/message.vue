@@ -2,7 +2,6 @@
 import { computed } from 'vue';
 import HourglassIcon from '@hugeicons/core-free-icons/HourglassIcon';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
-import { PageHeader } from '@brumaombra/ui-vintage/page-header';
 import { Switch } from '@brumaombra/ui-vintage/switch';
 import { applyDeviceSettings } from '~/composables/useDeviceState.js';
 import { COUNTDOWN_DAYS } from '~/composables/useMessage.js';
@@ -28,10 +27,7 @@ definePageMeta({
 </script>
 
 <template>
-    <div class="mx-auto w-full max-w-2xl space-y-6">
-        <!-- Title -->
-        <PageHeader :title="t('pages.message.title')" size="medium" />
-
+    <GizmoPage :title="t('pages.message.title')">
         <DeviceStateGate>
             <div class="space-y-6">
                 <!-- Scrolling message -->
@@ -47,5 +43,5 @@ definePageMeta({
                 </ListGroup>
             </div>
         </DeviceStateGate>
-    </div>
+    </GizmoPage>
 </template>
