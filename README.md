@@ -290,7 +290,7 @@ The main shared constants live in [config.h](microcontroller/src/config/config.h
 
 ### Partitions
 
-The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the embedded dashboard fits and wireless updates still work. Moving from the older default table needs one USB upload. The saved settings are kept.
+The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the embedded dashboard fits and wireless updates still work. Moving from the older default table needs one USB upload.
 
 <a id="troubleshooting"></a>
 ## 🧰 Troubleshooting

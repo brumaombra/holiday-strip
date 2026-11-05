@@ -7,8 +7,8 @@
 #include "settings/settings_rules.h"
 
 namespace {
-	// NVS namespace and keys (kept from the first version, so the saved settings survive updates)
-	const char NAMESPACE[] = "matrix";
+	// NVS namespace (the project name; namespaces fit 15 characters) and keys
+	const char NAMESPACE[] = "holiday-strip";
 	const char ON_KEY[] = "on";
 	const char BRIGHTNESS_KEY[] = "brightness";
 	const char SCENE_KEY[] = "scene";
