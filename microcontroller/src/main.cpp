@@ -10,10 +10,6 @@
 #include "settings/settings.h"
 #include "wifi/wifi.h"
 
-
-#ifndef PIO_DEV_MODE
-#define PIO_DEV_MODE 0 // Serial logging off in normal builds
-#endif
 namespace {
 	// The main loop's copy of the settings, and the revision it was taken at
 	Settings settings;
@@ -35,7 +31,7 @@ namespace {
 
 // Setup
 void setup() {
-	gizmo::initLog(PIO_DEV_MODE != 0); // Start logging (off unless the build sets PIO_DEV_MODE=1, in platformio_secrets.ini)
+	gizmo::initLog(); // Start logging (off unless the build sets PIO_DEV_MODE=1, in platformio_secrets.ini)
 	setupDisplay(); // Start the LED output
 
 	// Load the saved settings
