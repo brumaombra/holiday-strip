@@ -94,7 +94,7 @@ Holiday Strip is built around three cooperating parts:
 
 ### 📋 Requirements
 
-- ESP32 development board (the firmware is built for `esp32dev`).
+- Seeed Studio XIAO ESP32-S3, with its FPC antenna (the firmware is built for it, env `matrix`).
 - A 72x12 WS2812B matrix, or any 864-LED chain wired the same way.
 - A 5 V power supply sized for the brightness you want (see [Power](#power)).
 - VS Code with the PlatformIO IDE extension installed, or PlatformIO Core installed locally.
@@ -162,9 +162,9 @@ pio run -e matrix-ota --target upload
 
 Current pin assignments from the firmware configuration:
 
-- Matrix data: `GPIO13`
+- Matrix data: XIAO pad `D10` (GPIO9)
 
-The data line enters the matrix on its left edge. Connect the ground of the ESP32 to the ground of the matrix's power supply.
+The data line enters the matrix on its left edge. Connect the ground of the XIAO to the ground of the matrix's power supply, and never power the matrix through the XIAO. The XIAO has no antenna on the board: connect its FPC antenna to the U.FL connector, or it won't join the Wi-Fi.
 
 ### Matrix
 

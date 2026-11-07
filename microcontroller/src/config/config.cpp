@@ -28,7 +28,7 @@ namespace config {
 	const char NTP_BACKUP_SERVER[] = "time.google.com";
 
 	// Pin assignments
-	const uint8_t DATA_PIN = 13; // Data line of the LED matrix, on its left edge
+	const uint8_t DATA_PIN = 9; // Data line of the LED matrix, on its left edge: XIAO ESP32-S3 pad D10, next to 5V and GND like every OpenGizmo display
 
 	// Animation timing
 	const uint32_t FRAME_MS = 33; // About 30 frames per second (a full frame takes 26 ms to send)
