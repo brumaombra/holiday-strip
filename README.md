@@ -298,8 +298,8 @@ The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the
 - Nothing lights up: check the data wire on `GPIO13`, and that the ESP32 and the matrix share the same ground.
 - Wrong colors or flickering pixels: the data signal is probably too weak or too long. Keep the data wire short, or add a 3.3 V to 5 V level shifter.
 - The picture looks dim with bright scenes: the power limiter is dimming it. Raise the limit on the dashboard only if your power supply can deliver it.
-- The `Holiday-Strip` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Check the serial monitor.
-- `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects.
+- The `Holiday-Strip` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Build with `-D PIO_DEV_MODE=1` (in `platformio_secrets.ini`) and check the serial monitor.
+- `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects (with `PIO_DEV_MODE=1`).
 - The dashboard shows an old version: rebuild the web app with `npm run build:embedded` before building the firmware.
 - No countdown: the clock is set from NTP, so the countdown only appears once the board is online, and only in the 60 days before Christmas.
 - OTA upload fails with an authentication error: the password in `upload_flags` must match `PIO_OTA_PASSWORD` in the firmware on the board.
