@@ -68,8 +68,8 @@ The firmware runs on an ESP32 and:
 - Wi-Fi setup from your phone: with no saved network, the matrix opens a setup hotspot with a captive portal.
 - Settings saved in flash, so they survive a reboot.
 - Gamma-corrected brightness and a per-frame power limiter, capped below what the power supply can deliver.
-- A JSON API that only answers the dashboard's own page, so other websites can't change the settings from your browser.
-- Password-protected over-the-air updates, so the matrix can stay up on the wall.
+- A JSON API that only answers the dashboard's own page, under the matrix's own name or address, so other websites can't change the settings from your browser. Through the setup hotspot, only the Wi-Fi setup answers.
+- Factory reset: hold the board's BOOT button for 10 seconds while it runs to forget the Wi-Fi and the settings, and start again from the setup hotspot.
 - Host tests for the LED mapping, the power limiter, the countdown and the settings, and Vitest tests for the web app.
 
 <a id="architecture"></a>

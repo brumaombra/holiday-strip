@@ -28,4 +28,7 @@ uint32_t getSettingsRevision();
 // Save new settings and make them current (safe from any task; false, and nothing changes, if they couldn't be saved)
 bool updateSettings(const Settings &settings);
 
+// Forget the saved settings (a factory reset: the defaults come back at the next boot)
+bool clearSettings();
+
 #endif

@@ -36,6 +36,11 @@ void setup() {
 	setupWiFi(); // Join the saved network, or open the setup hotspot
 	setupServer(); // Serve the web app and its API
 
+	// Factory reset: hold the BOOT button for 10 s to forget the Wi-Fi and the settings
+	gizmo::FactoryResetOptions resetOptions;
+	resetOptions.clearSettings = [] { clearSettings(); };
+	gizmo::setupFactoryReset(resetOptions);
+
 	// Start the first scene
 	setupPlayer(settings);
 }

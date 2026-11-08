@@ -81,3 +81,14 @@ bool updateSettings(const Settings &settings) {
 	xSemaphoreGive(settingsMutex);
 	return true;
 }
+
+// Forget the saved settings
+bool clearSettings() {
+	Preferences preferences;
+	if (!preferences.begin(NAMESPACE, false)) {
+		return false;
+	}
+	const bool isCleared = preferences.clear();
+	preferences.end();
+	return isCleared;
+}
