@@ -1,6 +1,6 @@
 {
 	"name": "holiday-strip",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "Holiday Strip web app, the dashboard embedded in the ESP32 firmware.",
 	"homepage": "https://github.com/brumaombra/holiday-strip",
 	"bugs": {

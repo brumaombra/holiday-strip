@@ -25,7 +25,7 @@ namespace {
 
 // Setup
 void setup() {
-	gizmo::initLog(); // Start logging (off unless the build sets PIO_DEV_MODE=1, in platformio_secrets.ini)
+	gizmo::initLog(); // Start logging (off in the released firmware, on in the debug build: pio run -e debug)
 	setupDisplay(); // Start the LED output
 
 	// Load the saved settings

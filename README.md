@@ -119,31 +119,23 @@ npm run build:embedded
 
 This runs the Nuxt static build, then the `gizmo-embed` tool from [gizmo-common](https://github.com/open-gizmo/gizmo-common) turns it into gzipped C++ files in `microcontroller/src/webui/`. Re-run it any time you change the web app.
 
-3. **Create your local secrets file.**
-
-From `microcontroller/`:
-
-```bash
-copy platformio_secrets.example.ini platformio_secrets.ini
-```
-
-Fill in the serial port of the board.
-
-4. **Build and upload the firmware over USB.**
+3. **Build and upload the firmware over USB.**
 
 For VS Code, open `microcontroller/` in the PlatformIO panel and click **Upload**.
 
 For the CLI, run:
 
 ```bash
-pio run -e matrix --target upload
+pio run --target upload
 ```
 
-5. **Connect the matrix to your Wi-Fi.**
+This builds the `release` profile. For the serial log, use `debug` instead (see [Build profiles](#build-profiles)).
+
+4. **Connect the matrix to your Wi-Fi.**
 
 On the first boot there's no saved network, so the matrix opens an open hotspot called `Holiday-Strip`. Join it with your phone, and the setup page opens by itself: pick your network and type its password.
 
-6. **Open the dashboard.**
+5. **Open the dashboard.**
 
 Once the matrix joins your network, open `http://holiday-strip.local/`, or the IP address of the board.
 
@@ -243,26 +235,15 @@ The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, lib
 <a id="configuration"></a>
 ## ⚙️ Configuration
 
-### Secrets file
+### Build profiles
 
-The project uses PlatformIO extra configs:
+[platformio.ini](microcontroller/platformio.ini) has the same three profiles as every OpenGizmo firmware:
 
-```ini
-[platformio]
-extra_configs = platformio_secrets.ini
-```
+- `release`, the default: the firmware the release workflow builds and the website flashes, with the serial log off.
+- `debug`: the same firmware with the serial log on, and the ESP32 core's own messages. Flash it with `pio run -e debug --target upload`, then open `pio device monitor`.
+- `native`: the tests of the hardware-free logic, on your computer (`pio test -e native`).
 
-Example secrets file:
-
-```ini
-[env:matrix]
-build_flags =
-	-D PIO_DEV_MODE=0 ; 1 turns the serial log on
-upload_port = COM5
-monitor_port = COM5
-```
-
-Use [platformio_secrets.example.ini](microcontroller/platformio_secrets.example.ini) as the template. The real file is ignored by git. The Wi-Fi credentials aren't in the firmware: they're set from the setup hotspot, and saved on the board.
+Nothing needs a secrets file: the Wi-Fi is set from the phone and saved on the board.
 
 ### Key runtime settings
 
@@ -292,8 +273,8 @@ Versions follow [semantic versioning](https://semver.org) (`vMAJOR.MINOR.PATCH`)
 - Nothing lights up: check the data wire on `GPIO13`, and that the ESP32 and the matrix share the same ground.
 - Wrong colors or flickering pixels: the data signal is probably too weak or too long. Keep the data wire short, or add a 3.3 V to 5 V level shifter.
 - The picture looks dim with bright scenes: the power limiter is dimming it. Raise the limit on the dashboard only if your power supply can deliver it.
-- The `Holiday-Strip` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Build with `-D PIO_DEV_MODE=1` (in `platformio_secrets.ini`) and check the serial monitor.
-- `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects (with `PIO_DEV_MODE=1`).
+- The `Holiday-Strip` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Flash the `debug` profile and check the serial monitor.
+- `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects (with the `debug` profile).
 - The dashboard shows an old version: rebuild the web app with `npm run build:embedded` before building the firmware.
 - No countdown: the clock is set from NTP, so the countdown only appears once the board is online, and only in the 60 days before Christmas.
 
