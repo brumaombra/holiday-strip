@@ -3,7 +3,6 @@
 #include <gizmo/log.h>
 
 #include "display/display.h"
-#include "ota/ota.h"
 #include "player/player.h"
 #include "scenes/scenes.h"
 #include "server/server.h"
@@ -22,11 +21,6 @@ namespace {
 		setGreetingMessage(settings.message);
 		setCountdownEnabled(settings.countdown);
 	}
-
-	// Turn the LEDs off while an OTA update runs
-	void handleOtaStart() {
-		showBlackFrame(settings.maxMilliamps);
-	}
 }
 
 // Setup
@@ -38,10 +32,9 @@ void setup() {
 	loadSettings(getSceneCount());
 	applySettings();
 
-	// Network, web app and wireless updates
+	// Network and web app
 	setupWiFi(); // Join the saved network, or open the setup hotspot
 	setupServer(); // Serve the web app and its API
-	setupOta(handleOtaStart); // Accept wireless updates
 
 	// Start the first scene
 	setupPlayer(settings);
@@ -51,7 +44,6 @@ void setup() {
 void loop() {
 	manageWiFiConnection();
 	gizmo::manageDevice(); // Restart when the web app asks
-	handleOta();
 
 	// Apply the changes made from the web app
 	if (getSettingsRevision() != appliedRevision) {

@@ -14,9 +14,6 @@ namespace config {
 	extern const char SETUP_PAGE_PATH[];
 	extern const char ASSET_PATH_PREFIX[];
 
-	// Wireless updates
-	extern const char OTA_PASSWORD[];
-
 	// Clock
 	extern const char TIMEZONE[];
 	extern const char NTP_SERVER[];

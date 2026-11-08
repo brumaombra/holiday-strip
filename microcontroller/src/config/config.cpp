@@ -4,10 +4,6 @@
 #define PIO_FIRMWARE_VERSION "dev"
 #endif
 
-#ifndef PIO_OTA_PASSWORD
-#define PIO_OTA_PASSWORD ""
-#endif
-
 namespace config {
 	// Project details shown in the web app (the release build sets the version)
 	const char PROJECT_NAME[] = "Holiday Strip";
@@ -18,9 +14,6 @@ namespace config {
 	const char ACCESS_POINT_NAME[] = "Holiday-Strip"; // Open hotspot for the Wi-Fi setup, when no saved network works
 	const char SETUP_PAGE_PATH[] = "/ap-setup"; // Page of the web app the hotspot clients are sent to
 	const char ASSET_PATH_PREFIX[] = "/_nuxt/"; // Files of the web app, never redirected by the hotspot
-
-	// Wireless updates (from platformio_secrets.ini, empty turns them off)
-	const char OTA_PASSWORD[] = PIO_OTA_PASSWORD;
 
 	// Clock (Central European Time, with daylight saving time)
 	const char TIMEZONE[] = "CET-1CEST,M3.5.0,M10.5.0/3";

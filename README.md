@@ -17,7 +17,7 @@ Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into 
 </p>
 
 <p>
-  🎅 Nine animated scenes • 💬 Scrolling greeting • ⏳ Christmas countdown • 📱 Web dashboard • 🔌 Power limiter • 📡 OTA updates
+  🎅 Nine animated scenes • 💬 Scrolling greeting • ⏳ Christmas countdown • 📱 Web dashboard • 🔌 Power limiter
 </p>
 
 <p>
@@ -127,7 +127,7 @@ From `microcontroller/`:
 copy platformio_secrets.example.ini platformio_secrets.ini
 ```
 
-Fill in the serial port of the board, and choose a password for wireless updates (the same one in both places).
+Fill in the serial port of the board.
 
 4. **Build and upload the firmware over USB.**
 
@@ -146,14 +146,6 @@ On the first boot there's no saved network, so the matrix opens an open hotspot 
 6. **Open the dashboard.**
 
 Once the matrix joins your network, open `http://holiday-strip.local/`, or the IP address of the board.
-
-7. **Update over the air afterward.**
-
-Put the IP address of the board in `platformio_secrets.ini`, then run:
-
-```bash
-pio run -e matrix-ota --target upload
-```
 
 <a id="hardware"></a>
 ## 🔌 Hardware
@@ -189,7 +181,7 @@ The default limit is `3000 mA`, and the dashboard can set it between `1000` and 
 The firmware lives in `microcontroller/`, and its entry point is [src/main.cpp](microcontroller/src/main.cpp). It:
 
 - Initializes all modules and loads the saved settings.
-- Keeps the Wi-Fi connected, and wireless updates running.
+- Keeps the Wi-Fi connected.
 - Applies the settings changed from the dashboard.
 - Asks the player for a new frame every 33 ms.
 
@@ -205,7 +197,6 @@ The firmware is split into focused modules under `microcontroller/src/`:
 - 💾 `settings/` loads and saves the settings in NVS, shares them safely between the loop and the web server, and checks the JSON from the dashboard.
 - 🌐 `server/` serves the dashboard and its API, one file per endpoint.
 - 📡 `wifi/` runs the Wi-Fi setup and the captive portal from the shared [gizmo-common](https://github.com/open-gizmo/gizmo-common) library, and sets the clock from NTP.
-- 🔄 `ota/` handles password-protected wireless updates, and blanks the matrix while one runs.
 - ⚙️ `config/` centralizes pins, timing values, network names, power figures, and defaults.
 
 ### 🌐 Web API
@@ -266,17 +257,12 @@ Example secrets file:
 ```ini
 [env:matrix]
 build_flags =
-	-D PIO_OTA_PASSWORD='"your-ota-password"'
+	-D PIO_DEV_MODE=0 ; 1 turns the serial log on
 upload_port = COM5
 monitor_port = COM5
-
-[env:matrix-ota]
-upload_port = 192.168.1.100
-upload_flags =
-	--auth=your-ota-password
 ```
 
-Use [platformio_secrets.example.ini](microcontroller/platformio_secrets.example.ini) as the template. The real file is ignored by git. Leave the OTA password empty to turn wireless updates off. The Wi-Fi credentials aren't in the firmware: they're set from the setup hotspot, and saved on the board.
+Use [platformio_secrets.example.ini](microcontroller/platformio_secrets.example.ini) as the template. The real file is ignored by git. The Wi-Fi credentials aren't in the firmware: they're set from the setup hotspot, and saved on the board.
 
 ### Key runtime settings
 
@@ -290,7 +276,7 @@ The main shared constants live in [config.h](microcontroller/src/config/config.h
 
 ### Partitions
 
-The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the embedded dashboard fits and wireless updates still work. Moving from the older default table needs one USB upload.
+The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the embedded dashboard fits. Moving from the older default table needs one USB upload.
 
 ### Releasing a new version
 
@@ -310,8 +296,6 @@ Versions follow [semantic versioning](https://semver.org) (`vMAJOR.MINOR.PATCH`)
 - `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects (with `PIO_DEV_MODE=1`).
 - The dashboard shows an old version: rebuild the web app with `npm run build:embedded` before building the firmware.
 - No countdown: the clock is set from NTP, so the countdown only appears once the board is online, and only in the 60 days before Christmas.
-- OTA upload fails with an authentication error: the password in `upload_flags` must match `PIO_OTA_PASSWORD` in the firmware on the board.
-- OTA upload doesn't find the board: check the IP address in `platformio_secrets.ini`, and that your computer is on the same network as the board.
 
 <a id="license"></a>
 ## 📄 License

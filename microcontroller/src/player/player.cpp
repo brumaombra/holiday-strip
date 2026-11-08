@@ -96,12 +96,6 @@ void updatePlayer(const Settings &settings) {
 	}
 }
 
-// Turn every LED off (before an OTA update)
-void showBlackFrame(uint32_t maxMilliamps) {
-	fillFrame(outputFrame, { 0, 0, 0 });
-	showFrame(outputFrame, 0, maxMilliamps);
-}
-
 // Get the scene on the matrix
 int getCurrentSceneIndex() {
 	return currentScene;
