@@ -257,7 +257,7 @@ The main shared constants live in [config.h](microcontroller/src/config/config.h
 
 ### Partitions
 
-The firmware uses the `min_spiffs` partition table: two 1.9 MB app slots, so the embedded dashboard fits. Moving from the older default table needs one USB upload.
+The firmware uses the `huge_app` partition table, like every OpenGizmo firmware: one 3 MB app slot, with plenty of room for the embedded dashboard. The saved settings and Wi-Fi sit at the same place in every table, so they survive a change of table, which needs one USB upload.
 
 ### Releasing a new version
 
