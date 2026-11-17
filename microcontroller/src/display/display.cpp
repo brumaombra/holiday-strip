@@ -8,7 +8,8 @@
 namespace {
 	// RMT at 40 MHz: one tick is 25 ns
 	constexpr uint32_t RMT_RESOLUTION_HZ = 40 * 1000 * 1000;
-	constexpr size_t RMT_MEMORY_SYMBOLS = 1024; // DMA buffer: the ESP32-S3 streams the frame from RAM, so Wi-Fi interrupts can't starve the LEDs (its RMT memory alone is only 48 symbols a channel)
+	constexpr size_t RMT_MEMORY_SYMBOLS = 512; // The ESP32 RMT has no DMA: the channel takes all 8 memory blocks (64 symbols each), refilled half at a time from the interrupt, every 320 us
+	constexpr int RMT_INTERRUPT_PRIORITY = 3; // Highest level the driver allows, so the Wi-Fi interrupts don't delay a refill and break the frame
 	constexpr uint32_t LATCH_MICROSECONDS = 300; // Line low before a new frame (PROTOCOL.md)
 
 	// WS2812B bits (PROTOCOL.md): 0 is 400 ns high then 850 ns low, 1 is 800 ns high then 450 ns low
@@ -44,7 +45,7 @@ void setupDisplay() {
 	channelConfig.resolution_hz = RMT_RESOLUTION_HZ;
 	channelConfig.mem_block_symbols = RMT_MEMORY_SYMBOLS;
 	channelConfig.trans_queue_depth = 1;
-	channelConfig.flags.with_dma = 1;
+	channelConfig.intr_priority = RMT_INTERRUPT_PRIORITY;
 	ESP_ERROR_CHECK(rmt_new_tx_channel(&channelConfig, &channel));
 
 	// Bytes encoder: most significant bit first, as the LEDs read it
