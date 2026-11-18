@@ -4,20 +4,22 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "calendar/holiday_calendar.h"
 #include "config/config.h"
 
 // Settings of the matrix, saved in flash
 struct Settings {
 	bool on;
 	uint8_t brightness;
-	int scene; // -1 rotates through all the scenes
+	int holiday; // -1 follows the calendar
+	int scene; // -1 rotates through all the scenes of the holiday; a chosen scene always comes with a chosen holiday
 	uint32_t maxMilliamps;
-	bool countdown;
-	char message[config::MAX_MESSAGE_LENGTH + 1]; // In capitals
+	bool countdown; // The Christmas countdown after the Christmas greeting
+	char messages[HOLIDAY_COUNT][config::MAX_MESSAGE_LENGTH + 1]; // The greeting of each holiday, in capitals
 };
 
-// Load the saved settings (call once in setup, before the web server starts)
-void loadSettings(int sceneCount);
+// Load the saved settings (call once in setup, before the web server starts; sceneCounts has one entry per holiday)
+void loadSettings(const int *sceneCounts);
 
 // Get a copy of the current settings (safe from any task)
 Settings getSettings();

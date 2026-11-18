@@ -2,6 +2,7 @@
 
 #include <gizmo/log.h>
 
+#include "player/player.h"
 #include "scenes/scenes.h"
 #include "settings/settings.h"
 #include "settings/settings_json.h"
@@ -17,7 +18,9 @@ namespace {
 
 		// Check and apply the fields to a copy of the settings
 		Settings settings = getSettings();
-		const char *invalidField = applySettingsFromJson(doc.as<JsonObjectConst>(), settings, getSceneCount());
+		int sceneCounts[HOLIDAY_COUNT];
+		getSceneCounts(sceneCounts);
+		const char *invalidField = applySettingsFromJson(doc.as<JsonObjectConst>(), settings, sceneCounts, getCurrentHolidayIndex());
 		if (invalidField != nullptr) {
 			gizmo::printLogfln("Invalid settings field: %s", invalidField);
 			sendErrorResponse(request, 400, "invalid_settings_field", invalidField);

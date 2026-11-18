@@ -14,11 +14,13 @@ namespace {
 	Settings settings;
 	uint32_t appliedRevision = 0;
 
-	// Take the current settings, and give the greeting its message
+	// Take the current settings, and give each holiday greeting its message
 	void applySettings() {
 		appliedRevision = getSettingsRevision();
 		settings = getSettings();
-		setGreetingMessage(settings.message);
+		for (int i = 0; i < HOLIDAY_COUNT; i++) {
+			setHolidayMessage(i, settings.messages[i]);
+		}
 		setCountdownEnabled(settings.countdown);
 	}
 }
@@ -29,7 +31,9 @@ void setup() {
 	setupDisplay(); // Start the LED output
 
 	// Load the saved settings
-	loadSettings(getSceneCount());
+	int sceneCounts[HOLIDAY_COUNT];
+	getSceneCounts(sceneCounts);
+	loadSettings(sceneCounts);
 	applySettings();
 
 	// Network and web app

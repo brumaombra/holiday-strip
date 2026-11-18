@@ -8,6 +8,7 @@
 
 void setupPlayer(const Settings &settings);
 void updatePlayer(const Settings &settings);
+int getCurrentHolidayIndex();
 int getCurrentSceneIndex();
 const Frame &getOutputFrame();
 

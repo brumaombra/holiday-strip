@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
 import { Socket } from 'node:net';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createEvent } from 'h3';
 
 // Stub the Nitro globals the routes of this app use before the handler modules load (the mock of the gizmo-common layer imports its h3 functions, so it runs on real h3 events)
@@ -17,7 +17,7 @@ vi.hoisted(() => {
 const { default: getState } = await import('../../server/api/state/index.get.js');
 const { default: postSettings } = await import('../../server/api/settings/index.post.js');
 const { default: getFrame } = await import('../../server/api/frame/index.get.js');
-const { SCENE_NAMES, getEspMockState } = await import('../../server/utils/esp-mock-state.js');
+const { HOLIDAYS, getEspMockState } = await import('../../server/utils/esp-mock-state.js');
 const { default: nameMockDevice } = await import('../../server/plugins/gizmo-mock.js');
 const { buildDevicePayload, resetGizmoMockState } = await import('gizmo-common/web/server/utils/gizmo-mock.js');
 
@@ -35,9 +35,16 @@ const callHandler = async (handler, event = buildEvent()) => {
     return { statusCode: event.node.res.statusCode, response, event };
 };
 
-// Start every test from the demo device the dev server boots with
+// Start every test from the demo device the dev server boots with, on a day when the calendar picks Christmas (so the tests never depend on the real date)
 beforeEach(() => {
     resetGizmoMockState();
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date('2026-11-18T12:00:00'));
+});
+
+// Give back the real clock
+afterEach(() => {
+    vi.useRealTimers();
 });
 
 // Response shape: the web app reads the same { errorId, errorMessage, data } as on the device
@@ -77,27 +84,65 @@ describe('mock state', () => {
         expect(response.data).toMatchObject({
             on: true,
             brightness: 60,
+            holiday: -1,
             scene: -1,
             maxMilliamps: 3000,
             countdown: true,
-            message: 'BUON NATALE * MERRY CHRISTMAS',
-            scenes: SCENE_NAMES,
+            messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR'],
+            holidays: HOLIDAYS,
             minMaxMilliamps: 1000,
             maxMaxMilliamps: 8000,
             maxMessageLength: 200,
             ssid: 'BrumaLab WiFi'
         });
-        expect(response.data.scenes).toHaveLength(9);
+        expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year']);
+        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([8, 5]);
+        expect(response.data.scenes).toBeUndefined();
+        expect(response.data.message).toBeUndefined();
         expect(response.data.currentScene).toBeGreaterThanOrEqual(0);
-        expect(response.data.currentScene).toBeLessThan(9);
+        expect(response.data.currentScene).toBeLessThan(response.data.holidays[response.data.activeHoliday].scenes.length);
         expect(response.data.uptimeSeconds).toBeGreaterThanOrEqual(0);
     });
 
     // A chosen scene is the one on screen, while the rotation moves on by itself
     it('shows the chosen scene as the current one', async () => {
-        await callHandler(postSettings, buildEvent({ scene: 4 }));
+        await callHandler(postSettings, buildEvent({ holiday: 0, scene: 4 }));
         const { response } = await callHandler(getState);
         expect(response.data.currentScene).toBe(4);
+    });
+
+    // Automatic follows the calendar: New Year's Eve from December 27 to January 1 included, Christmas the rest of the year
+    it.each([
+        ['2026-11-18T12:00:00', 0],
+        ['2026-12-26T12:00:00', 0],
+        ['2026-12-27T12:00:00', 1],
+        ['2026-12-31T23:30:00', 1],
+        ['2027-01-01T12:00:00', 1],
+        ['2027-01-02T12:00:00', 0]
+    ])('resolves Automatic on %s to holiday %i', async (date, expectedHoliday) => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date(date));
+        const { response } = await callHandler(getState);
+        vi.useRealTimers();
+        expect(response.data.holiday).toBe(-1);
+        expect(response.data.activeHoliday).toBe(expectedHoliday);
+    });
+
+    // A chosen holiday wins over the calendar, and the rotation stays inside its scenes
+    it('plays the chosen holiday and rotates only its scenes', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-11-18T12:00:00'));
+        await callHandler(postSettings, buildEvent({ holiday: 1 }));
+        const scenes = new Set();
+        for (let step = 0; step < 12; step += 1) {
+            vi.advanceTimersByTime(15000);
+            scenes.add((await callHandler(getState)).response.data.currentScene);
+        }
+        const { response } = await callHandler(getState);
+        vi.useRealTimers();
+        expect(response.data.activeHoliday).toBe(1);
+        expect([...scenes].every(scene => scene >= 0 && scene < 5)).toBe(true);
+        expect(scenes.size).toBe(5);
     });
 
     // A dark display draws no current
@@ -122,9 +167,9 @@ describe('mock settings validation', () => {
 
     // The answer is the state after the change, so the app needs no second request
     it('answers the state after the change', async () => {
-        const { statusCode, response } = await send({ brightness: 120, scene: 2, on: false });
+        const { statusCode, response } = await send({ brightness: 120, holiday: 0, scene: 2, on: false });
         expect(statusCode).toBe(200);
-        expect(response.data).toMatchObject({ brightness: 120, scene: 2, on: false, scenes: SCENE_NAMES });
+        expect(response.data).toMatchObject({ brightness: 120, holiday: 0, scene: 2, on: false, holidays: HOLIDAYS });
     });
 
     // Any subset of the fields is accepted, and the others keep their value
@@ -134,17 +179,93 @@ describe('mock settings validation', () => {
         expect(response.data).toMatchObject({ countdown: false, brightness: 60, on: true, maxMilliamps: 3000 });
     });
 
-    // The device stores the message in capitals
-    it('stores the message in capitals', async () => {
-        const { response } = await send({ message: 'Merry Christmas <3' });
-        expect(response.data.message).toBe('MERRY CHRISTMAS <3');
+    // The device stores the messages in capitals
+    it('stores the messages in capitals', async () => {
+        const { response } = await send({ messages: ['Merry Christmas <3', 'Happy new year'] });
+        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR']);
+    });
+
+    // A null leaves the message of that holiday as it is
+    it('leaves the message of a holiday that gets null', async () => {
+        const { response } = await send({ messages: [null, 'Happy new year'] });
+        expect(response.data.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'HAPPY NEW YEAR']);
+    });
+
+    // The list may be shorter than the holidays: the missing ones are not touched
+    it('accepts a messages list shorter than the holidays', async () => {
+        const { statusCode, response } = await send({ messages: ['Ciao'] });
+        expect(statusCode).toBe(200);
+        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO * HAPPY NEW YEAR']);
+    });
+
+    // Changing the holiday without a scene goes back to rotating
+    it('resets the scene to rotate when the holiday changes', async () => {
+        await send({ holiday: 0, scene: 3 });
+        const { response } = await send({ holiday: 1 });
+        expect(response.data).toMatchObject({ holiday: 1, activeHoliday: 1, scene: -1 });
+    });
+
+    // Sending the holiday that is already chosen keeps the chosen scene, like the firmware
+    it('keeps the scene when the same holiday is sent again', async () => {
+        await send({ holiday: 0, scene: 3 });
+        const { response } = await send({ holiday: 0 });
+        expect(response.data).toMatchObject({ holiday: 0, scene: 3 });
+    });
+
+    // A scene sent together with a new holiday is kept
+    it('keeps the scene sent together with a new holiday', async () => {
+        const { response } = await send({ holiday: 1, scene: 4 });
+        expect(response.data).toMatchObject({ holiday: 1, scene: 4, currentScene: 4 });
+    });
+
+    // A specific scene only makes sense inside a fixed holiday
+    it('pins the holiday playing when a scene is sent while Automatic', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-12-30T12:00:00'));
+        const { response } = await send({ scene: 2 });
+        vi.useRealTimers();
+        expect(response.data).toMatchObject({ holiday: 1, activeHoliday: 1, scene: 2 });
+    });
+
+    // Rotating (-1) is not a specific scene, so Automatic stays
+    it('keeps Automatic when the scene sent is -1', async () => {
+        const { response } = await send({ scene: -1 });
+        expect(response.data.holiday).toBe(-1);
+    });
+
+    // The scene is checked against the holiday it ends up in
+    it('validates the scene against the scenes of the resulting holiday', async () => {
+        // Scene 6 exists in Christmas (8 scenes) but not in New Year's Eve (5)
+        const christmas = await send({ holiday: 0, scene: 6 });
+        const newYear = await send({ holiday: 1, scene: 6 });
+        expect(christmas.statusCode).toBe(200);
+        expect(newYear.response).toEqual({ errorId: 'invalid_settings_field', errorMessage: 'scene', data: null });
+
+        // The holiday already chosen counts when none is sent
+        await send({ holiday: 1 });
+        const sameHoliday = await send({ scene: 6 });
+        expect(sameHoliday.statusCode).toBe(400);
+        expect((await send({ scene: 4 })).statusCode).toBe(200);
+    });
+
+    // While Automatic, the scenes are the ones of the holiday the calendar picked
+    it('validates the scene against the holiday of the calendar while Automatic', async () => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-12-30T12:00:00'));
+        const refused = await send({ scene: 5 });
+        const accepted = await send({ scene: 4 });
+        vi.useRealTimers();
+        expect(refused.response.errorMessage).toBe('scene');
+        expect(accepted.statusCode).toBe(200);
     });
 
     // The mock used to save any field it got, while the firmware ignores the unknown ones
     it('ignores the fields it does not know', async () => {
-        const { response } = await send({ ssid: 'elsewhere', uptimeSeconds: 99999, scenes: [], currentScene: 8 });
+        const { response } = await send({ ssid: 'elsewhere', uptimeSeconds: 99999, scenes: [], message: 'OLD', activeHoliday: 1, currentScene: 8 });
         expect(response.data.ssid).toBe('BrumaLab WiFi');
-        expect(response.data.scenes).toEqual(SCENE_NAMES);
+        expect(response.data.scenes).toBeUndefined();
+        expect(response.data.messages[0]).toBe('BUON NATALE * MERRY CHRISTMAS');
+        expect(response.data.activeHoliday).toBe(0);
         expect(response.data.uptimeSeconds).toBeLessThan(99999);
     });
 
@@ -154,13 +275,17 @@ describe('mock settings validation', () => {
         ['on', 'true'],
         ['brightness', '60'],
         ['brightness', 12.5],
+        ['holiday', '1'],
+        ['holiday', 0.5],
         ['scene', '1'],
         ['scene', 1.5],
         ['maxMilliamps', '3000'],
         ['maxMilliamps', 2000.5],
         ['countdown', 'yes'],
         ['countdown', 0],
-        ['message', 42]
+        ['messages', 'hello'],
+        ['messages', [42]],
+        ['messages', [null, {}]]
     ])('refuses %s = %j (wrong type)', async (field, value) => {
         const { statusCode, response } = await send({ [field]: value });
         expect(statusCode).toBe(400);
@@ -171,8 +296,10 @@ describe('mock settings validation', () => {
     it.each([
         ['brightness', -1],
         ['brightness', 256],
+        ['holiday', -2],
+        ['holiday', 2],
         ['scene', -2],
-        ['scene', 9],
+        ['scene', 8],
         ['maxMilliamps', 999],
         ['maxMilliamps', 8001]
     ])('refuses %s = %j (out of range)', async (field, value) => {
@@ -185,8 +312,10 @@ describe('mock settings validation', () => {
     it.each([
         ['brightness', 0],
         ['brightness', 255],
+        ['holiday', -1],
+        ['holiday', 1],
         ['scene', -1],
-        ['scene', 8],
+        ['scene', 7],
         ['maxMilliamps', 1000],
         ['maxMilliamps', 8000]
     ])('accepts %s = %j (edge of the range)', async (field, value) => {
@@ -197,29 +326,36 @@ describe('mock settings validation', () => {
 
     // The message is limited to 200 bytes
     it('refuses a message longer than 200 bytes, and accepts exactly 200', async () => {
-        const exact = await send({ message: 'A'.repeat(200) });
-        const tooLong = await send({ message: 'A'.repeat(201) });
+        const exact = await send({ messages: [null, 'A'.repeat(200)] });
+        const tooLong = await send({ messages: ['A'.repeat(201)] });
         expect(exact.statusCode).toBe(200);
-        expect(tooLong.response).toEqual({ errorId: 'invalid_settings_field', errorMessage: 'message', data: null });
+        expect(tooLong.response).toEqual({ errorId: 'invalid_settings_field', errorMessage: 'messages', data: null });
+    });
+
+    // One message per holiday, no more
+    it('refuses more messages than holidays', async () => {
+        const { response } = await send({ messages: ['A', 'B', 'C'] });
+        expect(response.errorMessage).toBe('messages');
     });
 
     // The device counts bytes (strlen), so accented letters weigh two
     it('counts the message in bytes', async () => {
-        const { statusCode } = await send({ message: 'È'.repeat(101) });
+        const { statusCode } = await send({ messages: ['È'.repeat(101)] });
         expect(statusCode).toBe(400);
     });
 
     // A refused body changes nothing, even the valid fields in it
     it('applies nothing when one field is wrong', async () => {
-        await send({ brightness: 10, scene: 99 });
+        await send({ brightness: 10, scene: 99, messages: ['CHANGED'] });
         const { response } = await callHandler(getState);
         expect(response.data.brightness).toBe(60);
         expect(getEspMockState().settings.scene).toBe(-1);
+        expect(getEspMockState().settings.messages[0]).toBe('BUON NATALE * MERRY CHRISTMAS');
     });
 
-    // Several wrong fields report the first one in the firmware order (on, countdown, brightness, scene, maxMilliamps, message)
+    // Several wrong fields report the first one in the firmware order (on, countdown, brightness, holiday, scene, maxMilliamps, messages)
     it('reports the first wrong field in the firmware order', async () => {
-        const { response } = await send({ message: 5, brightness: 300, countdown: 'yes' });
+        const { response } = await send({ messages: 5, brightness: 300, countdown: 'yes' });
         expect(response.errorMessage).toBe('countdown');
     });
 

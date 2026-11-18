@@ -9,7 +9,8 @@
 class Scene {
 public:
 	virtual ~Scene() = default;
-	virtual const char *name() const = 0;
+	virtual const char *id() const = 0; // Stable name for the web app, which translates it
+	virtual const char *name() const = 0; // English name, for a web app that doesn't know the scene
 	virtual void begin() {}
 	// Draw a frame: t is the time since the scene started, dt the time since the previous frame (seconds)
 	virtual void draw(Frame &f, float t, float dt) = 0;

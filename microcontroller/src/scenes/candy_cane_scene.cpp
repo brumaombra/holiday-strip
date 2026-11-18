@@ -9,7 +9,8 @@ namespace {
 	// Red and white candy cane stripes sliding diagonally, with sparkles
 	class CandyCaneScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "candy-cane"; }
 		const char *name() const override { return "Candy cane"; }
 
 		// Draw the sliding diagonal stripes and a few random sparkles

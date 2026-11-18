@@ -12,7 +12,7 @@
     "nav": {
         "home": {
             "label": "Home",
-            "description": "Anteprima della matrice e scelta della scena"
+            "description": "Anteprima della matrice e scelta di festività e scena"
         },
         "message": {
             "label": "Messaggio",
@@ -53,23 +53,35 @@
             "scenesDescription": "Scegli una scena da tenere fissa, oppure lascia che la striscia le alterni tutte.",
             "rotateAll": "Alterna tutte le scene",
             "rotateAllDescription": "Passa da una scena all'altra, una dopo l'altra",
+            "holidaysTitle": "Festività",
+            "holidaysDescription": "Segui il calendario, oppure tieni sempre la stessa festività.",
+            "holidayLabel": "Festività",
+            "holidayAutomatic": "Automatica",
+            "holidayAutomaticNow": "Ora: {holiday}",
+            "holidayNames": {
+                "christmas": "Natale",
+                "new-year": "Capodanno"
+            },
             "sceneNames": {
-                "0": "Saluto",
-                "1": "Nevicata",
-                "2": "Alberi di Natale",
-                "3": "Slitta di Babbo Natale",
-                "4": "Camino",
-                "5": "Luci fatate",
-                "6": "Regali",
-                "7": "Bastoncino di zucchero",
-                "8": "Fuochi d'artificio"
+                "greeting": "Saluto",
+                "snow": "Nevicata",
+                "trees": "Alberi di Natale",
+                "sleigh": "Slitta di Babbo Natale",
+                "fireplace": "Camino",
+                "garland": "Luci fatate",
+                "gifts": "Regali",
+                "candy-cane": "Bastoncino di zucchero",
+                "countdown": "Conto alla rovescia",
+                "confetti": "Coriandoli",
+                "fireworks": "Fuochi d'artificio",
+                "champagne": "Champagne",
+                "sparklers": "Stelline"
             },
             "sceneLabel": "Scena",
             "onScreenScene": "In onda: {scene}"
         },
         "message": {
             "title": "Messaggio",
-            "textTitle": "Testo",
             "label": "Messaggio scorrevole",
             "placeholder": "Scrivi il tuo saluto",
             "counter": "{length} / {max}",

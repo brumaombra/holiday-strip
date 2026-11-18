@@ -15,6 +15,7 @@ import { usePolling } from '~/composables/usePolling.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 import MatrixPreview from '~/components/matrix/MatrixPreview.vue';
+import HolidayPicker from '~/components/holidays/HolidayPicker.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
 
 const STATE_REFRESH_MS = 2000; // How often the scene on screen and the current are read again
@@ -39,6 +40,14 @@ const handlePowerChange = isOn => {
 // Change the brightness (the device gets one request when the slider rests)
 const handleBrightnessChange = ([brightness]) => {
     saveBrightness({ brightness });
+};
+
+// Scenes of the holiday playing now (none until the device sends its holidays)
+const activeScenes = computed(() => device.value.holidays[device.value.activeHoliday]?.scenes || []);
+
+// Pick the holiday to show, or -1 to follow the calendar
+const handleHolidayChange = holiday => {
+    applyDeviceSettings({ holiday });
 };
 
 // Pick the scene to show, or -1 to rotate them all
@@ -98,8 +107,11 @@ definePageMeta({
                     </Alert>
                 </div>
 
-                <!-- Scenes -->
-                <ScenePicker :scenes="device.scenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
+                <!-- Holidays -->
+                <HolidayPicker :holidays="device.holidays" :model-value="device.holiday" :active-holiday="device.activeHoliday" @update:model-value="handleHolidayChange" />
+
+                <!-- Scenes of the holiday playing -->
+                <ScenePicker :scenes="activeScenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
             </div>
         </DeviceStateGate>
     </GizmoPage>

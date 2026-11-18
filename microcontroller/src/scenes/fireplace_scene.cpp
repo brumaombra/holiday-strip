@@ -9,7 +9,8 @@ namespace {
 	// A brick fireplace with a crackling fire and stockings hanging from the mantel
 	class FireplaceScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "fireplace"; }
 		const char *name() const override { return "Fireplace"; }
 
 		// Cool the whole fire down

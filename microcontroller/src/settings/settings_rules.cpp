@@ -9,6 +9,17 @@ int sanitizeScene(long scene, int sceneCount) {
 	return (scene >= 0 && scene < sceneCount) ? (int)scene : -1;
 }
 
+// Keep a valid holiday index, or -1 (follow the calendar)
+int sanitizeHoliday(long holiday, int holidayCount) {
+	return (holiday >= 0 && holiday < holidayCount) ? (int)holiday : -1;
+}
+
+// Keep a valid pair of holiday and scene: the scene within its holiday, and no chosen scene while the calendar picks the holiday
+void sanitizeHolidayScene(long holiday, long scene, const int *sceneCounts, int holidayCount, int &holidayOutput, int &sceneOutput) {
+	holidayOutput = sanitizeHoliday(holiday, holidayCount);
+	sceneOutput = holidayOutput >= 0 ? sanitizeScene(scene, sceneCounts[holidayOutput]) : -1;
+}
+
 // Keep the power limit within the allowed range
 uint32_t sanitizeMaxMilliamps(long maxMilliamps) {
 	if (maxMilliamps < (long)config::MIN_MAX_MILLIAMPS) {

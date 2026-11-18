@@ -7,10 +7,10 @@ export default defineEventHandler(async event => {
         const body = await readMockJsonBody(event);
 
         // Validate the fields in the firmware order (nothing is applied if one is wrong)
-        validateSettings(body);
+        const state = getEspMockState();
+        validateSettings({ state, body });
 
         // Apply only the settings fields that are present
-        const state = getEspMockState();
         applySettings({ state, body });
 
         // Return the state after the change, like the firmware

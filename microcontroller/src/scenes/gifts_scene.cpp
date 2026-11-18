@@ -9,7 +9,8 @@ namespace {
 	// Wrapped presents fall from the sky and stack up into a pile
 	class GiftsScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "gifts"; }
 		const char *name() const override { return "Gifts"; }
 
 		// Empty the pile and drop the gift that was falling

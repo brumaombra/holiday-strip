@@ -18,6 +18,44 @@ void setUp() {}
 // Nothing to clean up after each test
 void tearDown() {}
 
+/******************************** Holidays ********************************/
+
+// A holiday that doesn't exist goes back to the calendar
+void test_unknown_holiday_follows_the_calendar() {
+	TEST_ASSERT_EQUAL_INT(1, sanitizeHoliday(1, 2));
+	TEST_ASSERT_EQUAL_INT(-1, sanitizeHoliday(2, 2));
+	TEST_ASSERT_EQUAL_INT(-1, sanitizeHoliday(-5, 2));
+}
+
+// The scene stays within its holiday, and a scene without a fixed holiday rotates
+void test_scene_stays_within_its_holiday() {
+	const int sceneCounts[] = { 8, 5 };
+	int holiday = 0, scene = 0;
+
+	// A valid pair is kept
+	sanitizeHolidayScene(1, 4, sceneCounts, 2, holiday, scene);
+	TEST_ASSERT_EQUAL_INT(1, holiday);
+	TEST_ASSERT_EQUAL_INT(4, scene);
+
+	// A scene past the end of its holiday rotates
+	sanitizeHolidayScene(1, 5, sceneCounts, 2, holiday, scene);
+	TEST_ASSERT_EQUAL_INT(-1, scene);
+
+	// A scene while the calendar picks the holiday rotates
+	sanitizeHolidayScene(-1, 2, sceneCounts, 2, holiday, scene);
+	TEST_ASSERT_EQUAL_INT(-1, holiday);
+	TEST_ASSERT_EQUAL_INT(-1, scene);
+}
+
+// A board saved on Fireworks (scene 8 before the holidays) rotates the Christmas scenes, since Fireworks moved to New Year's Eve
+void test_saved_fireworks_rotates_christmas() {
+	const int sceneCounts[] = { 8, 5 };
+	int holiday = 0, scene = 0;
+	sanitizeHolidayScene(0, 8, sceneCounts, 2, holiday, scene);
+	TEST_ASSERT_EQUAL_INT(0, holiday);
+	TEST_ASSERT_EQUAL_INT(-1, scene);
+}
+
 /******************************** Numbers ********************************/
 
 // A scene that doesn't exist goes back to the rotation
@@ -67,6 +105,9 @@ void test_small_output_is_not_overrun() {
 // Run all the settings tests
 int main() {
 	UNITY_BEGIN();
+	RUN_TEST(test_unknown_holiday_follows_the_calendar);
+	RUN_TEST(test_scene_stays_within_its_holiday);
+	RUN_TEST(test_saved_fireworks_rotates_christmas);
 	RUN_TEST(test_unknown_scene_rotates_all_scenes);
 	RUN_TEST(test_power_limit_is_kept_in_range);
 	RUN_TEST(test_message_is_in_capitals);

@@ -9,7 +9,8 @@ namespace {
 	// Santa's sleigh and reindeer flying across a starry sky, leaving a trail of sparkles
 	class SleighScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "sleigh"; }
 		const char *name() const override { return "Santa's sleigh"; }
 
 		// Place the stars once

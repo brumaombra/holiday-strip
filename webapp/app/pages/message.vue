@@ -30,17 +30,19 @@ definePageMeta({
     <GizmoPage :title="t('pages.message.title')">
         <DeviceStateGate>
             <div class="space-y-6">
-                <!-- Scrolling message -->
-                <MessageForm />
+                <!-- One scrolling message per holiday -->
+                <template v-for="(holiday, index) in device.holidays" :key="holiday.id">
+                    <MessageForm :holiday-index="index" />
 
-                <!-- Countdown to Christmas -->
-                <ListGroup :title="t('pages.message.countdown.title')" :hint="t('pages.message.countdown.note', { days: COUNTDOWN_DAYS })">
-                    <ListRow :label="t('pages.message.countdown.label')" :icon="HourglassIcon" label-for="countdown">
-                        <template #trailing>
-                            <Switch id="countdown" :model-value="device.countdown" @update:model-value="handleCountdownChange" />
-                        </template>
-                    </ListRow>
-                </ListGroup>
+                    <!-- Countdown to Christmas, with the Christmas message -->
+                    <ListGroup v-if="holiday.id === 'christmas'" :title="t('pages.message.countdown.title')" :hint="t('pages.message.countdown.note', { days: COUNTDOWN_DAYS })">
+                        <ListRow :label="t('pages.message.countdown.label')" :icon="HourglassIcon" label-for="countdown">
+                            <template #trailing>
+                                <Switch id="countdown" :model-value="device.countdown" @update:model-value="handleCountdownChange" />
+                            </template>
+                        </ListRow>
+                    </ListGroup>
+                </template>
             </div>
         </DeviceStateGate>
     </GizmoPage>

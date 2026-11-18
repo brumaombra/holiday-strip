@@ -9,7 +9,8 @@ namespace {
 	// A row of Christmas trees with twinkling ornaments and a star on top
 	class TreesScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "trees"; }
 		const char *name() const override { return "Christmas trees"; }
 
 		// Start the snow and scatter random ornaments on the trees

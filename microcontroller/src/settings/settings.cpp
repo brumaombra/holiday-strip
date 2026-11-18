@@ -11,10 +11,12 @@ namespace {
 	const char NAMESPACE[] = "holiday-strip";
 	const char ON_KEY[] = "on";
 	const char BRIGHTNESS_KEY[] = "brightness";
+	const char HOLIDAY_KEY[] = "holiday";
 	const char SCENE_KEY[] = "scene";
 	const char MAX_MILLIAMPS_KEY[] = "maxma";
 	const char COUNTDOWN_KEY[] = "countdown";
-	const char MESSAGE_KEY[] = "message";
+	const char *const MESSAGE_KEYS[HOLIDAY_COUNT] = { "message", "msg-newyear" }; // One greeting per holiday ("message" is the Christmas one, from before the holidays)
+	const char *const DEFAULT_MESSAGES[HOLIDAY_COUNT] = { config::DEFAULT_MESSAGE, config::DEFAULT_NEW_YEAR_MESSAGE };
 
 	// Current settings and their revision (shared by the main loop and the web server task)
 	Settings currentSettings;
@@ -22,8 +24,8 @@ namespace {
 	SemaphoreHandle_t settingsMutex = nullptr;
 }
 
-// Load the saved settings (call once in setup, before the web server starts)
-void loadSettings(int sceneCount) {
+// Load the saved settings (call once in setup, before the web server starts; sceneCounts has one entry per holiday)
+void loadSettings(const int *sceneCounts) {
 	settingsMutex = xSemaphoreCreateMutex();
 	Preferences preferences;
 	char savedMessage[config::MAX_MESSAGE_LENGTH + 1];
@@ -32,16 +34,22 @@ void loadSettings(int sceneCount) {
 	preferences.begin(NAMESPACE, true);
 	currentSettings.on = preferences.getBool(ON_KEY, config::DEFAULT_ON);
 	currentSettings.brightness = preferences.getUChar(BRIGHTNESS_KEY, config::DEFAULT_BRIGHTNESS);
-	currentSettings.scene = sanitizeScene(preferences.getInt(SCENE_KEY, config::DEFAULT_SCENE), sceneCount);
 	currentSettings.maxMilliamps = sanitizeMaxMilliamps(preferences.getUInt(MAX_MILLIAMPS_KEY, config::DEFAULT_MAX_MILLIAMPS));
 	currentSettings.countdown = preferences.getBool(COUNTDOWN_KEY, config::DEFAULT_COUNTDOWN);
-	if (preferences.getString(MESSAGE_KEY, savedMessage, sizeof(savedMessage)) == 0) {
-		gizmo::copyString(savedMessage, config::DEFAULT_MESSAGE, sizeof(savedMessage));
+
+	// Read the holiday and the scene: a scene saved before the holidays existed was a Christmas one, so it stays on Christmas
+	const long scene = preferences.getInt(SCENE_KEY, config::DEFAULT_SCENE);
+	const long holiday = preferences.isKey(HOLIDAY_KEY) ? preferences.getInt(HOLIDAY_KEY, config::DEFAULT_HOLIDAY) : (scene >= 0 ? CHRISTMAS : config::DEFAULT_HOLIDAY);
+	sanitizeHolidayScene(holiday, scene, sceneCounts, HOLIDAY_COUNT, currentSettings.holiday, currentSettings.scene);
+
+	// Read the greeting of each holiday, kept within the rules
+	for (int i = 0; i < HOLIDAY_COUNT; i++) {
+		if (preferences.getString(MESSAGE_KEYS[i], savedMessage, sizeof(savedMessage)) == 0) {
+			gizmo::copyString(savedMessage, DEFAULT_MESSAGES[i], sizeof(savedMessage));
+		}
+		sanitizeMessage(savedMessage, currentSettings.messages[i], sizeof(currentSettings.messages[i]));
 	}
 	preferences.end();
-
-	// Keep the message within the rules (a scene that no longer exists and a too high power limit were fixed above)
-	sanitizeMessage(savedMessage, currentSettings.message, sizeof(currentSettings.message));
 }
 
 // Get a copy of the current settings (safe from any task)
@@ -68,7 +76,10 @@ bool updateSettings(const Settings &settings) {
 	if (!preferences.begin(NAMESPACE, false)) {
 		return false;
 	}
-	const bool isSaved = preferences.putBool(ON_KEY, settings.on) > 0 && preferences.putUChar(BRIGHTNESS_KEY, settings.brightness) > 0 && preferences.putInt(SCENE_KEY, settings.scene) > 0 && preferences.putUInt(MAX_MILLIAMPS_KEY, settings.maxMilliamps) > 0 && preferences.putBool(COUNTDOWN_KEY, settings.countdown) > 0 && (preferences.putString(MESSAGE_KEY, settings.message) > 0 || settings.message[0] == '\0'); // An empty message writes 0 bytes
+	bool isSaved = preferences.putBool(ON_KEY, settings.on) > 0 && preferences.putUChar(BRIGHTNESS_KEY, settings.brightness) > 0 && preferences.putInt(HOLIDAY_KEY, settings.holiday) > 0 && preferences.putInt(SCENE_KEY, settings.scene) > 0 && preferences.putUInt(MAX_MILLIAMPS_KEY, settings.maxMilliamps) > 0 && preferences.putBool(COUNTDOWN_KEY, settings.countdown) > 0;
+	for (int i = 0; i < HOLIDAY_COUNT && isSaved; i++) {
+		isSaved = preferences.putString(MESSAGE_KEYS[i], settings.messages[i]) > 0 || settings.messages[i][0] == '\0'; // An empty message writes 0 bytes
+	}
 	preferences.end();
 	if (!isSaved) {
 		return false;

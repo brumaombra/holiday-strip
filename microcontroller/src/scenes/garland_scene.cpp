@@ -9,7 +9,8 @@ namespace {
 	// Two strings of fairy lights hanging in swags, cycling through light effects
 	class GarlandScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "garland"; }
 		const char *name() const override { return "Fairy lights"; }
 
 		// Give each bulb a random twinkle phase

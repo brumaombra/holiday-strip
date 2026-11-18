@@ -34,10 +34,12 @@ namespace config {
 	// Default settings and their limits
 	extern const bool DEFAULT_ON;
 	extern const uint8_t DEFAULT_BRIGHTNESS;
+	extern const int DEFAULT_HOLIDAY;
 	extern const int DEFAULT_SCENE;
 	extern const uint32_t DEFAULT_MAX_MILLIAMPS;
 	extern const bool DEFAULT_COUNTDOWN;
 	extern const char DEFAULT_MESSAGE[];
+	extern const char DEFAULT_NEW_YEAR_MESSAGE[];
 	extern const uint32_t MIN_MAX_MILLIAMPS;
 	extern const uint32_t MAX_MAX_MILLIAMPS;
 	constexpr size_t MAX_MESSAGE_LENGTH = 200; // In the header, because it sizes the message buffers

@@ -18,15 +18,40 @@ vi.mock('@brumaombra/ui-vintage/message-dialog', () => ({
 }));
 
 // State of the device, as GET /api/state answers it
-const SCENES = ['Greeting', 'Snowfall', 'Christmas trees', 'Santa\'s sleigh', 'Fireplace', 'Fairy lights', 'Gifts', 'Candy cane', 'Fireworks'];
+const HOLIDAYS = [{
+    id: 'christmas',
+    name: 'Christmas',
+    scenes: [
+        { id: 'greeting', name: 'Greeting' },
+        { id: 'snow', name: 'Snow' },
+        { id: 'trees', name: 'Trees' },
+        { id: 'sleigh', name: 'Sleigh' },
+        { id: 'fireplace', name: 'Fireplace' },
+        { id: 'garland', name: 'Garland' },
+        { id: 'gifts', name: 'Gifts' },
+        { id: 'candy-cane', name: 'Candy cane' }
+    ]
+}, {
+    id: 'new-year',
+    name: 'New Year\'s Eve',
+    scenes: [
+        { id: 'countdown', name: 'Countdown' },
+        { id: 'confetti', name: 'Confetti' },
+        { id: 'fireworks', name: 'Fireworks' },
+        { id: 'champagne', name: 'Champagne' },
+        { id: 'sparklers', name: 'Sparklers' }
+    ]
+}];
 const buildDeviceState = () => ({
     on: true,
     brightness: 128,
+    holiday: -1,
+    activeHoliday: 0,
     scene: -1,
     maxMilliamps: 3000,
     countdown: true,
-    message: 'BUON NATALE * MERRY CHRISTMAS',
-    scenes: SCENES,
+    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR'],
+    holidays: HOLIDAYS,
     currentScene: 2,
     estimatedMilliamps: 1200,
     minMaxMilliamps: 1000,
@@ -69,7 +94,15 @@ const registerDeviceEndpoints = () => {
             const body = await readBody(event);
             savedBodies.push(body);
             if (isSaveRefused) throw createError({ statusCode: 400, data: { errorId: 'invalid_settings_field', errorMessage: Object.keys(body)[0], data: null } });
-            deviceState = { ...deviceState, ...body, message: typeof body.message === 'string' ? body.message.toUpperCase() : deviceState.message };
+            const { messages: changedMessages, ...otherChanges } = body;
+            const messages = deviceState.messages.map((message, index) => typeof changedMessages?.[index] === 'string' ? changedMessages[index].toUpperCase() : message);
+            deviceState = { ...deviceState, ...otherChanges, messages };
+
+            // Like the firmware: a fixed holiday is the one playing, and a new one goes back to rotating its scenes
+            if (body.holiday !== undefined) {
+                deviceState.scene = body.scene ?? -1;
+                if (body.holiday >= 0) deviceState.activeHoliday = body.holiday;
+            }
             return { errorId: null, errorMessage: null, data: deviceState };
         }
     });
@@ -104,7 +137,7 @@ beforeEach(() => {
     const globalStore = useGlobalStore();
     globalStore.value.deviceLoaded = false;
     globalStore.value.deviceLoadFailed = false;
-    globalStore.value.device = { ...globalStore.value.device, brightness: 60, on: true, scene: -1, message: '', scenes: [] };
+    globalStore.value.device = { ...globalStore.value.device, brightness: 60, on: true, holiday: -1, activeHoliday: 0, scene: -1, messages: [], holidays: [] };
     vi.spyOn(console, 'error').mockImplementation(() => {});
     registerDeviceEndpoints();
 });
@@ -123,7 +156,7 @@ describe('loadDeviceState', () => {
         const globalStore = useGlobalStore();
         expect(globalStore.value.deviceLoaded).toBe(true);
         expect(globalStore.value.device.brightness).toBe(128);
-        expect(globalStore.value.device.scenes).toEqual(SCENES);
+        expect(globalStore.value.device.holidays).toEqual(HOLIDAYS);
     });
 
     // A failed load is remembered, and the store keeps its defaults marked as not loaded
@@ -140,9 +173,9 @@ describe('loadDeviceState', () => {
         await loadDeviceState();
         const globalStore = useGlobalStore();
         globalStore.value.device.brightness = 200;
-        deviceState = { ...deviceState, brightness: 10, currentScene: 5, estimatedMilliamps: 777, uptimeSeconds: 99999 };
+        deviceState = { ...deviceState, brightness: 10, activeHoliday: 1, currentScene: 5, estimatedMilliamps: 777, uptimeSeconds: 99999 };
         await refreshLiveState();
-        expect(globalStore.value.device).toMatchObject({ brightness: 200, currentScene: 5, estimatedMilliamps: 777, uptimeSeconds: 99999 });
+        expect(globalStore.value.device).toMatchObject({ brightness: 200, activeHoliday: 1, currentScene: 5, estimatedMilliamps: 777, uptimeSeconds: 99999 });
     });
 });
 
@@ -157,11 +190,28 @@ describe('applyDeviceSettings', () => {
         expect(useGlobalStore().value.device.on).toBe(false);
     });
 
-    // The message comes back in capitals
-    it('takes the message as the device stored it', async () => {
+    // The messages come back in capitals, and a null leaves the message of the other holiday as it is
+    it('takes the messages as the device stored them', async () => {
         await loadDeviceState();
-        await applyDeviceSettings({ message: 'ciao natale' });
-        expect(useGlobalStore().value.device.message).toBe('CIAO NATALE');
+        await applyDeviceSettings({ messages: [null, 'ciao anno'] });
+        expect(useGlobalStore().value.device.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'CIAO ANNO']);
+    });
+
+    // A new holiday plays its own scenes, so the page shows the rotation at once (like the device does)
+    it('shows a new holiday with the rotation, and a specific scene pins the holiday', async () => {
+        deviceState = { ...deviceState, scene: 3 };
+        await loadDeviceState();
+        const globalStore = useGlobalStore();
+        const pendingChange = applyDeviceSettings({ holiday: 1 });
+        expect(globalStore.value.device).toMatchObject({ holiday: 1, activeHoliday: 1, scene: -1 });
+        await pendingChange;
+
+        // A scene while Automatic keeps the holiday playing
+        deviceState = { ...deviceState, holiday: -1, activeHoliday: 1 };
+        await loadDeviceState();
+        const pinChange = applyDeviceSettings({ scene: 2 });
+        expect(globalStore.value.device).toMatchObject({ holiday: 1, scene: 2 });
+        await pinChange;
     });
 
     // A refused change used to stay on screen while the device kept the old value
@@ -244,7 +294,7 @@ describe('home page', () => {
         expect(frameCount).toBeLessThanOrEqual(framesAtUnmount + 1);
     });
 
-    // The scene picker cards render in a portal, outside the mounted page
+    // The picker cards render in a portal, outside the mounted page
     const sceneCards = () => [...document.querySelectorAll('[data-slot="radio-group-card"]')];
 
     // The scene row shows the chosen scene and the one on screen, and opens the picker with the rotation and the nine scenes
@@ -258,9 +308,80 @@ describe('home page', () => {
         // Open the picker
         await sceneRow.find('button').trigger('click');
         await flushPromises();
-        expect(sceneCards()).toHaveLength(10);
+        expect(sceneCards()).toHaveLength(9);
         expect(sceneCards()[0].getAttribute('data-state')).toBe('checked');
         expect(sceneCards()[4].textContent).toContain('Santa\'s sleigh');
+    });
+
+    // The scenes are the ones of the holiday playing, translated by id
+    it('lists the scenes of the holiday playing', async () => {
+        deviceState = { ...deviceState, holiday: 1, activeHoliday: 1, currentScene: 2 };
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        expect(wrapper.find('[data-testid="scene-row"]').text()).toContain('On screen: Fireworks');
+        await wrapper.find('[data-testid="scene-row"] button').trigger('click');
+        await flushPromises();
+        expect(sceneCards().map(card => card.textContent)).toEqual([
+            expect.stringContaining('Rotate all scenes'),
+            expect.stringContaining('Countdown'),
+            expect.stringContaining('Confetti'),
+            expect.stringContaining('Fireworks'),
+            expect.stringContaining('Champagne'),
+            expect.stringContaining('Sparklers')
+        ]);
+    });
+
+    // A scene id the app doesn't know shows the name of the device
+    it('falls back to the name of the device for an unknown scene', async () => {
+        deviceState = { ...deviceState, holidays: [{ id: 'christmas', name: 'Christmas', scenes: [{ id: 'mystery', name: 'Mystery show' }] }], currentScene: 0 };
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        expect(wrapper.find('[data-testid="scene-row"]').text()).toContain('On screen: Mystery show');
+    });
+
+    // The holiday row shows Automatic with the holiday the calendar picked
+    it('shows the Automatic holiday and the one the calendar picked', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        const holidayRow = wrapper.find('[data-testid="holiday-row"]');
+        expect(holidayRow.text()).toContain('Automatic');
+        expect(holidayRow.text()).toContain('Now: Christmas');
+    });
+
+    // The picker lists Automatic and one option per holiday
+    it('lists Automatic and every holiday in the holiday picker', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
+        await flushPromises();
+        expect(sceneCards()).toHaveLength(3);
+        expect(sceneCards()[0].getAttribute('data-state')).toBe('checked');
+        expect(sceneCards()[0].textContent).toContain('Now: Christmas');
+        expect(sceneCards()[1].textContent).toContain('Christmas');
+        expect(sceneCards()[2].textContent).toContain('New Year\'s Eve');
+    });
+
+    // Picking a holiday sends it, and the scenes follow the new holiday
+    it('sends the holiday that is picked, and shows its scenes', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
+        await flushPromises();
+        sceneCards()[2].click();
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ holiday: 1 }]));
+        await vi.waitFor(() => expect(wrapper.find('[data-testid="holiday-row"]').text()).toContain('New Year\'s Eve'));
+        expect(useGlobalStore().value.device.activeHoliday).toBe(1);
+    });
+
+    // Picking Automatic sends -1
+    it('sends -1 to follow the calendar', async () => {
+        deviceState = { ...deviceState, holiday: 1, activeHoliday: 1 };
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
+        await flushPromises();
+        sceneCards()[0].click();
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ holiday: -1 }]));
     });
 
     // Picking a scene sends it, and the row shows it as the chosen one
@@ -313,9 +434,9 @@ describe('home page', () => {
 
 // Message page: explicit save, a counter and a warning
 describe('message page', () => {
-    // Type in the message field
-    const typeMessage = async (wrapper, text) => {
-        await wrapper.find('#message').setValue(text);
+    // Type in the message field of a holiday
+    const typeMessage = async (wrapper, text, holidayId = 'christmas') => {
+        await wrapper.find(`#message-${holidayId}`).setValue(text);
         await flushPromises();
     };
 
@@ -323,7 +444,7 @@ describe('message page', () => {
     it('starts with the message of the device', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(MessagePage);
-        expect(wrapper.find('#message').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
+        expect(wrapper.find('#message-christmas').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
     });
 
     // The counter follows the typing, against the limit of the device
@@ -331,7 +452,7 @@ describe('message page', () => {
         await loadDeviceState();
         const wrapper = await mountPage(MessagePage);
         await typeMessage(wrapper, 'CIAO');
-        expect(wrapper.find('[data-testid="message-counter"]').text()).toBe('4 / 200');
+        expect(wrapper.find('[data-testid="message-counter-christmas"]').text()).toBe('4 / 200');
     });
 
     // The hint tells what the matrix can draw
@@ -359,20 +480,20 @@ describe('message page', () => {
         const wrapper = await mountPage(MessagePage);
         await typeMessage(wrapper, 'Ciao Natale');
         expect(savedBodies).toEqual([]);
-        await wrapper.find('form').trigger('submit');
-        await vi.waitFor(() => expect(savedBodies).toEqual([{ message: 'Ciao Natale' }]));
+        await wrapper.findAll('form')[0].trigger('submit');
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: ['Ciao Natale', null] }]));
 
         // The field then shows the message in capitals, like the device stored it
-        await vi.waitFor(() => expect(wrapper.find('#message').element.value).toBe('CIAO NATALE'));
+        await vi.waitFor(() => expect(wrapper.find('#message-christmas').element.value).toBe('CIAO NATALE'));
     });
 
     // Nothing changed, nothing to save
     it('disables Save while the message is unchanged', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(MessagePage);
-        expect(findButton(wrapper, 'Save message').attributes('disabled')).toBeDefined();
+        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeDefined();
         await typeMessage(wrapper, 'NEW');
-        expect(findButton(wrapper, 'Save message').attributes('disabled')).toBeUndefined();
+        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeUndefined();
     });
 
     // A message that only differs by case is the same for the device
@@ -380,7 +501,7 @@ describe('message page', () => {
         await loadDeviceState();
         const wrapper = await mountPage(MessagePage);
         await typeMessage(wrapper, 'buon natale * merry christmas');
-        expect(findButton(wrapper, 'Save message').attributes('disabled')).toBeDefined();
+        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeDefined();
     });
 
     // The device refuses more than 200 characters, so the page doesn't even send it
@@ -388,9 +509,9 @@ describe('message page', () => {
         await loadDeviceState();
         const wrapper = await mountPage(MessagePage);
         await typeMessage(wrapper, 'A'.repeat(201));
-        expect(wrapper.find('[data-testid="message-counter"]').text()).toBe('201 / 200');
-        expect(findButton(wrapper, 'Save message').attributes('disabled')).toBeDefined();
-        await wrapper.find('form').trigger('submit');
+        expect(wrapper.find('[data-testid="message-counter-christmas"]').text()).toBe('201 / 200');
+        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeDefined();
+        await wrapper.findAll('form')[0].trigger('submit');
         expect(savedBodies).toEqual([]);
     });
 
@@ -400,10 +521,10 @@ describe('message page', () => {
         const wrapper = await mountPage(MessagePage);
         isSaveRefused = true;
         await typeMessage(wrapper, 'Rifiutato');
-        await wrapper.find('form').trigger('submit');
+        await wrapper.findAll('form')[0].trigger('submit');
         await vi.waitFor(() => expect(savedBodies).toHaveLength(1));
         await flushPromises();
-        expect(wrapper.find('#message').element.value).toBe('Rifiutato');
+        expect(wrapper.find('#message-christmas').element.value).toBe('Rifiutato');
     });
 
     // The countdown switch applies at once
@@ -414,6 +535,48 @@ describe('message page', () => {
         expect(wrapper.text()).toContain('60 days');
         await wrapper.find('#countdown').trigger('click');
         await vi.waitFor(() => expect(savedBodies).toEqual([{ countdown: false }]));
+    });
+
+    // Every holiday has its own editor, titled with the name of the holiday
+    it('shows one message editor per holiday', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(MessagePage);
+        expect(wrapper.find('#message-christmas').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
+        expect(wrapper.find('#message-new-year').element.value).toBe('BUON ANNO * HAPPY NEW YEAR');
+        expect(wrapper.text()).toContain('Christmas');
+        expect(wrapper.text()).toContain('New Year\'s Eve');
+        expect(wrapper.findAll('[data-testid^="message-save-"]')).toHaveLength(2);
+    });
+
+    // Saving one holiday sends null for the others, so their messages stay as they are
+    it('sends only the message that was edited', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(MessagePage);
+        await typeMessage(wrapper, 'Felice anno nuovo', 'new-year');
+        await wrapper.findAll('form')[1].trigger('submit');
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo'] }]));
+        await vi.waitFor(() => expect(wrapper.find('#message-new-year').element.value).toBe('FELICE ANNO NUOVO'));
+        expect(wrapper.find('#message-christmas').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
+    });
+
+    // Editing one holiday leaves the Save button of the other disabled
+    it('enables Save only for the holiday that changed', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(MessagePage);
+        await typeMessage(wrapper, 'NEW', 'new-year');
+        const [christmasSave, newYearSave] = wrapper.findAll('[data-testid^="message-save-"]');
+        expect(christmasSave.attributes('disabled')).toBeDefined();
+        expect(newYearSave.attributes('disabled')).toBeUndefined();
+    });
+
+    // The countdown is about Christmas, so it sits with the Christmas message and not with the others
+    it('shows the countdown once, after the Christmas message', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(MessagePage);
+        expect(wrapper.findAll('#countdown')).toHaveLength(1);
+        const html = wrapper.html();
+        expect(html.indexOf('message-christmas')).toBeLessThan(html.indexOf('id="countdown"'));
+        expect(html.indexOf('id="countdown"')).toBeLessThan(html.indexOf('message-new-year'));
     });
 });
 

@@ -1,19 +1,23 @@
 <script setup>
 import { computed, ref } from 'vue';
+import DrinkIcon from '@hugeicons/core-free-icons/DrinkIcon';
 import FireIcon from '@hugeicons/core-free-icons/FireIcon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
 import GiftIcon from '@hugeicons/core-free-icons/GiftIcon';
+import ClockIcon from '@hugeicons/core-free-icons/Clock01Icon';
 import CandyCaneIcon from '@hugeicons/core-free-icons/CandyCaneIcon';
 import LightbulbIcon from '@hugeicons/core-free-icons/LightbulbIcon';
 import MessageSquareTextIcon from '@hugeicons/core-free-icons/MessageSquareTextIcon';
+import PartyIcon from '@hugeicons/core-free-icons/PartyIcon';
 import PineTreeIcon from '@hugeicons/core-free-icons/PineTreeIcon';
 import RepeatIcon from '@hugeicons/core-free-icons/RepeatIcon';
 import SnowflakeIcon from '@hugeicons/core-free-icons/SnowflakeIcon';
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon';
 import StarIcon from '@hugeicons/core-free-icons/StarIcon';
 import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 import { OptionPickerDialog } from '@brumaombra/ui-vintage/option-picker-dialog';
 
-// Props: the scene names in the order of the device, the chosen scene (-1 rotates them all) and the one on screen now
+// Props: the scenes of the holiday playing ({ id, name } in the order of the device), the chosen scene (-1 rotates them all) and the one on screen now
 const props = defineProps({
     scenes: { type: Array, required: true },
     modelValue: { type: Number, default: -1 },
@@ -25,19 +29,33 @@ const emits = defineEmits(['update:modelValue']);
 
 const { t, te } = useI18n();
 
-// Icon of each scene, in the order of the device
-const sceneIcons = [MessageSquareTextIcon, SnowflakeIcon, PineTreeIcon, StarIcon, FireIcon, LightbulbIcon, GiftIcon, CandyCaneIcon, FireworksIcon];
+// Icon of each scene by id
+const sceneIcons = {
+    greeting: MessageSquareTextIcon,
+    snow: SnowflakeIcon,
+    trees: PineTreeIcon,
+    sleigh: StarIcon,
+    fireplace: FireIcon,
+    garland: LightbulbIcon,
+    gifts: GiftIcon,
+    'candy-cane': CandyCaneIcon,
+    countdown: ClockIcon,
+    confetti: PartyIcon,
+    fireworks: FireworksIcon,
+    champagne: DrinkIcon,
+    sparklers: SparklesIcon
+};
 
 // Name of a scene in the language of the app (the name sent by the device is the fallback for a scene this app doesn't know)
-const getSceneName = ({ name, index }) => {
-    const key = `pages.home.sceneNames.${index}`;
+const getSceneName = ({ id, name }) => {
+    const key = `pages.home.sceneNames.${id}`;
     return te(key) ? t(key) : name;
 };
 
 // Options to pick from: rotate them all, then one per scene
 const options = computed(() => [
     { value: -1, label: t('pages.home.rotateAll'), description: t('pages.home.rotateAllDescription'), icon: RepeatIcon },
-    ...props.scenes.map((name, index) => ({ value: index, label: getSceneName({ name, index }), description: '', icon: sceneIcons[index] || StarIcon }))
+    ...props.scenes.map((scene, index) => ({ value: index, label: getSceneName(scene), description: '', icon: sceneIcons[scene.id] || StarIcon }))
 ]);
 
 // Whether the scene picker is open

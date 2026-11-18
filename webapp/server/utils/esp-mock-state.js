@@ -11,8 +11,35 @@ export const FRAME_WIDTH = 72;
 export const FRAME_HEIGHT = 12;
 export const FRAME_BYTES = FRAME_WIDTH * FRAME_HEIGHT * 3;
 
-// Scenes of the firmware, in order
-export const SCENE_NAMES = ['Greeting', 'Snowfall', 'Christmas trees', 'Santa\'s sleigh', 'Fireplace', 'Fairy lights', 'Gifts', 'Candy cane', 'Fireworks'];
+// Holidays of the firmware, in order, each with its scenes (the id is what the web app translates, the name is the English fallback)
+export const HOLIDAYS = [{
+    id: 'christmas',
+    name: 'Christmas',
+    scenes: [
+        { id: 'greeting', name: 'Greeting' },
+        { id: 'snow', name: 'Snow' },
+        { id: 'trees', name: 'Trees' },
+        { id: 'sleigh', name: 'Sleigh' },
+        { id: 'fireplace', name: 'Fireplace' },
+        { id: 'garland', name: 'Garland' },
+        { id: 'gifts', name: 'Gifts' },
+        { id: 'candy-cane', name: 'Candy cane' }
+    ]
+}, {
+    id: 'new-year',
+    name: 'New Year\'s Eve',
+    scenes: [
+        { id: 'countdown', name: 'Countdown' },
+        { id: 'confetti', name: 'Confetti' },
+        { id: 'fireworks', name: 'Fireworks' },
+        { id: 'champagne', name: 'Champagne' },
+        { id: 'sparklers', name: 'Sparklers' }
+    ]
+}];
+
+// Indexes of the holidays the calendar picks between
+const CHRISTMAS_INDEX = 0;
+const NEW_YEAR_INDEX = 1;
 
 // Time each scene stays on screen when the device rotates them all
 export const SCENE_DURATION_MS = 15000;
@@ -21,17 +48,32 @@ export const SCENE_DURATION_MS = 15000;
 const factorySettings = () => ({
     on: true,
     brightness: 60,
+    holiday: -1,
     scene: -1,
     maxMilliamps: 3000,
     countdown: true,
-    message: 'BUON NATALE * MERRY CHRISTMAS'
+    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR']
 });
 
 // Get the mock device state: the one of the layer (Wi-Fi, uptime, kept across hot reloads) plus the settings of the strip
 export const getEspMockState = () => {
     const state = getGizmoMockState();
-    state.settings ??= factorySettings();
+    if (!state.settings?.messages) state.settings = factorySettings(); // Also replaces the settings of an older shape kept across hot reloads
     return state;
+};
+
+// Get the holiday the calendar picks: New Year's Eve from December 27 to January 1 included, Christmas the rest of the year
+export const getCalendarHoliday = (now = Date.now()) => {
+    const date = new Date(now);
+    const month = date.getMonth(); // 0 is January
+    const day = date.getDate();
+    const isNewYearPeriod = (month === 11 && day >= 27) || (month === 0 && day === 1);
+    return isNewYearPeriod ? NEW_YEAR_INDEX : CHRISTMAS_INDEX;
+};
+
+// Get the holiday playing now: the chosen one, or the one of the calendar when the choice is Automatic (-1)
+export const getActiveHoliday = ({ state, now = Date.now() }) => {
+    return state.settings.holiday >= 0 ? state.settings.holiday : getCalendarHoliday(now);
 };
 
 /******************************** Settings ********************************/
@@ -39,29 +81,61 @@ export const getEspMockState = () => {
 // Check an integer inside a range
 const isIntegerInRange = (value, minimum, maximum) => Number.isInteger(value) && value >= minimum && value <= maximum;
 
+// Get the holiday a settings body ends up in (the holiday it sends, or the current one, resolved by the calendar when Automatic)
+const getResultingHoliday = ({ state, body, now }) => {
+    const holiday = body.holiday ?? state.settings.holiday;
+    return holiday >= 0 ? holiday : getActiveHoliday({ state, now });
+};
+
 // Rules of each settings field, in the order the firmware checks them (a missing field keeps its current value)
 const settingsRules = {
     on: value => typeof value === 'boolean',
     countdown: value => typeof value === 'boolean',
     brightness: value => isIntegerInRange(value, 0, 255),
-    scene: value => isIntegerInRange(value, -1, SCENE_NAMES.length - 1),
+    holiday: value => isIntegerInRange(value, -1, HOLIDAYS.length - 1),
+    scene: (value, { state, body, now }) => isIntegerInRange(value, -1, HOLIDAYS[getResultingHoliday({ state, body, now })].scenes.length - 1),
     maxMilliamps: value => isIntegerInRange(value, MIN_MAX_MILLIAMPS, MAX_MAX_MILLIAMPS),
-    message: value => typeof value === 'string' && byteLength(value) <= MAX_MESSAGE_LENGTH
+    messages: value => Array.isArray(value) && value.length <= HOLIDAYS.length && value.every(message => message === null || (typeof message === 'string' && byteLength(message) <= MAX_MESSAGE_LENGTH))
 };
 
 // Validate a settings body like the firmware: throws the 400 error with the name of the first wrong field, in the firmware's order (unknown and null fields are ignored)
-export const validateSettings = body => {
-    const invalidField = Object.keys(settingsRules).find(field => body[field] !== undefined && body[field] !== null && !settingsRules[field](body[field]));
+export const validateSettings = ({ state, body, now = Date.now() }) => {
+    const invalidField = Object.keys(settingsRules).find(field => body[field] !== undefined && body[field] !== null && !settingsRules[field](body[field], { state, body, now }));
     if (invalidField) {
         throw new EspMockError(400, 'invalid_settings_field', invalidField);
     }
 };
 
-// Apply a settings body that passed the validation (the device stores the message in capitals)
-export const applySettings = ({ state, body }) => {
-    for (const field of Object.keys(settingsRules)) {
-        if (body[field] === undefined || body[field] === null) continue; // Null is the same as a missing field, like on the firmware
-        state.settings[field] = field === 'message' ? body.message.toUpperCase() : body[field];
+// Apply a settings body that passed the validation (the device stores the messages in capitals)
+export const applySettings = ({ state, body, now = Date.now() }) => {
+    const { settings } = state;
+
+    // Read the holiday playing now before changing anything (a scene sent while Automatic pins this one)
+    const activeHoliday = getActiveHoliday({ state, now });
+
+    // Apply the plain fields (null is the same as a missing field, like on the firmware)
+    for (const field of ['on', 'countdown', 'brightness', 'maxMilliamps']) {
+        if (body[field] === undefined || body[field] === null) continue;
+        settings[field] = body[field];
+    }
+
+    // Change the holiday: the scenes of another one are different, so the scene goes back to rotating unless one is sent (the same holiday again keeps it, like the firmware)
+    if (body.holiday !== undefined && body.holiday !== null && body.holiday !== settings.holiday) {
+        settings.holiday = body.holiday;
+        settings.scene = -1;
+    }
+
+    // Change the scene: a specific scene only makes sense inside a fixed holiday, so Automatic is pinned to the holiday playing now
+    if (body.scene !== undefined && body.scene !== null) {
+        settings.scene = body.scene;
+        if (body.scene >= 0 && settings.holiday < 0) settings.holiday = activeHoliday;
+    }
+
+    // Change the messages of the holidays that have one (null leaves it as it is)
+    if (body.messages) {
+        body.messages.forEach((message, index) => {
+            if (message !== null) settings.messages[index] = message.toUpperCase();
+        });
     }
 };
 
@@ -76,7 +150,10 @@ const sceneColors = [
 // Get the scene on screen: the selected one, or the one the rotation has reached
 export const getCurrentScene = ({ state, now = Date.now() }) => {
     if (state.settings.scene >= 0) return state.settings.scene;
-    return Math.floor((now - state.startedAt) / SCENE_DURATION_MS) % SCENE_NAMES.length;
+
+    // Rotate through the scenes of the holiday playing now
+    const sceneCount = HOLIDAYS[getActiveHoliday({ state, now })].scenes.length;
+    return Math.floor((now - state.startedAt) / SCENE_DURATION_MS) % sceneCount;
 };
 
 // Build an animated fake frame: falling snow over a moving garland in the color of the scene (all black when the device is off)
@@ -125,7 +202,8 @@ export const buildStatePayload = ({ state, now = Date.now() }) => {
     const frame = buildMockFrame({ sceneIndex, now, isOn: state.settings.on });
     return {
         ...state.settings,
-        scenes: [...SCENE_NAMES],
+        activeHoliday: getActiveHoliday({ state, now }),
+        holidays: HOLIDAYS,
         currentScene: sceneIndex,
         estimatedMilliamps: estimateMilliamps({ frame, brightness: state.settings.brightness, maxMilliamps: state.settings.maxMilliamps }),
         minMaxMilliamps: MIN_MAX_MILLIAMPS,

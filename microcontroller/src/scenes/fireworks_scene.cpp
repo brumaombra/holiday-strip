@@ -11,7 +11,8 @@ namespace {
 	// Fireworks bursting over the year number, for New Year's Eve
 	class FireworksScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "fireworks"; }
 		const char *name() const override { return "Fireworks"; }
 
 		// Clear the sky and reset the rockets and sparks

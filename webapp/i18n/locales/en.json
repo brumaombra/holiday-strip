@@ -12,7 +12,7 @@
     "nav": {
         "home": {
             "label": "Home",
-            "description": "Preview the matrix and pick a scene"
+            "description": "Preview the matrix and pick a holiday and a scene"
         },
         "message": {
             "label": "Message",
@@ -53,23 +53,35 @@
             "scenesDescription": "Pick one scene to keep, or let the strip rotate through all of them.",
             "rotateAll": "Rotate all scenes",
             "rotateAllDescription": "Cycle through every scene, one after the other",
+            "holidaysTitle": "Holiday",
+            "holidaysDescription": "Follow the calendar, or keep one holiday all the time.",
+            "holidayLabel": "Holiday",
+            "holidayAutomatic": "Automatic",
+            "holidayAutomaticNow": "Now: {holiday}",
+            "holidayNames": {
+                "christmas": "Christmas",
+                "new-year": "New Year's Eve"
+            },
             "sceneNames": {
-                "0": "Greeting",
-                "1": "Snowfall",
-                "2": "Christmas trees",
-                "3": "Santa's sleigh",
-                "4": "Fireplace",
-                "5": "Fairy lights",
-                "6": "Gifts",
-                "7": "Candy cane",
-                "8": "Fireworks"
+                "greeting": "Greeting",
+                "snow": "Snow",
+                "trees": "Christmas trees",
+                "sleigh": "Santa's sleigh",
+                "fireplace": "Fireplace",
+                "garland": "Fairy lights",
+                "gifts": "Gifts",
+                "candy-cane": "Candy cane",
+                "countdown": "Countdown",
+                "confetti": "Confetti",
+                "fireworks": "Fireworks",
+                "champagne": "Champagne",
+                "sparklers": "Sparklers"
             },
             "sceneLabel": "Scene",
             "onScreenScene": "On screen: {scene}"
         },
         "message": {
             "title": "Message",
-            "textTitle": "Text",
             "label": "Scrolling message",
             "placeholder": "Type your greeting",
             "counter": "{length} / {max}",

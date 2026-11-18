@@ -11,7 +11,8 @@ namespace {
 	// Scrolling greeting between two chasing garlands, with a countdown to Christmas
 	class GreetingScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "greeting"; }
 		const char *name() const override { return "Greeting"; }
 
 		// Build the first text and restart the scroll
@@ -87,7 +88,7 @@ namespace {
 		// Build the scrolling text: the message, then the Christmas countdown when it's enabled and the clock is set
 		static String buildText() {
 			// Start from the greeting message
-			String result = getGreetingMessage();
+			String result = getHolidayMessage(CHRISTMAS);
 
 			// Stop here when the countdown is turned off
 			if (!isCountdownEnabled()) {

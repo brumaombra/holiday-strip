@@ -21,13 +21,23 @@ JsonDocument buildStateData() {
 	// Add the settings
 	writeSettingsToJson(data, getSettings());
 
-	// Add the scene names, in the order they rotate
-	JsonArray scenes = data["scenes"].to<JsonArray>();
-	for (int i = 0; i < getSceneCount(); i++) {
-		scenes.add(getScene(i)->name());
+	// Add the holidays and their scenes, in the order they rotate
+	JsonArray holidays = data["holidays"].to<JsonArray>();
+	for (int i = 0; i < HOLIDAY_COUNT; i++) {
+		const Holiday &holiday = getHoliday(i);
+		JsonObject holidayJson = holidays.add<JsonObject>();
+		holidayJson["id"] = holiday.id;
+		holidayJson["name"] = holiday.name;
+		JsonArray scenes = holidayJson["scenes"].to<JsonArray>();
+		for (int j = 0; j < holiday.sceneCount; j++) {
+			JsonObject sceneJson = scenes.add<JsonObject>();
+			sceneJson["id"] = holiday.scenes[j]->id();
+			sceneJson["name"] = holiday.scenes[j]->name();
+		}
 	}
 
 	// Add what the matrix is doing (written by the main loop, read here as whole words)
+	data["activeHoliday"] = getCurrentHolidayIndex();
 	data["currentScene"] = getCurrentSceneIndex();
 	data["estimatedMilliamps"] = getEstimatedMilliamps();
 

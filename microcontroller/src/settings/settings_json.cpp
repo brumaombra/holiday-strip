@@ -40,14 +40,20 @@ namespace {
 void writeSettingsToJson(JsonObject json, const Settings &settings) {
 	json["on"] = settings.on;
 	json["brightness"] = settings.brightness;
+	json["holiday"] = settings.holiday;
 	json["scene"] = settings.scene;
 	json["maxMilliamps"] = settings.maxMilliamps;
 	json["countdown"] = settings.countdown;
-	json["message"] = settings.message;
+
+	// The greeting of each holiday, in the order of the holidays
+	JsonArray messages = json["messages"].to<JsonArray>();
+	for (const auto &message : settings.messages) {
+		messages.add(message);
+	}
 }
 
 // Apply the fields of a JSON object to the settings, all or nothing (returns the name of the first invalid field, or nullptr)
-const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, int sceneCount) {
+const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, const int *sceneCounts, int activeHoliday) {
 	Settings updated = settings;
 
 	// Read the switches
@@ -65,12 +71,32 @@ const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, int 
 	}
 	updated.brightness = (uint8_t)brightness;
 
-	// Read the scene (-1 rotates through all of them)
-	long scene = updated.scene;
-	if (!readIntegerField(json["scene"], -1, sceneCount - 1, scene)) {
-		return "scene";
+	// Read the holiday (-1 follows the calendar)
+	long holiday = updated.holiday;
+	if (!readIntegerField(json["holiday"], AUTOMATIC_HOLIDAY, HOLIDAY_COUNT - 1, holiday)) {
+		return "holiday";
 	}
-	updated.scene = (int)scene;
+	const bool isHolidayChanged = holiday != updated.holiday;
+	updated.holiday = (int)holiday;
+
+	// Read the scene (-1 rotates through all of them) within the holiday it plays in
+	JsonVariantConst sceneField = json["scene"];
+	if (!sceneField.isNull()) {
+		const int sceneHoliday = updated.holiday >= 0 ? updated.holiday : activeHoliday;
+		long scene = updated.scene;
+		if (!readIntegerField(sceneField, -1, sceneCounts[sceneHoliday] - 1, scene)) {
+			return "scene";
+		}
+		updated.scene = (int)scene;
+
+		// A chosen scene only makes sense in a fixed holiday: pin the one playing now
+		if (updated.scene >= 0) {
+			updated.holiday = sceneHoliday;
+		}
+	} else if (isHolidayChanged) {
+		// Another holiday without a scene: rotate through its scenes
+		updated.scene = -1;
+	}
 
 	// Read the power limit
 	long maxMilliamps = updated.maxMilliamps;
@@ -79,13 +105,25 @@ const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, int 
 	}
 	updated.maxMilliamps = (uint32_t)maxMilliamps;
 
-	// Read the message, stored in capitals
-	JsonVariantConst message = json["message"];
-	if (!message.isNull()) {
-		if (!message.is<const char *>() || strlen(message.as<const char *>()) > config::MAX_MESSAGE_LENGTH) {
-			return "message";
+	// Read the greetings, one per holiday (null leaves one as it is), stored in capitals
+	JsonVariantConst messages = json["messages"];
+	if (!messages.isNull()) {
+		if (!messages.is<JsonArrayConst>() || messages.size() > HOLIDAY_COUNT) {
+			return "messages";
 		}
-		sanitizeMessage(message.as<const char *>(), updated.message, sizeof(updated.message));
+		for (size_t i = 0; i < messages.size(); i++) {
+			// Skip the greetings that don't change
+			JsonVariantConst message = messages[i];
+			if (message.isNull()) {
+				continue;
+			}
+
+			// Check and store the greeting
+			if (!message.is<const char *>() || strlen(message.as<const char *>()) > config::MAX_MESSAGE_LENGTH) {
+				return "messages";
+			}
+			sanitizeMessage(message.as<const char *>(), updated.messages[i], sizeof(updated.messages[i]));
+		}
 	}
 
 	// Every field is valid: apply them all

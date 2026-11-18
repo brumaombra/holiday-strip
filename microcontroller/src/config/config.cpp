@@ -35,10 +35,12 @@ namespace config {
 	// Default settings and their limits
 	const bool DEFAULT_ON = true;
 	const uint8_t DEFAULT_BRIGHTNESS = 60;
-	const int DEFAULT_SCENE = -1; // -1 rotates through all the scenes
+	const int DEFAULT_HOLIDAY = -1; // -1 follows the calendar
+	const int DEFAULT_SCENE = -1; // -1 rotates through all the scenes of the holiday
 	const uint32_t DEFAULT_MAX_MILLIAMPS = 3000;
 	const bool DEFAULT_COUNTDOWN = true;
-	const char DEFAULT_MESSAGE[] = "BUON NATALE * MERRY CHRISTMAS";
+	const char DEFAULT_MESSAGE[] = "BUON NATALE * MERRY CHRISTMAS"; // Christmas greeting
+	const char DEFAULT_NEW_YEAR_MESSAGE[] = "BUON ANNO * HAPPY NEW YEAR"; // New Year's Eve greeting
 	const uint32_t MIN_MAX_MILLIAMPS = 1000;
 	const uint32_t MAX_MAX_MILLIAMPS = 8000; // Highest limit the web app can set: keep it at about 80% of what the 5 V power supply delivers
 }

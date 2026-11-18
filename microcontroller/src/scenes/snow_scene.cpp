@@ -9,7 +9,8 @@ namespace {
 	// Snow falls and piles up next to a small house with lit windows
 	class SnowScene : public Scene {
 	public:
-		// Get the name of the scene
+		// Get the id and the name of the scene
+		const char *id() const override { return "snow"; }
 		const char *name() const override { return "Snowfall"; }
 
 		// Start the snowfall and clear the snow on the ground

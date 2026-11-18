@@ -4,7 +4,7 @@
 
 ### An ESP32-powered holiday show for a 72x12 LED matrix
 
-Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into an animated holiday display. It starts with Christmas: nine hand-drawn scenes that rotate with smooth crossfades, and your own greeting scrolling with a countdown to Christmas. A phone-friendly dashboard, built into the firmware, controls it all.
+Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into an animated holiday display. It has a set of hand-drawn scenes for each holiday, Christmas and New Year's Eve so far, that rotate with smooth crossfades, and your own greeting scrolling, with a countdown to Christmas and to midnight on New Year's Eve. It follows the calendar by itself, and a phone-friendly dashboard, built into the firmware, controls it all.
 
 <p>
   <img alt="ESP32" src="https://img.shields.io/badge/esp32-ESP32-E7352C?logo=espressif&logoColor=white">
@@ -17,7 +17,7 @@ Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into 
 </p>
 
 <p>
-  🎅 Nine animated scenes • 💬 Scrolling greeting • ⏳ Christmas countdown • 📱 Web dashboard • 🔌 Power limiter
+  🎅 Christmas and 🎆 New Year's Eve • 💬 Scrolling greetings • ⏳ Countdowns • 📱 Web dashboard • 🔌 Power limiter
 </p>
 
 <p>
@@ -37,13 +37,14 @@ Holiday Strip is a small ESP32 project that turns a 72x12 truck LED matrix into 
 <a id="overview"></a>
 ## 📘 Overview
 
-This project started from a 72x12 LED matrix pulled from a truck sign. Its protocol was worked out by driving it from an ESP32 and watching it with an ESP32-CAM (see [docs/protocol.md](docs/protocol.md)), and now it shows holiday scenes. Christmas is the first holiday, and more will follow.
+This project started from a 72x12 LED matrix pulled from a truck sign. Its protocol was worked out by driving it from an ESP32 and watching it with an ESP32-CAM (see [docs/protocol.md](docs/protocol.md)), and now it shows holiday scenes. Christmas and New Year's Eve are the first holidays, and more will follow.
 
 The firmware runs on an ESP32 and:
 
-- Rotates through the scenes every 20 seconds, with a 1-second crossfade.
-- Scrolls your message, and counts the days to Christmas from late October.
-- Serves a dashboard on your network to switch it on and off, set the brightness, watch a live preview, pick a scene, and edit the message.
+- Plays the scenes of a holiday: the one the calendar picks (New Year's Eve from December 27 to January 1, Christmas the rest of the year), or the one you choose.
+- Rotates through the scenes every 20 seconds, with a 1-second crossfade, and fades to the next holiday when the date changes.
+- Scrolls a message per holiday, counts the days to Christmas from late October, and counts down to midnight on December 31 (in the last minute of the year it switches to the countdown by itself).
+- Serves a dashboard on your network to switch it on and off, set the brightness, watch a live preview, pick a holiday and a scene, and edit the messages.
 - Estimates the current of every frame and dims it before it goes over your power supply's limit.
 
 ### 🎄 Christmas scenes
@@ -56,21 +57,31 @@ The firmware runs on an ESP32 and:
 6. **Fairy lights**: two strings of lights hanging in swags. They alternate between twinkle, chase, and color-cycle effects.
 7. **Gifts**: wrapped presents with ribbons and bows fall and stack up. When the pile gets too high, it sinks away and starts over.
 8. **Candy cane**: shaded red and white stripes sliding along, with sparkles.
-9. **Fireworks**: rockets launch and burst into colored sparks over a dim gold year number. From November on, it shows the coming year.
+
+### 🎆 New Year's Eve scenes
+
+1. **Countdown**: on December 31, the time left to midnight (hours, minutes and seconds, then minutes and seconds, then seconds), the last ten seconds one by one in a flashing ring, then the new year bursting in with a white flash and sparks for the first two minutes. The other days it shows the coming year with a glint sweeping across it.
+2. **Confetti**: the New Year's greeting scrolls in gold and silver under falling, spinning confetti.
+3. **Fireworks**: rockets launch and burst into colored sparks over a dim gold year number. From November on, it shows the coming year.
+4. **Champagne**: a bottle shakes and pops its cork, foam sprays out, then two glasses fill with bubbles, slide together and clink.
+5. **Sparklers**: a sparkler writes the coming year in the air. The trail cools from white-hot to an orange glow while sparks spit from the tip, then it fades and starts over.
+
+Every scene can be watched on your computer, without a board: `microcontroller/tools/scene_video/render.sh` builds the real scene code for your computer and records it to an MP4 (see [Scene videos](#scene-videos)).
 
 <a id="features"></a>
 ## ✨ Features
 
-- Nine animated scenes at about 30 fps, rotating with crossfades, or one scene shown on its own.
-- Scrolling greeting in capitals (letters A–Z, digits, and `! ' * , - . : ?`, while `<` draws a heart).
-- Christmas countdown that follows the local timezone, daylight saving time included.
-- Web dashboard built into the firmware, with a live preview of the matrix, the scene picker, the message editor and the power limit.
+- Thirteen animated scenes in two holidays, at about 30 fps, rotating with crossfades, or one scene shown on its own.
+- The holiday follows the calendar, or stays on the one you pick.
+- A scrolling greeting per holiday, in capitals (letters A–Z, digits, and `! ' * , - . : ?`, while `<` draws a heart).
+- Christmas countdown and New Year's midnight countdown that follow the local timezone, daylight saving time included.
+- Web dashboard built into the firmware, with a live preview of the matrix, the holiday and scene pickers, the message editors and the power limit.
 - Wi-Fi setup from your phone: with no saved network, the matrix opens a setup hotspot with a captive portal.
 - Settings saved in flash, so they survive a reboot.
 - Gamma-corrected brightness and a per-frame power limiter, capped below what the power supply can deliver.
 - A JSON API that only answers the dashboard's own page, under the matrix's own name or address, so other websites can't change the settings from your browser. Through the setup hotspot, only the Wi-Fi setup answers.
 - Factory reset: hold the board's BOOT button for 10 seconds while it runs to forget the Wi-Fi and the settings, and start again from the setup hotspot.
-- Host tests for the LED mapping, the power limiter, the countdown and the settings, and Vitest tests for the web app.
+- Host tests for the LED mapping, the power limiter, the countdowns, the holiday calendar and the settings, and Vitest tests for the web app.
 
 <a id="architecture"></a>
 ## 🏗️ Architecture
@@ -183,9 +194,9 @@ The firmware is split into focused modules under `microcontroller/src/`:
 
 - 💡 `display/` holds the frame buffer and colors, maps pixels to the LED chain, limits the power, and drives the RMT peripheral.
 - 🔤 `font/` is the 5x7 font of the greeting.
-- 🎬 `scenes/` holds one file per scene, the shared effects (snowfall, stars, sprites), and the list of scenes.
-- ▶️ `player/` rotates the scenes, crossfades between them, and sends the frames to the display.
-- 📅 `calendar/` works out the Christmas countdown and the year of the fireworks.
+- 🎬 `scenes/` holds one file per scene, the shared effects (snowfall, stars, sprites), and the holidays with their scenes (`scenes.cpp`).
+- ▶️ `player/` follows the holiday, rotates its scenes, crossfades between them, and sends the frames to the display.
+- 📅 `calendar/` works out the holiday of the date, the Christmas countdown, the time to midnight on New Year's Eve and the year of the fireworks.
 - 💾 `settings/` loads and saves the settings in NVS, shares them safely between the loop and the web server, and checks the JSON from the dashboard.
 - 🌐 `server/` serves the dashboard and its API, one file per endpoint.
 - 📡 `wifi/` runs the Wi-Fi setup and the captive portal from the shared [gizmo-common](https://github.com/open-gizmo/gizmo-common) library, and sets the clock from NTP.
@@ -195,8 +206,8 @@ The firmware is split into focused modules under `microcontroller/src/`:
 
 Every response has the OpenGizmo shape `{ errorId, errorMessage, data }`, and only requests from the dashboard's own page are accepted:
 
-- `GET /api/state` returns the settings, the scene names, the scene on screen, the estimated current, the limits, the uptime and the saved network.
-- `POST /api/settings` changes any of `on`, `brightness`, `scene`, `maxMilliamps`, `countdown` and `message`, and answers with the new state. A scene of `-1` rotates all of them. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
+- `GET /api/state` returns the settings (with one message per holiday in `messages`), the holidays and their scenes (`holidays`, each with an `id`, a `name` and its `scenes`), the holiday and the scene on screen (`activeHoliday`, `currentScene`), the estimated current, the limits, the uptime and the saved network.
+- `POST /api/settings` changes any of `on`, `brightness`, `holiday`, `scene`, `maxMilliamps`, `countdown` and `messages`, and answers with the new state. A holiday of `-1` follows the calendar, and a scene of `-1` rotates all the scenes of the holiday. Another holiday without a scene rotates its scenes; a scene chosen while the calendar picks the holiday keeps the holiday playing now. `messages` has one entry per holiday, `null` to leave one as it is. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
 - `GET /api/frame` returns the raw RGB bytes of the last frame (72x12, row by row, before gamma and brightness), for the live preview.
 - `GET /api/networks`, `POST /api/connect` and `GET /api/check-connection` are the Wi-Fi setup API of gizmo-common.
 
@@ -213,6 +224,7 @@ The tests live in [microcontroller/test/](microcontroller/test/). They build the
 - The LED chain mapping, checked against the corners measured in [docs/protocol.md](docs/protocol.md).
 - The byte order, the gamma, and the power limiter.
 - The Christmas countdown, in the real timezone, including the day the clocks go back.
+- The holiday of each date, the seconds to midnight on New Year's Eve, and the New Year moment.
 - The rules of the saved settings, and the checks of the JSON the dashboard sends.
 
 The web app has its own tests. From `webapp/`:
@@ -221,12 +233,23 @@ The web app has its own tests. From `webapp/`:
 npm test
 ```
 
+<a id="scene-videos"></a>
+### 🎬 Scene videos
+
+`microcontroller/tools/scene_video/render.sh` records any scene to an MP4, with the real scene code built for your computer (it needs `g++` and `ffmpeg`). Give it the holiday and the scene by index (in the order of `scenes.cpp`), the seconds to record, the output file, and optionally the local date and time the scenes read:
+
+```bash
+microcontroller/tools/scene_video/render.sh 1 0 24 countdown.mp4 2026-12-31T23:59:47
+```
+
+This records the New Year's Eve countdown from 13 seconds before midnight. Without a date, the scenes see a clock that isn't set yet, like a board before it's online.
+
 ### 📱 Web App Overview
 
 The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps:
 
-- **Home**: switch the matrix on and off, set the brightness, watch the live preview, and pick a scene or the rotation.
-- **Message**: edit the scrolling message, and turn the Christmas countdown on or off.
+- **Home**: switch the matrix on and off, set the brightness, watch the live preview, pick a holiday or the calendar, and a scene or the rotation.
+- **Message**: edit the scrolling message of each holiday, and turn the Christmas countdown on or off.
 - **Settings**: the power limit, the language (English or Italian), and the device info.
 - **Wi-Fi**: change the network, and the setup page the hotspot opens.
 

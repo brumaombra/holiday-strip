@@ -6,8 +6,9 @@
 #include "settings/settings_json.h"
 
 namespace {
-	// Number of scenes the matrix has
-	constexpr int SCENE_COUNT = 9;
+	// Number of scenes of each holiday (Christmas, New Year's Eve), and the holiday playing now
+	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 8, 5 };
+	int activeHoliday = CHRISTMAS;
 
 	// Settings under test, and the JSON the web app sends
 	Settings settings;
@@ -17,13 +18,14 @@ namespace {
 	const char *applyJson(const char *body) {
 		doc.clear();
 		deserializeJson(doc, body);
-		return applySettingsFromJson(doc.as<JsonObjectConst>(), settings, SCENE_COUNT);
+		return applySettingsFromJson(doc.as<JsonObjectConst>(), settings, SCENE_COUNTS, activeHoliday);
 	}
 }
 
 // Start each test from the default settings
 void setUp() {
-	settings = { true, 60, -1, 3000, true, "MERRY CHRISTMAS" };
+	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, true, { "MERRY CHRISTMAS", "HAPPY NEW YEAR" } };
+	activeHoliday = CHRISTMAS;
 }
 
 // Nothing to clean up after each test
@@ -37,26 +39,73 @@ void test_only_sent_fields_change() {
 	TEST_ASSERT_EQUAL_UINT8(80, settings.brightness);
 	TEST_ASSERT_FALSE(settings.on);
 	TEST_ASSERT_EQUAL_INT(-1, settings.scene);
-	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", settings.message);
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", settings.messages[CHRISTMAS]);
 }
 
-// The message is stored in capitals
-void test_message_is_stored_in_capitals() {
-	TEST_ASSERT_NULL(applyJson("{\"message\":\"buon natale <\"}"));
-	TEST_ASSERT_EQUAL_STRING("BUON NATALE <", settings.message);
+// The messages are stored in capitals, and a null one is left as it is
+void test_messages_are_stored_in_capitals() {
+	TEST_ASSERT_NULL(applyJson("{\"messages\":[null,\"buon anno <\"]}"));
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", settings.messages[CHRISTMAS]);
+	TEST_ASSERT_EQUAL_STRING("BUON ANNO <", settings.messages[NEW_YEAR]);
 }
 
 // The edges of each range are accepted
 void test_range_edges_are_accepted() {
-	TEST_ASSERT_NULL(applyJson("{\"brightness\":255,\"scene\":8,\"maxMilliamps\":1000}"));
+	TEST_ASSERT_NULL(applyJson("{\"brightness\":255,\"holiday\":1,\"scene\":4,\"maxMilliamps\":1000}"));
 	TEST_ASSERT_EQUAL_UINT8(255, settings.brightness);
-	TEST_ASSERT_EQUAL_INT(8, settings.scene);
+	TEST_ASSERT_EQUAL_INT(NEW_YEAR, settings.holiday);
+	TEST_ASSERT_EQUAL_INT(4, settings.scene);
 	TEST_ASSERT_EQUAL_UINT32(config::MIN_MAX_MILLIAMPS, settings.maxMilliamps);
 }
 
 // A null field is the same as a missing one
 void test_null_field_is_ignored() {
 	TEST_ASSERT_NULL(applyJson("{\"scene\":null}"));
+	TEST_ASSERT_EQUAL_INT(-1, settings.scene);
+}
+
+/******************************** Holidays and scenes ********************************/
+
+// Another holiday without a scene rotates through its scenes
+void test_new_holiday_rotates_its_scenes() {
+	settings.holiday = CHRISTMAS;
+	settings.scene = 3;
+	TEST_ASSERT_NULL(applyJson("{\"holiday\":1}"));
+	TEST_ASSERT_EQUAL_INT(NEW_YEAR, settings.holiday);
+	TEST_ASSERT_EQUAL_INT(-1, settings.scene);
+}
+
+// Sending the same holiday again keeps the chosen scene
+void test_same_holiday_keeps_the_scene() {
+	settings.holiday = CHRISTMAS;
+	settings.scene = 3;
+	TEST_ASSERT_NULL(applyJson("{\"holiday\":0}"));
+	TEST_ASSERT_EQUAL_INT(3, settings.scene);
+}
+
+// A scene chosen while the calendar picks the holiday pins the holiday playing now
+void test_chosen_scene_pins_the_active_holiday() {
+	activeHoliday = NEW_YEAR;
+	TEST_ASSERT_NULL(applyJson("{\"scene\":2}"));
+	TEST_ASSERT_EQUAL_INT(NEW_YEAR, settings.holiday);
+	TEST_ASSERT_EQUAL_INT(2, settings.scene);
+}
+
+// The scene is checked against the holiday it plays in (New Year's Eve has fewer scenes)
+void test_scene_is_checked_against_its_holiday() {
+	activeHoliday = NEW_YEAR;
+	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":7}"));
+	TEST_ASSERT_NULL(applyJson("{\"holiday\":0,\"scene\":7}"));
+	TEST_ASSERT_EQUAL_INT(CHRISTMAS, settings.holiday);
+	TEST_ASSERT_EQUAL_INT(7, settings.scene);
+}
+
+// Back to the calendar with the rotation
+void test_automatic_holiday_rotates() {
+	settings.holiday = NEW_YEAR;
+	settings.scene = 1;
+	TEST_ASSERT_NULL(applyJson("{\"holiday\":-1}"));
+	TEST_ASSERT_EQUAL_INT(AUTOMATIC_HOLIDAY, settings.holiday);
 	TEST_ASSERT_EQUAL_INT(-1, settings.scene);
 }
 
@@ -74,10 +123,14 @@ void test_power_limit_above_the_maximum_is_refused() {
 void test_invalid_fields_are_named() {
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":256}"));
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":12.5}"));
-	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":9}"));
+	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":8}"));
+	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":2}"));
+	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":-2}"));
 	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":-2}"));
 	TEST_ASSERT_EQUAL_STRING("on", applyJson("{\"on\":1}"));
-	TEST_ASSERT_EQUAL_STRING("message", applyJson("{\"message\":42}"));
+	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":\"HELLO\"}"));
+	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[42]}"));
+	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[\"A\",\"B\",\"C\"]}"));
 }
 
 // A message longer than the matrix keeps is refused
@@ -86,8 +139,8 @@ void test_long_message_is_refused() {
 	char message[config::MAX_MESSAGE_LENGTH + 2];
 	memset(message, 'A', sizeof(message) - 1);
 	message[sizeof(message) - 1] = '\0';
-	snprintf(body, sizeof(body), "{\"message\":\"%s\"}", message);
-	TEST_ASSERT_EQUAL_STRING("message", applyJson(body));
+	snprintf(body, sizeof(body), "{\"messages\":[\"%s\"]}", message);
+	TEST_ASSERT_EQUAL_STRING("messages", applyJson(body));
 }
 
 // One invalid field leaves every setting as it was
@@ -107,16 +160,23 @@ void test_settings_are_written_to_json() {
 	TEST_ASSERT_EQUAL_INT(-1, output["scene"].as<int>());
 	TEST_ASSERT_EQUAL_INT(3000, output["maxMilliamps"].as<int>());
 	TEST_ASSERT_TRUE(output["countdown"].as<bool>());
-	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", output["message"].as<const char *>());
+	TEST_ASSERT_EQUAL_INT(-1, output["holiday"].as<int>());
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", output["messages"][0].as<const char *>());
+	TEST_ASSERT_EQUAL_STRING("HAPPY NEW YEAR", output["messages"][1].as<const char *>());
 }
 
 // Run all the settings JSON tests
 int main() {
 	UNITY_BEGIN();
 	RUN_TEST(test_only_sent_fields_change);
-	RUN_TEST(test_message_is_stored_in_capitals);
+	RUN_TEST(test_messages_are_stored_in_capitals);
 	RUN_TEST(test_range_edges_are_accepted);
 	RUN_TEST(test_null_field_is_ignored);
+	RUN_TEST(test_new_holiday_rotates_its_scenes);
+	RUN_TEST(test_same_holiday_keeps_the_scene);
+	RUN_TEST(test_chosen_scene_pins_the_active_holiday);
+	RUN_TEST(test_scene_is_checked_against_its_holiday);
+	RUN_TEST(test_automatic_holiday_rotates);
 	RUN_TEST(test_power_limit_above_the_maximum_is_refused);
 	RUN_TEST(test_invalid_fields_are_named);
 	RUN_TEST(test_long_message_is_refused);
