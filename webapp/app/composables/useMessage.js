@@ -4,9 +4,6 @@ export const MESSAGE_PUNCTUATION = '! \' * , - . : ?';
 export const MESSAGE_HEART = '<';
 const ALLOWED_CHARACTERS = new Set([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 !\'*,-.:?<']);
 
-// Number of days before Christmas in which the device shows the countdown
-export const COUNTDOWN_DAYS = 60;
-
 // Check if the matrix font can draw a character (only the plain a-z are folded to capitals, like the device does)
 export const isCharacterSupported = character => {
     const folded = /^[a-z]$/.test(character) ? character.toUpperCase() : character;

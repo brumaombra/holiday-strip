@@ -37,45 +37,50 @@ void tearDown() {}
 
 // Before the clock is set from the network the date is in 1970: no countdown
 void test_no_countdown_before_the_clock_is_set() {
-	TEST_ASSERT_FALSE(formatChristmasCountdown(makeDate(1970, 1, 1), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_EQUAL_STRING("", text);
+	TEST_ASSERT_EQUAL_INT32(-1, getDaysToChristmas(makeDate(1970, 1, 1)));
 }
 
-// Some days before Christmas, the countdown says how many
+// The days left until Christmas, on any day of the year
 void test_countdown_counts_the_days() {
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 12, 1), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_EQUAL_STRING(" * MANCANO 24 GIORNI A NATALE!", text);
+	TEST_ASSERT_EQUAL_INT32(24, getDaysToChristmas(makeDate(2026, 12, 1)));
+	TEST_ASSERT_EQUAL_INT32(1, getDaysToChristmas(makeDate(2026, 12, 24)));
+	TEST_ASSERT_EQUAL_INT32(176, getDaysToChristmas(makeDate(2026, 7, 2)));
 }
 
-// The day before Christmas uses the singular
-void test_last_day_is_singular() {
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 12, 24), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_EQUAL_STRING(" * MANCA 1 GIORNO A NATALE!", text);
+// On Christmas day there are no days left
+void test_christmas_day_is_zero() {
+	TEST_ASSERT_EQUAL_INT32(0, getDaysToChristmas(makeDate(2026, 12, 25)));
 }
 
-// On Christmas day, the greeting says it is today
-void test_christmas_day_says_today() {
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 12, 25), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_EQUAL_STRING(" * OGGI E' NATALE!", text);
-}
-
-// After Christmas there is no countdown (it would count to a Christmas in the past)
-void test_no_countdown_after_christmas() {
-	TEST_ASSERT_FALSE(formatChristmasCountdown(makeDate(2026, 12, 26), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_FALSE(formatChristmasCountdown(makeDate(2026, 12, 31), text, sizeof(text), ITALIAN));
-}
-
-// The countdown starts 60 days before Christmas, not earlier
-void test_countdown_starts_60_days_before() {
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 10, 26), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_EQUAL_STRING(" * MANCANO 60 GIORNI A NATALE!", text);
-	TEST_ASSERT_FALSE(formatChristmasCountdown(makeDate(2026, 10, 25), text, sizeof(text), ITALIAN));
+// After Christmas it counts to the next one
+void test_after_christmas_counts_to_the_next() {
+	TEST_ASSERT_EQUAL_INT32(364, getDaysToChristmas(makeDate(2026, 12, 26)));
+	TEST_ASSERT_EQUAL_INT32(359, getDaysToChristmas(makeDate(2026, 12, 31)));
 }
 
 // On the day the clocks go back (one hour longer), the count is still a whole number of days
 void test_countdown_survives_the_end_of_summer_time() {
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2025, 10, 26), text, sizeof(text), ITALIAN));
-	TEST_ASSERT_EQUAL_STRING(" * MANCANO 60 GIORNI A NATALE!", text);
+	TEST_ASSERT_EQUAL_INT32(60, getDaysToChristmas(makeDate(2025, 10, 26)));
+}
+
+// The sentence in Italian: several days, the last one, and Christmas day
+void test_sentence_in_italian() {
+	formatChristmasCountdown(24, ITALIAN, text, sizeof(text));
+	TEST_ASSERT_EQUAL_STRING("MANCANO 24 GIORNI A NATALE!", text);
+	formatChristmasCountdown(1, ITALIAN, text, sizeof(text));
+	TEST_ASSERT_EQUAL_STRING("MANCA 1 GIORNO A NATALE!", text);
+	formatChristmasCountdown(0, ITALIAN, text, sizeof(text));
+	TEST_ASSERT_EQUAL_STRING("OGGI E' NATALE!", text);
+}
+
+// The sentence in English, when the dashboard is in English
+void test_sentence_in_english() {
+	formatChristmasCountdown(24, ENGLISH, text, sizeof(text));
+	TEST_ASSERT_EQUAL_STRING("24 DAYS TO CHRISTMAS!", text);
+	formatChristmasCountdown(1, ENGLISH, text, sizeof(text));
+	TEST_ASSERT_EQUAL_STRING("1 DAY TO CHRISTMAS!", text);
+	formatChristmasCountdown(0, ENGLISH, text, sizeof(text));
+	TEST_ASSERT_EQUAL_STRING("IT'S CHRISTMAS DAY!", text);
 }
 
 /******************************** New Year ********************************/
@@ -97,31 +102,18 @@ void test_no_year_before_the_clock_is_set() {
 	TEST_ASSERT_EQUAL_INT(0, getUpcomingYear(makeDate(1970, 1, 1)));
 }
 
-/******************************** English ********************************/
-
-// The countdown in English, when the dashboard is in English
-void test_countdown_in_english() {
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 12, 1), text, sizeof(text), ENGLISH));
-	TEST_ASSERT_EQUAL_STRING(" * 24 DAYS TO CHRISTMAS!", text);
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 12, 24), text, sizeof(text), ENGLISH));
-	TEST_ASSERT_EQUAL_STRING(" * 1 DAY TO CHRISTMAS!", text);
-	TEST_ASSERT_TRUE(formatChristmasCountdown(makeDate(2026, 12, 25), text, sizeof(text), ENGLISH));
-	TEST_ASSERT_EQUAL_STRING(" * IT'S CHRISTMAS DAY!", text);
-}
-
 // Run all the countdown tests
 int main() {
 	UNITY_BEGIN();
 	RUN_TEST(test_no_countdown_before_the_clock_is_set);
 	RUN_TEST(test_countdown_counts_the_days);
-	RUN_TEST(test_last_day_is_singular);
-	RUN_TEST(test_christmas_day_says_today);
-	RUN_TEST(test_no_countdown_after_christmas);
-	RUN_TEST(test_countdown_starts_60_days_before);
+	RUN_TEST(test_christmas_day_is_zero);
+	RUN_TEST(test_after_christmas_counts_to_the_next);
 	RUN_TEST(test_countdown_survives_the_end_of_summer_time);
+	RUN_TEST(test_sentence_in_italian);
+	RUN_TEST(test_sentence_in_english);
 	RUN_TEST(test_fireworks_show_the_current_year);
 	RUN_TEST(test_fireworks_show_the_coming_year_from_november);
 	RUN_TEST(test_no_year_before_the_clock_is_set);
-	RUN_TEST(test_countdown_in_english);
 	return UNITY_END();
 }

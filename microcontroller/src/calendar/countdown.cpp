@@ -5,7 +5,6 @@
 
 namespace {
 	constexpr int CLOCK_SET_YEAR = 120; // tm_year of 2020: an earlier date means the clock was not set from the network yet
-	constexpr long COUNTDOWN_DAYS = 60; // Days before Christmas when the countdown starts
 	constexpr int DECEMBER = 11;
 	constexpr int NOVEMBER = 10;
 	constexpr int CHRISTMAS_DAY = 25;
@@ -25,39 +24,35 @@ bool isClockSet(const struct tm &now) {
 	return now.tm_year >= CLOCK_SET_YEAR;
 }
 
-// Write the countdown to Christmas shown after the greeting, in the language of the matrix, and return whether there is one (none after Christmas or more than 60 days before)
-bool formatChristmasCountdown(const struct tm &now, char *text, size_t length, uint8_t language) {
-	const bool isEnglish = language == ENGLISH;
-	text[0] = '\0';
+// Get the days left until the next Christmas (0 on Christmas day, the next year's after it; -1 before the clock is set)
+long getDaysToChristmas(const struct tm &now) {
 	if (!isClockSet(now)) {
-		return false;
+		return -1;
 	}
 
-	// Christmas day itself
-	if (now.tm_mon == DECEMBER && now.tm_mday == CHRISTMAS_DAY) {
-		snprintf(text, length, isEnglish ? " * IT'S CHRISTMAS DAY!" : " * OGGI E' NATALE!");
-		return true;
-	}
-
-	// Days until Christmas, rounded (the hour lost when daylight saving time ends would otherwise make it one less)
+	// This year's Christmas, or next year's once it has passed
+	struct tm today = getMidnight(now);
 	struct tm christmas = getMidnight(now);
 	christmas.tm_mon = DECEMBER;
 	christmas.tm_mday = CHRISTMAS_DAY;
-	struct tm today = getMidnight(now);
-	const long days = lround(difftime(mktime(&christmas), mktime(&today)) / 86400.0);
-
-	// No countdown after Christmas, or too early
-	if (days <= 0 || days > COUNTDOWN_DAYS) {
-		return false;
+	if (now.tm_mon == DECEMBER && now.tm_mday > CHRISTMAS_DAY) {
+		christmas.tm_year += 1;
 	}
 
-	// One day, or several
-	if (days == 1) {
-		snprintf(text, length, isEnglish ? " * 1 DAY TO CHRISTMAS!" : " * MANCA 1 GIORNO A NATALE!");
+	// Rounded, since the hour given back when summer time ends would otherwise make it one less
+	return lround(difftime(mktime(&christmas), mktime(&today)) / 86400.0);
+}
+
+// Write the countdown sentence in the language of the matrix: the days left, or that it's Christmas today
+void formatChristmasCountdown(long days, uint8_t language, char *text, size_t length) {
+	const bool isEnglish = language == ENGLISH;
+	if (days == 0) {
+		snprintf(text, length, isEnglish ? "IT'S CHRISTMAS DAY!" : "OGGI E' NATALE!");
+	} else if (days == 1) {
+		snprintf(text, length, isEnglish ? "1 DAY TO CHRISTMAS!" : "MANCA 1 GIORNO A NATALE!");
 	} else {
-		snprintf(text, length, isEnglish ? " * %ld DAYS TO CHRISTMAS!" : " * MANCANO %ld GIORNI A NATALE!", days);
+		snprintf(text, length, isEnglish ? "%ld DAYS TO CHRISTMAS!" : "MANCANO %ld GIORNI A NATALE!", days);
 	}
-	return true;
 }
 
 // Get the year the fireworks show: the current one, or the coming one from November on (0 before the clock is set)

@@ -56,6 +56,15 @@ void test_saved_fireworks_rotates_christmas() {
 	TEST_ASSERT_EQUAL_INT(-1, scene);
 }
 
+// With the Christmas countdown, the ninth Christmas scene, a board saved on Fireworks shows the countdown instead
+void test_saved_fireworks_shows_the_christmas_countdown() {
+	const int sceneCounts[] = { 9, 5, 1 };
+	int holiday = 0, scene = 0;
+	sanitizeHolidayScene(0, 8, sceneCounts, 3, holiday, scene);
+	TEST_ASSERT_EQUAL_INT(0, holiday);
+	TEST_ASSERT_EQUAL_INT(8, scene);
+}
+
 // A color of the custom message that doesn't exist goes back to the default one (white)
 void test_unknown_message_color_is_white() {
 	TEST_ASSERT_EQUAL_UINT8(6, sanitizeMessageColor(6));
@@ -134,6 +143,7 @@ int main() {
 	RUN_TEST(test_unknown_holiday_follows_the_calendar);
 	RUN_TEST(test_scene_stays_within_its_holiday);
 	RUN_TEST(test_saved_fireworks_rotates_christmas);
+	RUN_TEST(test_saved_fireworks_shows_the_christmas_countdown);
 	RUN_TEST(test_unknown_message_color_is_white);
 	RUN_TEST(test_languages_by_code);
 	RUN_TEST(test_default_greetings_are_recognized);

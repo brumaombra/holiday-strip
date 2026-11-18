@@ -7,7 +7,7 @@
 
 namespace {
 	// Number of scenes of each holiday (Christmas, New Year's Eve, the custom message), and the holiday playing now
-	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 8, 5, 1 };
+	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 9, 5, 1 };
 	int activeHoliday = CHRISTMAS;
 
 	// Settings under test, and the JSON the web app sends
@@ -24,7 +24,7 @@ namespace {
 
 // Start each test from the default settings
 void setUp() {
-	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, true, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO" }, 0, ITALIAN };
+	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO" }, 0, ITALIAN };
 	activeHoliday = CHRISTMAS;
 }
 
@@ -168,7 +168,7 @@ void test_power_limit_above_the_maximum_is_refused() {
 void test_invalid_fields_are_named() {
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":256}"));
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":12.5}"));
-	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":8}"));
+	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":9}"));
 	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":3}"));
 	TEST_ASSERT_EQUAL_STRING("messageColor", applyJson("{\"messageColor\":7}"));
 	TEST_ASSERT_EQUAL_STRING("language", applyJson("{\"language\":\"fr\"}"));
@@ -208,7 +208,7 @@ void test_settings_are_written_to_json() {
 	TEST_ASSERT_EQUAL_INT(60, output["brightness"].as<int>());
 	TEST_ASSERT_EQUAL_INT(-1, output["scene"].as<int>());
 	TEST_ASSERT_EQUAL_INT(3000, output["maxMilliamps"].as<int>());
-	TEST_ASSERT_TRUE(output["countdown"].as<bool>());
+	TEST_ASSERT_TRUE(output["countdown"].isNull()); // The countdown is a scene now, not a setting
 	TEST_ASSERT_EQUAL_INT(-1, output["holiday"].as<int>());
 	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", output["messages"][0].as<const char *>());
 	TEST_ASSERT_EQUAL_STRING("HAPPY NEW YEAR", output["messages"][1].as<const char *>());

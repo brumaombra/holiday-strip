@@ -5,14 +5,13 @@
 #include "settings/settings_rules.h"
 
 namespace {
-	// The greeting of each holiday, and the Christmas countdown switch
+	// The greeting of each holiday
 	String holidayMessages[HOLIDAY_COUNT] = { getDefaultMessage(CHRISTMAS, DEFAULT_LANGUAGE), getDefaultMessage(NEW_YEAR, DEFAULT_LANGUAGE), getDefaultMessage(CUSTOM, DEFAULT_LANGUAGE) };
 	uint8_t matrixLanguage = DEFAULT_LANGUAGE;
-	bool countdownEnabled = config::DEFAULT_COUNTDOWN;
 	uint8_t messageColor = config::DEFAULT_MESSAGE_COLOR;
 
 	// The scenes of each holiday, in the order they rotate
-	Scene *const CHRISTMAS_SCENES[] = { &getGreetingScene(), &getSnowScene(), &getTreesScene(), &getSleighScene(), &getFireplaceScene(), &getGarlandScene(), &getGiftsScene(), &getCandyCaneScene() };
+	Scene *const CHRISTMAS_SCENES[] = { &getGreetingScene(), &getSnowScene(), &getTreesScene(), &getSleighScene(), &getFireplaceScene(), &getGarlandScene(), &getGiftsScene(), &getCandyCaneScene(), &getChristmasCountdownScene() }; // The countdown last, so the scenes saved before it keep their place
 	Scene *const NEW_YEAR_SCENES[] = { &getMidnightCountdownScene(), &getConfettiScene(), &getFireworksScene(), &getChampagneScene(), &getSparklersScene() };
 	Scene *const CUSTOM_SCENES[] = { &getCustomMessageScene() };
 
@@ -36,14 +35,9 @@ void getSceneCounts(int *sceneCounts) {
 	}
 }
 
-// Set the greeting of a holiday (the Christmas countdown is added after the Christmas one when enabled)
+// Set the greeting of a holiday
 void setHolidayMessage(int holiday, const char *message) {
 	holidayMessages[holiday] = message;
-}
-
-// Turn the Christmas countdown of the greeting on or off
-void setCountdownEnabled(bool enabled) {
-	countdownEnabled = enabled;
 }
 
 // Set the color of the custom message (0 to MESSAGE_COLOR_COUNT - 1)
@@ -69,9 +63,4 @@ uint8_t getMessageColor() {
 // Get the greeting of a holiday
 const String &getHolidayMessage(int holiday) {
 	return holidayMessages[holiday];
-}
-
-// Check whether the Christmas countdown is on
-bool isCountdownEnabled() {
-	return countdownEnabled;
 }

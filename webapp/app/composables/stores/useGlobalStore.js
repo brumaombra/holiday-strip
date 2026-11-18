@@ -8,7 +8,6 @@ export const useGlobalStore = () => useState('global', () => ({
         activeHoliday: 0,
         scene: -1,
         maxMilliamps: 3000,
-        countdown: true,
         messages: [],
         messageColor: 0,
         language: 'it',

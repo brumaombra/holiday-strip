@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "config/config.h"
+#include "config/language.h"
 #include "scenes/scenes.h"
 
 // The clock of the stubbed getLocalTime: the date the video starts at, and how long it has played
@@ -70,6 +71,11 @@ int main(int argc, char **argv) {
 	// Color of the custom message, from MESSAGE_COLOR (0 white to 6 rainbow, like the dashboard)
 	if (getenv("MESSAGE_COLOR") != nullptr) {
 		setMessageColor((uint8_t)atoi(getenv("MESSAGE_COLOR")));
+	}
+
+	// Language of the texts on the matrix, from MATRIX_LANGUAGE (it or en)
+	if (getenv("MATRIX_LANGUAGE") != nullptr) {
+		setMatrixLanguage(strcmp(getenv("MATRIX_LANGUAGE"), "en") == 0 ? ENGLISH : ITALIAN);
 	}
 
 	// Pick the scene

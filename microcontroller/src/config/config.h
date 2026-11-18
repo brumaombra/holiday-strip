@@ -37,7 +37,6 @@ namespace config {
 	extern const int DEFAULT_HOLIDAY;
 	extern const int DEFAULT_SCENE;
 	extern const uint32_t DEFAULT_MAX_MILLIAMPS;
-	extern const bool DEFAULT_COUNTDOWN;
 	extern const uint8_t DEFAULT_MESSAGE_COLOR;
 	constexpr uint8_t MESSAGE_COLOR_COUNT = 7; // Colors of the custom message: white, warm white, red, green, blue, gold, rainbow (in the header, because it sizes the checks)
 	extern const uint32_t MIN_MAX_MILLIAMPS;

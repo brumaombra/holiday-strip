@@ -14,7 +14,6 @@ namespace {
 	const char HOLIDAY_KEY[] = "holiday";
 	const char SCENE_KEY[] = "scene";
 	const char MAX_MILLIAMPS_KEY[] = "maxma";
-	const char COUNTDOWN_KEY[] = "countdown";
 	const char *const MESSAGE_KEYS[HOLIDAY_COUNT] = { "message", "msg-newyear", "msg-custom" }; // One message per holiday ("message" is the Christmas one, from before the holidays)
 	const char MESSAGE_COLOR_KEY[] = "msg-color";
 	const char LANGUAGE_KEY[] = "language";
@@ -36,7 +35,6 @@ void loadSettings(const int *sceneCounts) {
 	currentSettings.on = preferences.getBool(ON_KEY, config::DEFAULT_ON);
 	currentSettings.brightness = preferences.getUChar(BRIGHTNESS_KEY, config::DEFAULT_BRIGHTNESS);
 	currentSettings.maxMilliamps = sanitizeMaxMilliamps(preferences.getUInt(MAX_MILLIAMPS_KEY, config::DEFAULT_MAX_MILLIAMPS));
-	currentSettings.countdown = preferences.getBool(COUNTDOWN_KEY, config::DEFAULT_COUNTDOWN);
 	currentSettings.messageColor = sanitizeMessageColor(preferences.getUChar(MESSAGE_COLOR_KEY, config::DEFAULT_MESSAGE_COLOR));
 	currentSettings.language = sanitizeLanguage(preferences.getUChar(LANGUAGE_KEY, DEFAULT_LANGUAGE));
 
@@ -79,7 +77,7 @@ bool updateSettings(const Settings &settings) {
 	if (!preferences.begin(NAMESPACE, false)) {
 		return false;
 	}
-	bool isSaved = preferences.putBool(ON_KEY, settings.on) > 0 && preferences.putUChar(BRIGHTNESS_KEY, settings.brightness) > 0 && preferences.putInt(HOLIDAY_KEY, settings.holiday) > 0 && preferences.putInt(SCENE_KEY, settings.scene) > 0 && preferences.putUInt(MAX_MILLIAMPS_KEY, settings.maxMilliamps) > 0 && preferences.putBool(COUNTDOWN_KEY, settings.countdown) > 0 && preferences.putUChar(MESSAGE_COLOR_KEY, settings.messageColor) > 0 && preferences.putUChar(LANGUAGE_KEY, settings.language) > 0;
+	bool isSaved = preferences.putBool(ON_KEY, settings.on) > 0 && preferences.putUChar(BRIGHTNESS_KEY, settings.brightness) > 0 && preferences.putInt(HOLIDAY_KEY, settings.holiday) > 0 && preferences.putInt(SCENE_KEY, settings.scene) > 0 && preferences.putUInt(MAX_MILLIAMPS_KEY, settings.maxMilliamps) > 0 && preferences.putUChar(MESSAGE_COLOR_KEY, settings.messageColor) > 0 && preferences.putUChar(LANGUAGE_KEY, settings.language) > 0;
 	for (int i = 0; i < HOLIDAY_COUNT && isSaved; i++) {
 		isSaved = preferences.putString(MESSAGE_KEYS[i], settings.messages[i]) > 0 || settings.messages[i][0] == '\0'; // An empty message writes 0 bytes
 	}

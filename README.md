@@ -43,13 +43,13 @@ The firmware runs on an ESP32 and:
 
 - Plays the scenes of a holiday: the one the calendar picks (New Year's Eve from December 27 to January 1, Christmas the rest of the year), or the one you choose. Or, any day, just your custom message, in the color you choose.
 - Rotates through the scenes every 20 seconds, with a 1-second crossfade, and fades to the next holiday when the date changes.
-- Scrolls a message per holiday, counts the days to Christmas from late October, and counts down to midnight on December 31 (in the last minute of the year it switches to the countdown by itself).
+- Scrolls a message per holiday, counts the days to Christmas in a scene of its own, and counts down to midnight on December 31 (in the last minute of the year it switches to the countdown by itself).
 - Serves a dashboard on your network to switch it on and off, set the brightness, watch a live preview, pick a holiday and a scene, and edit the messages.
 - Estimates the current of every frame and dims it before it goes over your power supply's limit.
 
 ### 🎄 Christmas scenes
 
-1. **Greeting**: your message scrolls between two chasing garlands. In the 60 days before Christmas it adds a countdown (`MANCANO N GIORNI A NATALE!` or `N DAYS TO CHRISTMAS!`), and on December 25 it shows `OGGI E' NATALE!` or `IT'S CHRISTMAS DAY!`, in the language picked on the dashboard.
+1. **Greeting**: your message scrolls between two chasing garlands.
 2. **Snowfall**: snow falls and piles up next to a little house with warm windows.
 3. **Christmas trees**: six trees with twinkling ornaments and gold stars, in falling snow.
 4. **Santa's sleigh**: Santa and two reindeer fly across a starry sky with a moon. Rudolph's nose blinks red, and the sleigh leaves a trail of sparkles.
@@ -57,6 +57,7 @@ The firmware runs on an ESP32 and:
 6. **Fairy lights**: two strings of lights hanging in swags. They alternate between twinkle, chase, and color-cycle effects.
 7. **Gifts**: wrapped presents with ribbons and bows fall and stack up. When the pile gets too high, it sinks away and starts over.
 8. **Candy cane**: shaded red and white stripes sliding along, with sparkles.
+9. **Countdown to Christmas**: the days left, in gold between two little trees in the snow, then the sentence scrolling between them (`MANCANO 37 GIORNI A NATALE!` or `37 DAYS TO CHRISTMAS!`, in the language picked on the dashboard). On December 25 it shows a heart and `OGGI E' NATALE!` or `IT'S CHRISTMAS DAY!`; after it, it counts to the next Christmas.
 
 ### 🎆 New Year's Eve scenes
 
@@ -75,7 +76,7 @@ Every scene can be watched on your computer, without a board: `microcontroller/t
 <a id="features"></a>
 ## ✨ Features
 
-- Thirteen animated scenes in two holidays, at about 30 fps, rotating with crossfades, or one scene shown on its own.
+- Fourteen animated scenes in two holidays, plus the custom message, at about 30 fps, rotating with crossfades, or one scene shown on its own.
 - The holiday follows the calendar, or stays on the one you pick.
 - A scrolling greeting per holiday, in capitals (letters A–Z, digits, and `! ' * , - . : ?`, while `<` draws a heart).
 - Christmas countdown and New Year's midnight countdown that follow the local timezone, daylight saving time included.
@@ -211,7 +212,7 @@ The firmware is split into focused modules under `microcontroller/src/`:
 Every response has the OpenGizmo shape `{ errorId, errorMessage, data }`, and only requests from the dashboard's own page are accepted:
 
 - `GET /api/state` returns the settings (with one message per holiday in `messages`), the holidays and their scenes (`holidays`, each with an `id`, a `name` and its `scenes`), the holiday and the scene on screen (`activeHoliday`, `currentScene`), the estimated current and the limits. The device info (firmware, uptime, saved network, address) is `GET /api/device` of gizmo-common.
-- `POST /api/settings` changes any of `on`, `brightness`, `holiday`, `scene`, `maxMilliamps`, `countdown`, `messages`, `messageColor` (0 to 6: white, warm white, red, green, blue, gold, rainbow, for the custom message) and `language` (`it` or `en`, the texts on the matrix; the greetings still at their default follow it), and answers with the new state. A holiday of `-1` follows the calendar, and a scene of `-1` rotates all the scenes of the holiday. Another holiday without a scene rotates its scenes; a scene chosen while the calendar picks the holiday keeps the holiday playing now. `messages` has one entry per holiday, `null` to leave one as it is. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
+- `POST /api/settings` changes any of `on`, `brightness`, `holiday`, `scene`, `maxMilliamps`, `messages`, `messageColor` (0 to 6: white, warm white, red, green, blue, gold, rainbow, for the custom message) and `language` (`it` or `en`, the texts on the matrix; the greetings still at their default follow it), and answers with the new state. A holiday of `-1` follows the calendar, and a scene of `-1` rotates all the scenes of the holiday. Another holiday without a scene rotates its scenes; a scene chosen while the calendar picks the holiday keeps the holiday playing now. `messages` has one entry per holiday, `null` to leave one as it is. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
 - `GET /api/frame` returns the raw RGB bytes of the last frame (72x12, row by row, before gamma and brightness), for the live preview.
 - `GET /api/networks`, `POST /api/connect` and `GET /api/check-connection` are the Wi-Fi setup API of gizmo-common.
 
@@ -246,13 +247,13 @@ npm test
 microcontroller/tools/scene_video/render.sh 1 0 24 countdown.mp4 2026-12-31T23:59:47
 ```
 
-This records the New Year's Eve countdown from 13 seconds before midnight. `MESSAGE_COLOR=6` in front of the command records the custom message (holiday 2) in rainbow colors. Without a date, the scenes see a clock that isn't set yet, like a board before it's online.
+This records the New Year's Eve countdown from 13 seconds before midnight. `MESSAGE_COLOR=6` in front of the command records the custom message (holiday 2) in rainbow colors, and `MATRIX_LANGUAGE=en` records the texts on the matrix in English. Without a date, the scenes see a clock that isn't set yet, like a board before it's online.
 
 ### 📱 Web App Overview
 
 The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps, and their pages in the same order (the strip, then Device, then WiFi):
 
-- **Strip** (`/strip`, where the app opens): switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), for Christmas the countdown, and for the custom message its text color. Last, the power: the estimated current and the power limit.
+- **Strip** (`/strip`, where the app opens): switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), and for the custom message its text color. Last, the power: the estimated current and the power limit.
 - **Device**: the device card of gizmo-common (info, network, restart and forget network), the same page as in every OpenGizmo app.
 - **WiFi**: change the network, and the setup page the hotspot opens.
 
@@ -304,7 +305,7 @@ Versions follow [semantic versioning](https://semver.org) (`vMAJOR.MINOR.PATCH`)
 - The `Holiday-Strip` hotspot doesn't appear: it only opens when there's no saved network or the saved one fails to connect. Flash the `debug` profile and check the serial monitor.
 - `holiday-strip.local` doesn't open: some networks and devices don't support mDNS. Use the IP address of the board, printed on the serial monitor once it connects (with the `debug` profile).
 - The dashboard shows an old version: rebuild the web app with `npm run build:embedded` before building the firmware.
-- No countdown: the clock is set from NTP, so the countdown only appears once the board is online, and only in the 60 days before Christmas.
+- The countdown shows dots: the clock is set from NTP, so the days only appear once the board is online.
 
 <a id="license"></a>
 ## 📄 License

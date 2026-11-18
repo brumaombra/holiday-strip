@@ -23,7 +23,8 @@ export const HOLIDAYS = [{
         { id: 'fireplace', name: 'Fireplace' },
         { id: 'garland', name: 'Garland' },
         { id: 'gifts', name: 'Gifts' },
-        { id: 'candy-cane', name: 'Candy cane' }
+        { id: 'candy-cane', name: 'Candy cane' },
+        { id: 'christmas-countdown', name: 'Countdown to Christmas' }
     ]
 }, {
     id: 'new-year',
@@ -73,7 +74,6 @@ const factorySettings = () => ({
     holiday: -1,
     scene: -1,
     maxMilliamps: 3000,
-    countdown: true,
     messages: [...DEFAULT_MESSAGES.it],
     messageColor: 0,
     language: 'it'
@@ -114,7 +114,6 @@ const getResultingHoliday = ({ state, body, now }) => {
 // Rules of each settings field, in the order the firmware checks them (a missing field keeps its current value)
 const settingsRules = {
     on: value => typeof value === 'boolean',
-    countdown: value => typeof value === 'boolean',
     messageColor: value => isIntegerInRange(value, 0, MESSAGE_COLOR_COUNT - 1),
     language: value => LANGUAGES.includes(value),
     brightness: value => isIntegerInRange(value, 0, 255),
@@ -140,7 +139,7 @@ export const applySettings = ({ state, body, now = Date.now() }) => {
     const activeHoliday = getActiveHoliday({ state, now });
 
     // Apply the plain fields (null is the same as a missing field, like on the firmware)
-    for (const field of ['on', 'countdown', 'brightness', 'maxMilliamps', 'messageColor']) {
+    for (const field of ['on', 'brightness', 'maxMilliamps', 'messageColor']) {
         if (body[field] === undefined || body[field] === null) continue;
         settings[field] = body[field];
     }

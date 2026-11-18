@@ -21,7 +21,6 @@ namespace {
 		for (int i = 0; i < HOLIDAY_COUNT; i++) {
 			setHolidayMessage(i, settings.messages[i]);
 		}
-		setCountdownEnabled(settings.countdown);
 		setMessageColor(settings.messageColor);
 		setMatrixLanguage(settings.language);
 	}

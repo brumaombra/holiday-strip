@@ -43,7 +43,6 @@ void writeSettingsToJson(JsonObject json, const Settings &settings) {
 	json["holiday"] = settings.holiday;
 	json["scene"] = settings.scene;
 	json["maxMilliamps"] = settings.maxMilliamps;
-	json["countdown"] = settings.countdown;
 	json["messageColor"] = settings.messageColor;
 	json["language"] = getLanguageCode(settings.language);
 
@@ -58,12 +57,9 @@ void writeSettingsToJson(JsonObject json, const Settings &settings) {
 const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, const int *sceneCounts, int activeHoliday) {
 	Settings updated = settings;
 
-	// Read the switches
+	// Read the switch
 	if (!readBoolField(json["on"], updated.on)) {
 		return "on";
-	}
-	if (!readBoolField(json["countdown"], updated.countdown)) {
-		return "countdown";
 	}
 
 	// Read the brightness

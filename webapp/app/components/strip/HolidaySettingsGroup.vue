@@ -1,11 +1,8 @@
 <script setup>
 import { computed } from 'vue';
-import HourglassIcon from '@hugeicons/core-free-icons/HourglassIcon';
-import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
-import { Switch } from '@brumaombra/ui-vintage/switch';
+import { ListGroup } from '@brumaombra/ui-vintage/list';
 import { applyDeviceSettings } from '~/composables/useDeviceState.js';
 import { getHolidayName } from '~/composables/useHolidays.js';
-import { COUNTDOWN_DAYS } from '~/composables/useMessage.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 import CustomMessageRow from '~/components/strip/CustomMessageRow.vue';
 import MessageColorPicker from '~/components/strip/MessageColorPicker.vue';
@@ -29,15 +26,10 @@ const handleSceneChange = scene => {
 const handleMessageColorChange = messageColor => {
     applyDeviceSettings({ messageColor });
 };
-
-// Turn the Christmas countdown on or off right away
-const handleCountdownChange = isOn => {
-    applyDeviceSettings({ countdown: isOn });
-};
 </script>
 
 <template>
-    <!-- The settings of the holiday playing, in a group named after it: its scene, its custom message, and what only that holiday has -->
+    <!-- The settings of the holiday playing, in a group named after it: its scene, its custom message, and what only that holiday has (the text color of the custom message) -->
     <ListGroup v-if="holiday" :title="getHolidayName({ holiday, t, te })" :data-testid="`holiday-settings-${holiday.id}`">
         <!-- The scene, when there is more than one to pick from -->
         <ScenePicker v-if="holiday.scenes.length > 1" :scenes="holiday.scenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
@@ -48,11 +40,5 @@ const handleCountdownChange = isOn => {
         <!-- Custom message: the color of the text -->
         <MessageColorPicker v-if="holiday.id === 'custom'" :model-value="device.messageColor" @update:model-value="handleMessageColorChange" />
 
-        <!-- Christmas: the countdown after the greeting -->
-        <ListRow v-if="holiday.id === 'christmas'" :label="t('pages.strip.message.countdown.label')" :description="t('pages.strip.message.countdown.note', { days: COUNTDOWN_DAYS })" :icon="HourglassIcon" label-for="countdown">
-            <template #trailing>
-                <Switch id="countdown" :model-value="device.countdown" @update:model-value="handleCountdownChange" />
-            </template>
-        </ListRow>
     </ListGroup>
 </template>

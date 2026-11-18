@@ -4,6 +4,7 @@ import DrinkIcon from '@hugeicons/core-free-icons/DrinkIcon';
 import FireIcon from '@hugeicons/core-free-icons/FireIcon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
 import GiftIcon from '@hugeicons/core-free-icons/GiftIcon';
+import HourglassIcon from '@hugeicons/core-free-icons/HourglassIcon';
 import ClockIcon from '@hugeicons/core-free-icons/Clock01Icon';
 import CandyCaneIcon from '@hugeicons/core-free-icons/CandyCaneIcon';
 import LightbulbIcon from '@hugeicons/core-free-icons/LightbulbIcon';
@@ -40,6 +41,7 @@ const sceneIcons = {
     garland: LightbulbIcon,
     gifts: GiftIcon,
     'candy-cane': CandyCaneIcon,
+    'christmas-countdown': HourglassIcon,
     countdown: ClockIcon,
     confetti: PartyIcon,
     fireworks: FireworksIcon,

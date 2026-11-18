@@ -66,6 +66,7 @@
                 "garland": "Fairy lights",
                 "gifts": "Gifts",
                 "candy-cane": "Candy cane",
+                "christmas-countdown": "Countdown to Christmas",
                 "countdown": "Countdown",
                 "confetti": "Confetti",
                 "fireworks": "Fireworks",
@@ -84,10 +85,6 @@
                 "unsupportedDescription": "The matrix font has no {characters}. The matrix shows each of them as a question mark (accented letters as two).",
                 "saveAction": "Save message",
                 "saveSuccess": "The message has been saved!",
-                "countdown": {
-                    "label": "Christmas countdown",
-                    "note": "In the {days} days before Christmas the strip also scrolls the days left (for example \"12 DAYS TO CHRISTMAS!\"), in the language of this app."
-                },
                 "colorLabel": "Text color",
                 "colors": {
                     "white": "White",

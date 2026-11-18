@@ -15,6 +15,7 @@ Scene &getFireplaceScene();
 Scene &getGarlandScene();
 Scene &getGiftsScene();
 Scene &getCandyCaneScene();
+Scene &getChristmasCountdownScene();
 
 // New Year's Eve
 Scene &getMidnightCountdownScene();
@@ -28,7 +29,6 @@ Scene &getCustomMessageScene();
 
 // Settings of the greeting scenes
 const String &getHolidayMessage(int holiday);
-bool isCountdownEnabled();
 uint8_t getMessageColor();
 uint8_t getMatrixLanguage();
 

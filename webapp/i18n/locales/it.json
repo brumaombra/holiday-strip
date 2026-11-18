@@ -66,6 +66,7 @@
                 "garland": "Luci fatate",
                 "gifts": "Regali",
                 "candy-cane": "Bastoncino di zucchero",
+                "christmas-countdown": "Conto alla rovescia per Natale",
                 "countdown": "Conto alla rovescia",
                 "confetti": "Coriandoli",
                 "fireworks": "Fuochi d'artificio",
@@ -84,10 +85,6 @@
                 "unsupportedDescription": "Il font della matrice non ha {characters}. La matrice li mostra come punti di domanda (le lettere accentate come due).",
                 "saveAction": "Salva messaggio",
                 "saveSuccess": "Il messaggio è stato salvato!",
-                "countdown": {
-                    "label": "Conto alla rovescia per Natale",
-                    "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche i giorni rimasti (per esempio \"MANCANO 12 GIORNI A NATALE!\"), nella lingua di questa app."
-                },
                 "colorLabel": "Colore del testo",
                 "colors": {
                     "white": "Bianco",

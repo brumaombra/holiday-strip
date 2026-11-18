@@ -87,7 +87,6 @@ describe('mock state', () => {
             holiday: -1,
             scene: -1,
             maxMilliamps: 3000,
-            countdown: true,
             messages: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!'],
             messageColor: 0,
             language: 'it',
@@ -97,7 +96,7 @@ describe('mock state', () => {
             maxMessageLength: 200
         });
         expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year', 'custom']);
-        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([8, 5, 1]);
+        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([9, 5, 1]);
         expect(response.data.scenes).toBeUndefined();
         expect(response.data.message).toBeUndefined();
         expect(response.data.currentScene).toBeGreaterThanOrEqual(0);
@@ -176,9 +175,9 @@ describe('mock settings validation', () => {
 
     // Any subset of the fields is accepted, and the others keep their value
     it('changes only the fields that are sent', async () => {
-        await send({ countdown: false });
+        await send({ on: false });
         const { response } = await send({});
-        expect(response.data).toMatchObject({ countdown: false, brightness: 60, on: true, maxMilliamps: 3000 });
+        expect(response.data).toMatchObject({ on: false, brightness: 60, maxMilliamps: 3000 });
     });
 
     // The device stores the messages in capitals
@@ -307,8 +306,6 @@ describe('mock settings validation', () => {
         ['scene', 1.5],
         ['maxMilliamps', '3000'],
         ['maxMilliamps', 2000.5],
-        ['countdown', 'yes'],
-        ['countdown', 0],
         ['messages', 'hello'],
         ['messages', [42]],
         ['messages', [null, {}]]
@@ -327,7 +324,7 @@ describe('mock settings validation', () => {
         ['messageColor', -1],
         ['messageColor', 7],
         ['scene', -2],
-        ['scene', 8],
+        ['scene', 9],
         ['maxMilliamps', 999],
         ['maxMilliamps', 8001]
     ])('refuses %s = %j (out of range)', async (field, value) => {
@@ -381,10 +378,10 @@ describe('mock settings validation', () => {
         expect(getEspMockState().settings.messages[0]).toBe('BUON NATALE!');
     });
 
-    // Several wrong fields report the first one in the firmware order (on, countdown, brightness, holiday, scene, maxMilliamps, messages)
+    // Several wrong fields report the first one in the firmware order (on, brightness, holiday, scene, maxMilliamps, messages)
     it('reports the first wrong field in the firmware order', async () => {
-        const { response } = await send({ messages: 5, brightness: 300, countdown: 'yes' });
-        expect(response.errorMessage).toBe('countdown');
+        const { response } = await send({ messages: 5, brightness: 300, on: 'yes' });
+        expect(response.errorMessage).toBe('on');
     });
 
     // A null field is ignored, like a missing one (the firmware's ArduinoJson reads null as missing)

@@ -9,7 +9,8 @@
 // Christmas countdown and New Year dates, kept free of the hardware so the native tests can check them
 
 bool isClockSet(const struct tm &now);
-bool formatChristmasCountdown(const struct tm &now, char *text, size_t length, uint8_t language);
+long getDaysToChristmas(const struct tm &now);
+void formatChristmasCountdown(long days, uint8_t language, char *text, size_t length);
 int getUpcomingYear(const struct tm &now);
 
 #endif

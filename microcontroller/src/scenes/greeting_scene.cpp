@@ -1,14 +1,11 @@
 #include "scene_list.h"
 
-#include <time.h>
-
 #include "scenes/effects.h"
 #include "font/font.h"
-#include "calendar/countdown.h"
 
 namespace {
 
-	// Scrolling greeting between two chasing garlands, with a countdown to Christmas
+	// Scrolling greeting between two chasing garlands
 	class GreetingScene : public Scene {
 	public:
 		// Get the id and the name of the scene
@@ -38,7 +35,7 @@ namespace {
 			const Color palette[] = { RED, GREEN, GOLD };
 
 			// Scroll the text left and restart it once it has left the screen
-			// Each pass picks up the latest message and countdown
+			// Each pass picks up the latest message
 			scroll += SPEED * dt;
 			if (scroll >= textWidth(text) + WIDTH) {
 				scroll = 0;
@@ -85,25 +82,9 @@ namespace {
 		float scroll = 0; // Columns scrolled so far in this pass
 		Stars stars;
 
-		// Build the scrolling text: the message, then the Christmas countdown when it's enabled and the clock is set
+		// Build the scrolling text: the Christmas greeting
 		static String buildText() {
-			// Start from the greeting message
-			String result = getHolidayMessage(CHRISTMAS);
-
-			// Stop here when the countdown is turned off
-			if (!isCountdownEnabled()) {
-				return result;
-			}
-
-			// Add the countdown, if there is one today
-			struct tm now;
-			char countdown[48]; // Room for the countdown text
-			if (getLocalTime(&now, 0) && formatChristmasCountdown(now, countdown, sizeof(countdown), getMatrixLanguage())) {
-				result += countdown;
-			}
-
-			// Return the message with the countdown when there is one
-			return result;
+			return getHolidayMessage(CHRISTMAS);
 		}
 	};
 

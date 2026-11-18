@@ -17,7 +17,6 @@ struct Holiday {
 const Holiday &getHoliday(int index);
 void getSceneCounts(int *sceneCounts);
 void setHolidayMessage(int holiday, const char *message);
-void setCountdownEnabled(bool enabled);
 void setMessageColor(uint8_t color);
 void setMatrixLanguage(uint8_t language);
 

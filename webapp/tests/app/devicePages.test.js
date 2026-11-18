@@ -29,7 +29,8 @@ const HOLIDAYS = [{
         { id: 'fireplace', name: 'Fireplace' },
         { id: 'garland', name: 'Garland' },
         { id: 'gifts', name: 'Gifts' },
-        { id: 'candy-cane', name: 'Candy cane' }
+        { id: 'candy-cane', name: 'Candy cane' },
+        { id: 'christmas-countdown', name: 'Countdown to Christmas' }
     ]
 }, {
     id: 'new-year',
@@ -55,7 +56,6 @@ const buildDeviceState = () => ({
     activeHoliday: 0,
     scene: -1,
     maxMilliamps: 3000,
-    countdown: true,
     messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
     messageColor: 0,
     language: 'it',
@@ -316,7 +316,7 @@ describe('home page', () => {
         // Open the picker
         await sceneRow.find('button').trigger('click');
         await flushPromises();
-        expect(sceneCards()).toHaveLength(9);
+        expect(sceneCards()).toHaveLength(10);
         expect(sceneCards()[0].getAttribute('data-state')).toBe('checked');
         expect(sceneCards()[4].textContent).toContain('Santa\'s sleigh');
     });
@@ -562,21 +562,14 @@ describe('holiday settings on the home page', () => {
         expect(wrapper.find('[data-testid="message-row-christmas"]').exists()).toBe(false);
     });
 
-    // The countdown is a Christmas setting: it only shows with Christmas, and applies at once
-    it('shows the Christmas countdown only with Christmas, and switches it right away', async () => {
+    // The Christmas countdown is a scene of Christmas now, not a switch
+    it('lists the countdown to Christmas as a scene, and has no countdown switch', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(StripPage);
-        expect(wrapper.text()).toContain('12 DAYS TO CHRISTMAS!');
-        expect(wrapper.text()).toContain('60 days');
-        await wrapper.find('#countdown').trigger('click');
-        await vi.waitFor(() => expect(savedBodies).toEqual([{ countdown: false }]));
-
-        // Not with New Year's Eve, picked in the holiday picker
-        await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
-        await flushPromises();
-        pickerOptions()[2].click();
-        await vi.waitFor(() => expect(wrapper.find('[data-testid="message-row-new-year"]').exists()).toBe(true));
         expect(wrapper.find('#countdown').exists()).toBe(false);
+        await wrapper.find('[data-testid="scene-row"] button').trigger('click');
+        await flushPromises();
+        expect(pickerOptions().map(option => option.textContent).join()).toContain('Countdown to Christmas');
     });
 
     // The custom message has no scene to pick, only its message and its color
@@ -588,7 +581,6 @@ describe('holiday settings on the home page', () => {
         expect(group.find('[data-testid="scene-row"]').exists()).toBe(false);
         expect(group.find('[data-testid="message-row-custom"]').text()).toContain('CIAO! * HELLO!');
         expect(group.find('[data-testid="message-color-row"]').text()).toContain('Rainbow');
-        expect(group.find('#countdown').exists()).toBe(false);
     });
 
     // Picking a color sends it right away
@@ -618,10 +610,9 @@ describe('holiday settings on the home page', () => {
         expect(settingsGroup.text()).toContain('Christmas');
         expect(settingsGroup.find('[data-testid="holiday-row"]').exists()).toBe(false);
 
-        // Its rows: the scene, the custom message, then the countdown
+        // Its rows: the scene, then the custom message
         const html = settingsGroup.html();
         expect(html.indexOf('scene-row')).toBeLessThan(html.indexOf('message-row-christmas'));
-        expect(html.indexOf('message-row-christmas')).toBeLessThan(html.indexOf('id="countdown"'));
 
         // And it comes after the picker
         expect(wrapper.html().indexOf('holiday-row')).toBeLessThan(wrapper.html().indexOf('holiday-settings-christmas'));
