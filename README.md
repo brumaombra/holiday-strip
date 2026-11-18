@@ -132,10 +132,10 @@ microcontroller/tools/scene_video/render.sh 1 0 24 countdown.mp4 2026-12-31T23:5
 
 **README banner:** `tools/banner/make_banner.sh` draws `docs/images/banner-*.webp` again, with a real frame of the matrix (needs Playwright and `webapp/node_modules`).
 
-**Releasing:** versions follow [semver](https://semver.org) in `VERSION`.
-1. On `feature`, set the version in `VERSION` and in `webapp/` (`npm version X.Y.Z --no-git-tag-version`).
+**Releasing:** versions follow [semver](https://semver.org) in `VERSION`, and what changed goes in [CHANGELOG.md](CHANGELOG.md), under Unreleased while the work is done.
+1. On `feature`, set the version in `VERSION` and in `webapp/` (`npm version X.Y.Z --no-git-tag-version`). Move the Unreleased notes under `## vX.Y.Z - YYYY-MM-DD`.
 2. Bring it through `develop` to `main`.
-3. Run the **Release 📦** workflow on `main` (Actions > Release > Run workflow). It checks the version, runs the tests, and creates the GitHub release.
+3. Run the **Release 📦** workflow on `main` (Actions > Release > Run workflow). It checks the version and its notes, runs the tests, and creates the GitHub release with those notes.
 
 <a id="troubleshooting"></a>
 ## 🧰 Troubleshooting

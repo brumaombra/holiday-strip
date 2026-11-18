@@ -39,6 +39,10 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
 
+      # Stop before anything is built or released if CHANGELOG.md has no notes for this version: they become the body of the GitHub release
+      - name: 📝 Read the release notes
+        run: python3 .github/scripts/release_notes.py --version "${{ steps.version.outputs.VERSION }}" --output release-notes.md
+
       # Set up Node.js
       - name: 🧰 Set up Node.js
         uses: actions/setup-node@v6
@@ -79,14 +83,13 @@ jobs:
         working-directory: microcontroller
         run: pio test -e native
 
-      # Create the GitHub release, with its notes from the commits since the last one
+      # Create the GitHub release, with the notes of CHANGELOG.md (and GitHub's link to the full changelog)
       - name: 📦 Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.VERSION }}
           name: Holiday Strip ${{ steps.version.outputs.VERSION }}
+          body_path: release-notes.md
           generate_release_notes: true
-          body: |
-            Built from commit ${{ github.sha }}.
           draft: false
           prerelease: false
