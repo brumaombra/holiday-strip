@@ -3,7 +3,7 @@ import { readBody } from 'h3';
 import { flushPromises } from '@vue/test-utils';
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime';
 import HomePage from '~/pages/index.vue';
-import MessagePage from '~/pages/message.vue';
+import MessageEditor from '~/components/message/MessageEditor.vue';
 import SettingsPage from '~/pages/settings.vue';
 import { applyDeviceSettings, createSettingsSaver, loadDeviceState, refreshLiveState } from '~/composables/useDeviceState.js';
 import { FRAME_BYTES } from '~/composables/useFrame.js';
@@ -433,7 +433,15 @@ describe('home page', () => {
 });
 
 // Message page: explicit save, a counter and a warning
-describe('message page', () => {
+describe('custom message editor', () => {
+    // Mount the editor of a holiday, like the dialog of its custom message row does
+    const mountEditor = async (holidayIndex = 0) => {
+        await loadDeviceState();
+        const wrapper = await mountSuspended(MessageEditor, { props: { holidayIndex } });
+        mountedWrappers.push(wrapper);
+        return wrapper;
+    };
+
     // Type in the message field of a holiday
     const typeMessage = async (wrapper, text, holidayId = 'christmas') => {
         await wrapper.find(`#message-${holidayId}`).setValue(text);
@@ -442,23 +450,20 @@ describe('message page', () => {
 
     // The field starts with the message of the device
     it('starts with the message of the device', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         expect(wrapper.find('#message-christmas').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
     });
 
     // The counter follows the typing, against the limit of the device
     it('counts the characters against the limit of the device', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         await typeMessage(wrapper, 'CIAO');
         expect(wrapper.find('[data-testid="message-counter-christmas"]').text()).toBe('4 / 200');
     });
 
     // The hint tells what the matrix can draw
     it('lists the characters the matrix can draw', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         expect(wrapper.text()).toContain('A-Z 0-9');
         expect(wrapper.text()).toContain('! \' * , - . : ?');
         expect(wrapper.text()).toContain('for a heart');
@@ -466,117 +471,113 @@ describe('message page', () => {
 
     // A character the font can't draw is flagged before it is sent
     it('warns about characters the font can\'t draw', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         expect(wrapper.text()).not.toContain('can\'t be drawn');
         await typeMessage(wrapper, 'Buon Natale è bello @');
         expect(wrapper.text()).toContain('Some characters can\'t be drawn');
         expect(wrapper.text()).toContain('è @');
     });
 
-    // A message is only sent with the Save button
-    it('saves nothing until Save is pressed', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
-        await typeMessage(wrapper, 'Ciao Natale');
+    // A message is only sent with the Save button, null for the other holidays, and the editor then says it's saved
+    it('saves only with Save, and only the message of its holiday', async () => {
+        const wrapper = await mountEditor(1);
+        await typeMessage(wrapper, 'Felice anno nuovo', 'new-year');
         expect(savedBodies).toEqual([]);
-        await wrapper.findAll('form')[0].trigger('submit');
-        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: ['Ciao Natale', null] }]));
+        await wrapper.find('form').trigger('submit');
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo'] }]));
 
-        // The field then shows the message in capitals, like the device stored it
-        await vi.waitFor(() => expect(wrapper.find('#message-christmas').element.value).toBe('CIAO NATALE'));
+        // The field then shows the message in capitals, like the device stored it, and the dialog is told to close
+        await vi.waitFor(() => expect(wrapper.find('#message-new-year').element.value).toBe('FELICE ANNO NUOVO'));
+        expect(wrapper.emitted('saved')).toHaveLength(1);
     });
 
     // Nothing changed, nothing to save
     it('disables Save while the message is unchanged', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
-        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeDefined();
+        const wrapper = await mountEditor();
+        expect(wrapper.find('[data-testid="message-save-christmas"]').attributes('disabled')).toBeDefined();
         await typeMessage(wrapper, 'NEW');
-        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeUndefined();
+        expect(wrapper.find('[data-testid="message-save-christmas"]').attributes('disabled')).toBeUndefined();
     });
 
     // A message that only differs by case is the same for the device
     it('treats a lowercase copy of the message as unchanged', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         await typeMessage(wrapper, 'buon natale * merry christmas');
-        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeDefined();
+        expect(wrapper.find('[data-testid="message-save-christmas"]').attributes('disabled')).toBeDefined();
     });
 
-    // The device refuses more than 200 characters, so the page doesn't even send it
+    // The device refuses more than 200 characters, so the editor doesn't even send it
     it('refuses a message that is too long', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         await typeMessage(wrapper, 'A'.repeat(201));
         expect(wrapper.find('[data-testid="message-counter-christmas"]').text()).toBe('201 / 200');
-        expect(wrapper.findAll('[data-testid^="message-save-"]')[0].attributes('disabled')).toBeDefined();
-        await wrapper.findAll('form')[0].trigger('submit');
+        expect(wrapper.find('[data-testid="message-save-christmas"]').attributes('disabled')).toBeDefined();
+        await wrapper.find('form').trigger('submit');
         expect(savedBodies).toEqual([]);
     });
 
-    // After a refusal of the device the typed text stays, to be fixed
+    // After a refusal of the device the typed text stays, to be fixed, and the dialog stays open
     it('keeps the typed text when the device refuses it', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountEditor();
         isSaveRefused = true;
         await typeMessage(wrapper, 'Rifiutato');
-        await wrapper.findAll('form')[0].trigger('submit');
+        await wrapper.find('form').trigger('submit');
         await vi.waitFor(() => expect(savedBodies).toHaveLength(1));
         await flushPromises();
         expect(wrapper.find('#message-christmas').element.value).toBe('Rifiutato');
+        expect(wrapper.emitted('saved')).toBeUndefined();
+    });
+});
+
+describe('holiday settings on the home page', () => {
+    // The options of the open picker dialog
+    const pickerOptions = () => [...document.querySelectorAll('[data-slot="radio-group-card"]')];
+
+    // The custom message of the holiday playing sits under the holiday picker, named Custom message
+    it('shows the custom message of the holiday playing while Automatic', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        const row = wrapper.find('[data-testid="message-row-christmas"]');
+        expect(row.exists()).toBe(true);
+        expect(row.text()).toContain('Custom message');
+        expect(row.text()).toContain('BUON NATALE * MERRY CHRISTMAS');
+        expect(wrapper.find('[data-testid="message-row-new-year"]').exists()).toBe(false);
     });
 
-    // The countdown switch applies at once
-    it('turns the countdown off right away, and explains it', async () => {
+    // The settings follow the holiday picked
+    it('shows the settings of the holiday picked', async () => {
+        deviceState = { ...buildDeviceState(), holiday: 1, activeHoliday: 1 };
         await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
+        const wrapper = await mountPage(HomePage);
+        expect(wrapper.find('[data-testid="message-row-new-year"]').text()).toContain('BUON ANNO * HAPPY NEW YEAR');
+        expect(wrapper.find('[data-testid="message-row-christmas"]').exists()).toBe(false);
+    });
+
+    // The countdown is a Christmas setting: it only shows with Christmas, and applies at once
+    it('shows the Christmas countdown only with Christmas, and switches it right away', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
         expect(wrapper.text()).toContain('MANCANO N GIORNI A NATALE!');
         expect(wrapper.text()).toContain('60 days');
         await wrapper.find('#countdown').trigger('click');
         await vi.waitFor(() => expect(savedBodies).toEqual([{ countdown: false }]));
+
+        // Not with New Year's Eve, picked in the holiday picker
+        await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
+        await flushPromises();
+        pickerOptions()[2].click();
+        await vi.waitFor(() => expect(wrapper.find('[data-testid="message-row-new-year"]').exists()).toBe(true));
+        expect(wrapper.find('#countdown').exists()).toBe(false);
     });
 
-    // Every holiday has its own editor, titled with the name of the holiday
-    it('shows one message editor per holiday', async () => {
+    // The rows sit in one group: the holiday first, then its settings
+    it('lists the holiday, then its scene, its custom message and its countdown', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
-        expect(wrapper.find('#message-christmas').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
-        expect(wrapper.find('#message-new-year').element.value).toBe('BUON ANNO * HAPPY NEW YEAR');
-        expect(wrapper.text()).toContain('Christmas');
-        expect(wrapper.text()).toContain('New Year\'s Eve');
-        expect(wrapper.findAll('[data-testid^="message-save-"]')).toHaveLength(2);
-    });
-
-    // Saving one holiday sends null for the others, so their messages stay as they are
-    it('sends only the message that was edited', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
-        await typeMessage(wrapper, 'Felice anno nuovo', 'new-year');
-        await wrapper.findAll('form')[1].trigger('submit');
-        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo'] }]));
-        await vi.waitFor(() => expect(wrapper.find('#message-new-year').element.value).toBe('FELICE ANNO NUOVO'));
-        expect(wrapper.find('#message-christmas').element.value).toBe('BUON NATALE * MERRY CHRISTMAS');
-    });
-
-    // Editing one holiday leaves the Save button of the other disabled
-    it('enables Save only for the holiday that changed', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
-        await typeMessage(wrapper, 'NEW', 'new-year');
-        const [christmasSave, newYearSave] = wrapper.findAll('[data-testid^="message-save-"]');
-        expect(christmasSave.attributes('disabled')).toBeDefined();
-        expect(newYearSave.attributes('disabled')).toBeUndefined();
-    });
-
-    // The countdown is about Christmas, so it sits with the Christmas message and not with the others
-    it('shows the countdown once, after the Christmas message', async () => {
-        await loadDeviceState();
-        const wrapper = await mountPage(MessagePage);
-        expect(wrapper.findAll('#countdown')).toHaveLength(1);
+        const wrapper = await mountPage(HomePage);
         const html = wrapper.html();
-        expect(html.indexOf('message-christmas')).toBeLessThan(html.indexOf('id="countdown"'));
-        expect(html.indexOf('id="countdown"')).toBeLessThan(html.indexOf('message-new-year'));
+        expect(html.indexOf('holiday-row')).toBeLessThan(html.indexOf('scene-row'));
+        expect(html.indexOf('scene-row')).toBeLessThan(html.indexOf('message-row-christmas'));
+        expect(html.indexOf('message-row-christmas')).toBeLessThan(html.indexOf('id="countdown"'));
     });
 });
 

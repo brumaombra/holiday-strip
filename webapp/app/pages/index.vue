@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onBeforeUnmount } from 'vue';
 import FlashIcon from '@hugeicons/core-free-icons/FlashIcon';
+import HourglassIcon from '@hugeicons/core-free-icons/HourglassIcon';
 import PowerIcon from '@hugeicons/core-free-icons/PowerIcon';
 import SunIcon from '@hugeicons/core-free-icons/Sun01Icon';
 import { HugeiconsIcon } from '@hugeicons/vue';
@@ -11,11 +12,13 @@ import { Progress } from '@brumaombra/ui-vintage/progress';
 import { Slider } from '@brumaombra/ui-vintage/slider';
 import { Switch } from '@brumaombra/ui-vintage/switch';
 import { applyDeviceSettings, createSettingsSaver, refreshLiveState } from '~/composables/useDeviceState.js';
+import { COUNTDOWN_DAYS } from '~/composables/useMessage.js';
 import { usePolling } from '~/composables/usePolling.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 import MatrixPreview from '~/components/matrix/MatrixPreview.vue';
 import HolidayPicker from '~/components/holidays/HolidayPicker.vue';
+import CustomMessageRow from '~/components/message/CustomMessageRow.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
 
 const STATE_REFRESH_MS = 2000; // How often the scene on screen and the current are read again
@@ -42,6 +45,10 @@ const handleBrightnessChange = ([brightness]) => {
     saveBrightness({ brightness });
 };
 
+// The holiday whose settings the group shows: the chosen one, or the one playing now while the calendar picks it
+const shownHoliday = computed(() => device.value.holiday >= 0 ? device.value.holiday : device.value.activeHoliday);
+const shownHolidayId = computed(() => device.value.holidays[shownHoliday.value]?.id);
+
 // Scenes of the holiday playing now (none until the device sends its holidays)
 const activeScenes = computed(() => device.value.holidays[device.value.activeHoliday]?.scenes || []);
 
@@ -53,6 +60,11 @@ const handleHolidayChange = holiday => {
 // Pick the scene to show, or -1 to rotate them all
 const handleSceneChange = scene => {
     applyDeviceSettings({ scene });
+};
+
+// Turn the Christmas countdown on or off right away
+const handleCountdownChange = isOn => {
+    applyDeviceSettings({ countdown: isOn });
 };
 
 // Read again what the device changes by itself, while the page is visible
@@ -107,11 +119,19 @@ definePageMeta({
                     </Alert>
                 </div>
 
-                <!-- Holidays -->
-                <HolidayPicker :holidays="device.holidays" :model-value="device.holiday" :active-holiday="device.activeHoliday" @update:model-value="handleHolidayChange" />
+                <!-- The holiday, then the settings of the one shown: its scene, its custom message, and what only that holiday has -->
+                <ListGroup v-if="device.holidays.length" :title="t('pages.home.holidaysTitle')" :hint="t('pages.home.holidaysDescription')">
+                    <HolidayPicker :holidays="device.holidays" :model-value="device.holiday" :active-holiday="device.activeHoliday" @update:model-value="handleHolidayChange" />
+                    <ScenePicker :scenes="activeScenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
+                    <CustomMessageRow :holiday-index="shownHoliday" />
 
-                <!-- Scenes of the holiday playing -->
-                <ScenePicker :scenes="activeScenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
+                    <!-- Christmas: the countdown after the greeting -->
+                    <ListRow v-if="shownHolidayId === 'christmas'" :label="t('pages.message.countdown.label')" :description="t('pages.message.countdown.note', { days: COUNTDOWN_DAYS })" :icon="HourglassIcon" label-for="countdown">
+                        <template #trailing>
+                            <Switch id="countdown" :model-value="device.countdown" @update:model-value="handleCountdownChange" />
+                        </template>
+                    </ListRow>
+                </ListGroup>
             </div>
         </DeviceStateGate>
     </GizmoPage>

@@ -2,25 +2,25 @@
 import { computed, ref } from 'vue';
 import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
 import CheckmarkCircle02Icon from '@hugeicons/core-free-icons/CheckmarkCircle02Icon';
-import MessageSquareTextIcon from '@hugeicons/core-free-icons/MessageSquareTextIcon';
 import SaveIcon from '@hugeicons/core-free-icons/SaveIcon';
 import { HugeiconsIcon } from '@hugeicons/vue';
 import { Alert, AlertDescription, AlertTitle } from '@brumaombra/ui-vintage/alert';
 import { Button } from '@brumaombra/ui-vintage/button';
-import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
 import { showMessageToast } from '@brumaombra/ui-vintage/message-toast';
 import { Textarea } from '@brumaombra/ui-vintage/textarea';
 import { applyDeviceSettings } from '~/composables/useDeviceState.js';
 import { describeCharacter, findUnsupportedCharacters, getMessageByteLength, MESSAGE_HEART, MESSAGE_LETTERS_AND_DIGITS, MESSAGE_PUNCTUATION } from '~/composables/useMessage.js';
-import { getHolidayName } from '~/composables/useHolidays.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 
-// Props: the index of the holiday whose message is edited
+// Props: the index of the holiday whose custom message is edited
 const props = defineProps({
     holidayIndex: { type: Number, required: true }
 });
 
-const { t, te } = useI18n();
+// Emits: saved, once the device stored the message (the dialog then closes)
+const emits = defineEmits(['saved']);
+
+const { t } = useI18n();
 const globalStore = useGlobalStore();
 const isSaving = ref(false);
 
@@ -61,6 +61,7 @@ const handleSave = async () => {
         if (isSaved) {
             draft.value = deviceMessage.value;
             showMessageToast({ type: 'success', icon: CheckmarkCircle02Icon, message: t('pages.message.saveSuccess') });
+            emits('saved');
         }
     } finally {
         isSaving.value = false;
@@ -69,19 +70,19 @@ const handleSave = async () => {
 </script>
 
 <template>
-    <form class="space-y-6" @submit.prevent="handleSave">
-        <!-- The message, with the characters the matrix can draw under the group -->
-        <ListGroup :title="getHolidayName({ holiday, t, te })" :hint="t('pages.message.allowedHint', { letters: MESSAGE_LETTERS_AND_DIGITS, punctuation: MESSAGE_PUNCTUATION, heart: MESSAGE_HEART })">
-            <ListRow :label="t('pages.message.label')" :icon="MessageSquareTextIcon" :label-for="fieldId">
-                <!-- Message -->
-                <Textarea :id="fieldId" v-model="draft" rows="3" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.message.placeholder')" :aria-invalid="isTooLong || undefined" />
+    <form class="space-y-4" @submit.prevent="handleSave">
+        <div>
+            <!-- Message -->
+            <Textarea :id="fieldId" v-model="draft" rows="3" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.message.placeholder')" :aria-label="t('pages.message.label')" :aria-invalid="isTooLong || undefined" />
 
-                <!-- Counter against the limit of the device -->
-                <p class="mt-2 text-right text-xs tabular-nums" :class="isTooLong ? 'font-semibold text-destructive' : 'text-muted-foreground'" :data-testid="`message-counter-${holiday.id}`">
-                    {{ t('pages.message.counter', { length: draftLength, max: device.maxMessageLength }) }}
-                </p>
-            </ListRow>
-        </ListGroup>
+            <!-- Counter against the limit of the device -->
+            <p class="mt-2 text-right text-xs tabular-nums" :class="isTooLong ? 'font-semibold text-destructive' : 'text-muted-foreground'" :data-testid="`message-counter-${holiday.id}`">
+                {{ t('pages.message.counter', { length: draftLength, max: device.maxMessageLength }) }}
+            </p>
+
+            <!-- The characters the matrix can draw -->
+            <p class="text-xs text-muted-foreground">{{ t('pages.message.allowedHint', { letters: MESSAGE_LETTERS_AND_DIGITS, punctuation: MESSAGE_PUNCTUATION, heart: MESSAGE_HEART }) }}</p>
+        </div>
 
         <!-- Characters the font can't draw -->
         <Alert v-if="unsupportedCharacters.length" color="yellow">

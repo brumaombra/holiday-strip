@@ -12,11 +12,7 @@
     "nav": {
         "home": {
             "label": "Home",
-            "description": "Anteprima della matrice e scelta di festività e scena"
-        },
-        "message": {
-            "label": "Messaggio",
-            "description": "Modifica il saluto scorrevole e il conto alla rovescia"
+            "description": "Guarda l'anteprima della matrice, scegli una festività, e imposta la sua scena e il messaggio personalizzato"
         },
         "settings": {
             "label": "Impostazioni",
@@ -49,12 +45,11 @@
                 "label": "Corrente stimata",
                 "value": "{milliamps} / {limit} mA"
             },
-            "scenesTitle": "Scene",
             "scenesDescription": "Scegli una scena da tenere fissa, oppure lascia che la striscia le alterni tutte.",
             "rotateAll": "Alterna tutte le scene",
             "rotateAllDescription": "Passa da una scena all'altra, una dopo l'altra",
             "holidaysTitle": "Festività",
-            "holidaysDescription": "Segui il calendario, oppure tieni sempre la stessa festività.",
+            "holidaysDescription": "Segui il calendario, oppure tieni sempre la stessa festività. Le righe sotto sono le impostazioni della festività mostrata sopra.",
             "holidayLabel": "Festività",
             "holidayAutomatic": "Automatica",
             "holidayAutomaticNow": "Ora: {holiday}",
@@ -81,8 +76,7 @@
             "onScreenScene": "In onda: {scene}"
         },
         "message": {
-            "title": "Messaggio",
-            "label": "Messaggio scorrevole",
+            "label": "Messaggio personalizzato",
             "placeholder": "Scrivi il tuo saluto",
             "counter": "{length} / {max}",
             "allowedHint": "La matrice sa disegnare {letters}, spazi e {punctuation}. Scrivi {heart} per un cuore. Le minuscole vengono mostrate in maiuscolo.",
@@ -91,7 +85,6 @@
             "saveAction": "Salva messaggio",
             "saveSuccess": "Il messaggio è stato salvato!",
             "countdown": {
-                "title": "Conto alla rovescia",
                 "label": "Conto alla rovescia per Natale",
                 "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche \"MANCANO N GIORNI A NATALE!\" (N sono i giorni rimasti). Il conto alla rovescia è sempre in italiano."
             }

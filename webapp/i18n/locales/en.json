@@ -12,11 +12,7 @@
     "nav": {
         "home": {
             "label": "Home",
-            "description": "Preview the matrix and pick a holiday and a scene"
-        },
-        "message": {
-            "label": "Message",
-            "description": "Edit the scrolling greeting and the countdown"
+            "description": "Preview the matrix, pick a holiday, and set its scene and custom message"
         },
         "settings": {
             "label": "Settings",
@@ -49,12 +45,11 @@
                 "label": "Estimated current",
                 "value": "{milliamps} / {limit} mA"
             },
-            "scenesTitle": "Scenes",
             "scenesDescription": "Pick one scene to keep, or let the strip rotate through all of them.",
             "rotateAll": "Rotate all scenes",
             "rotateAllDescription": "Cycle through every scene, one after the other",
             "holidaysTitle": "Holiday",
-            "holidaysDescription": "Follow the calendar, or keep one holiday all the time.",
+            "holidaysDescription": "Follow the calendar, or keep one holiday all the time. The rows below are the settings of the holiday shown above.",
             "holidayLabel": "Holiday",
             "holidayAutomatic": "Automatic",
             "holidayAutomaticNow": "Now: {holiday}",
@@ -81,8 +76,7 @@
             "onScreenScene": "On screen: {scene}"
         },
         "message": {
-            "title": "Message",
-            "label": "Scrolling message",
+            "label": "Custom message",
             "placeholder": "Type your greeting",
             "counter": "{length} / {max}",
             "allowedHint": "The matrix can draw {letters}, spaces and {punctuation}. Type {heart} for a heart. Lowercase is shown in capitals.",
@@ -91,7 +85,6 @@
             "saveAction": "Save message",
             "saveSuccess": "The message has been saved!",
             "countdown": {
-                "title": "Countdown",
                 "label": "Christmas countdown",
                 "note": "In the {days} days before Christmas the strip also scrolls \"MANCANO N GIORNI A NATALE!\" (N is the number of days left). The countdown is always in Italian."
             }

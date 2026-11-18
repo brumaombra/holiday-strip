@@ -14,7 +14,7 @@ import RepeatIcon from '@hugeicons/core-free-icons/RepeatIcon';
 import SnowflakeIcon from '@hugeicons/core-free-icons/SnowflakeIcon';
 import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon';
 import StarIcon from '@hugeicons/core-free-icons/StarIcon';
-import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
+import { ListRow } from '@brumaombra/ui-vintage/list';
 import { OptionPickerDialog } from '@brumaombra/ui-vintage/option-picker-dialog';
 
 // Props: the scenes of the holiday playing ({ id, name } in the order of the device), the chosen scene (-1 rotates them all) and the one on screen now
@@ -77,10 +77,8 @@ const handleSelect = value => {
 </script>
 
 <template>
-    <!-- The scene of the strip: one row with the chosen scene and the one on screen, opening the picker -->
-    <ListGroup :title="t('pages.home.scenesTitle')" :hint="t('pages.home.scenesDescription')">
-        <ListRow :label="t('pages.home.sceneLabel')" :value="selectedOption.label" :description="onScreenText" :icon="selectedOption.icon" action data-testid="scene-row" @click="isPickerOpen = true" />
-    </ListGroup>
+    <!-- The scene of the strip: a row of the holiday group, with the chosen scene and the one on screen, opening the picker -->
+    <ListRow :label="t('pages.home.sceneLabel')" :value="selectedOption.label" :description="onScreenText" :icon="selectedOption.icon" action data-testid="scene-row" @click="isPickerOpen = true" />
 
     <!-- The scenes to pick from: the rotation, then one per scene -->
     <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.home.sceneLabel')" :description="t('pages.home.scenesDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />

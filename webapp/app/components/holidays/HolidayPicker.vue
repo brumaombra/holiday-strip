@@ -4,7 +4,7 @@ import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
 import PineTreeIcon from '@hugeicons/core-free-icons/PineTreeIcon';
 import StarIcon from '@hugeicons/core-free-icons/StarIcon';
-import { ListGroup, ListRow } from '@brumaombra/ui-vintage/list';
+import { ListRow } from '@brumaombra/ui-vintage/list';
 import { OptionPickerDialog } from '@brumaombra/ui-vintage/option-picker-dialog';
 import { getHolidayName } from '~/composables/useHolidays.js';
 
@@ -54,10 +54,8 @@ const handleSelect = value => {
 </script>
 
 <template>
-    <!-- The holiday of the strip: one row with the chosen holiday, opening the picker -->
-    <ListGroup :title="t('pages.home.holidaysTitle')" :hint="t('pages.home.holidaysDescription')">
-        <ListRow :label="t('pages.home.holidayLabel')" :value="selectedOption.label" :description="playingText" :icon="selectedOption.icon" action data-testid="holiday-row" @click="isPickerOpen = true" />
-    </ListGroup>
+    <!-- The holiday of the strip: a row of the holiday group, with the chosen holiday, opening the picker -->
+    <ListRow :label="t('pages.home.holidayLabel')" :value="selectedOption.label" :description="playingText" :icon="selectedOption.icon" action data-testid="holiday-row" @click="isPickerOpen = true" />
 
     <!-- The holidays to pick from: Automatic, then one per holiday -->
     <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.home.holidayLabel')" :description="t('pages.home.holidaysDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />

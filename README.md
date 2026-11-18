@@ -75,7 +75,7 @@ Every scene can be watched on your computer, without a board: `microcontroller/t
 - The holiday follows the calendar, or stays on the one you pick.
 - A scrolling greeting per holiday, in capitals (letters A–Z, digits, and `! ' * , - . : ?`, while `<` draws a heart).
 - Christmas countdown and New Year's midnight countdown that follow the local timezone, daylight saving time included.
-- Web dashboard built into the firmware, with a live preview of the matrix, the holiday and scene pickers, the message editors and the power limit.
+- Web dashboard built into the firmware, with a live preview of the matrix, the holiday picker with the settings of each holiday under it, and the power limit.
 - Wi-Fi setup from your phone: with no saved network, the matrix opens a setup hotspot with a captive portal.
 - Settings saved in flash, so they survive a reboot.
 - Gamma-corrected brightness and a per-frame power limiter, capped below what the power supply can deliver.
@@ -248,8 +248,7 @@ This records the New Year's Eve countdown from 13 seconds before midnight. Witho
 
 The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps:
 
-- **Home**: switch the matrix on and off, set the brightness, watch the live preview, pick a holiday or the calendar, and a scene or the rotation.
-- **Message**: edit the scrolling message of each holiday, and turn the Christmas countdown on or off.
+- **Home**: switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar, and under it the settings of the holiday shown (the one playing, while the calendar picks): its scene or the rotation, its custom message (edited in a sheet), and for Christmas the countdown.
 - **Settings**: the power limit, the language (English or Italian), and the device info.
 - **Wi-Fi**: change the network, and the setup page the hotspot opens.
 
