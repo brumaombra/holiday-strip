@@ -6,8 +6,8 @@
 #include "settings/settings_json.h"
 
 namespace {
-	// Number of scenes of each holiday (Christmas, New Year's Eve), and the holiday playing now
-	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 8, 5 };
+	// Number of scenes of each holiday (Christmas, New Year's Eve, the custom message), and the holiday playing now
+	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 8, 5, 1 };
 	int activeHoliday = CHRISTMAS;
 
 	// Settings under test, and the JSON the web app sends
@@ -24,7 +24,7 @@ namespace {
 
 // Start each test from the default settings
 void setUp() {
-	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, true, { "MERRY CHRISTMAS", "HAPPY NEW YEAR" } };
+	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, true, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO" }, 0 };
 	activeHoliday = CHRISTMAS;
 }
 
@@ -109,6 +109,16 @@ void test_automatic_holiday_rotates() {
 	TEST_ASSERT_EQUAL_INT(-1, settings.scene);
 }
 
+// The custom message is picked like a holiday, and has its own message and color
+void test_custom_message_has_its_message_and_color() {
+	TEST_ASSERT_NULL(applyJson("{\"holiday\":2,\"messages\":[null,null,\"saldi!\"],\"messageColor\":6}"));
+	TEST_ASSERT_EQUAL_INT(CUSTOM, settings.holiday);
+	TEST_ASSERT_EQUAL_INT(-1, settings.scene);
+	TEST_ASSERT_EQUAL_STRING("SALDI!", settings.messages[CUSTOM]);
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", settings.messages[CHRISTMAS]);
+	TEST_ASSERT_EQUAL_UINT8(6, settings.messageColor);
+}
+
 /******************************** Invalid changes ********************************/
 
 // A power limit above the supply's safe limit is refused (this used to be up to 60 A)
@@ -124,13 +134,15 @@ void test_invalid_fields_are_named() {
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":256}"));
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":12.5}"));
 	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":8}"));
-	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":2}"));
+	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":3}"));
+	TEST_ASSERT_EQUAL_STRING("messageColor", applyJson("{\"messageColor\":7}"));
+	TEST_ASSERT_EQUAL_STRING("messageColor", applyJson("{\"messageColor\":-1}"));
 	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":-2}"));
 	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":-2}"));
 	TEST_ASSERT_EQUAL_STRING("on", applyJson("{\"on\":1}"));
 	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":\"HELLO\"}"));
 	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[42]}"));
-	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[\"A\",\"B\",\"C\"]}"));
+	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[\"A\",\"B\",\"C\",\"D\"]}"));
 }
 
 // A message longer than the matrix keeps is refused
@@ -163,6 +175,8 @@ void test_settings_are_written_to_json() {
 	TEST_ASSERT_EQUAL_INT(-1, output["holiday"].as<int>());
 	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", output["messages"][0].as<const char *>());
 	TEST_ASSERT_EQUAL_STRING("HAPPY NEW YEAR", output["messages"][1].as<const char *>());
+	TEST_ASSERT_EQUAL_STRING("CIAO", output["messages"][2].as<const char *>());
+	TEST_ASSERT_EQUAL_INT(0, output["messageColor"].as<int>());
 }
 
 // Run all the settings JSON tests
@@ -177,6 +191,7 @@ int main() {
 	RUN_TEST(test_chosen_scene_pins_the_active_holiday);
 	RUN_TEST(test_scene_is_checked_against_its_holiday);
 	RUN_TEST(test_automatic_holiday_rotates);
+	RUN_TEST(test_custom_message_has_its_message_and_color);
 	RUN_TEST(test_power_limit_above_the_maximum_is_refused);
 	RUN_TEST(test_invalid_fields_are_named);
 	RUN_TEST(test_long_message_is_refused);

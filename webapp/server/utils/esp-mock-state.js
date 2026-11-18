@@ -35,9 +35,18 @@ export const HOLIDAYS = [{
         { id: 'champagne', name: 'Champagne' },
         { id: 'sparklers', name: 'Sparklers' }
     ]
+}, {
+    id: 'custom',
+    name: 'Custom message',
+    scenes: [
+        { id: 'message', name: 'Message' }
+    ]
 }];
 
-// Indexes of the holidays the calendar picks between
+// Colors of the custom message: white, warm white, red, green, blue, gold, rainbow
+export const MESSAGE_COLOR_COUNT = 7;
+
+// Indexes of the holidays the calendar picks between (it never picks the custom message)
 const CHRISTMAS_INDEX = 0;
 const NEW_YEAR_INDEX = 1;
 
@@ -52,7 +61,8 @@ const factorySettings = () => ({
     scene: -1,
     maxMilliamps: 3000,
     countdown: true,
-    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR']
+    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
+    messageColor: 0
 });
 
 // Get the mock device state: the one of the layer (Wi-Fi, uptime, kept across hot reloads) plus the settings of the strip
@@ -91,6 +101,7 @@ const getResultingHoliday = ({ state, body, now }) => {
 const settingsRules = {
     on: value => typeof value === 'boolean',
     countdown: value => typeof value === 'boolean',
+    messageColor: value => isIntegerInRange(value, 0, MESSAGE_COLOR_COUNT - 1),
     brightness: value => isIntegerInRange(value, 0, 255),
     holiday: value => isIntegerInRange(value, -1, HOLIDAYS.length - 1),
     scene: (value, { state, body, now }) => isIntegerInRange(value, -1, HOLIDAYS[getResultingHoliday({ state, body, now })].scenes.length - 1),
@@ -114,7 +125,7 @@ export const applySettings = ({ state, body, now = Date.now() }) => {
     const activeHoliday = getActiveHoliday({ state, now });
 
     // Apply the plain fields (null is the same as a missing field, like on the firmware)
-    for (const field of ['on', 'countdown', 'brightness', 'maxMilliamps']) {
+    for (const field of ['on', 'countdown', 'brightness', 'maxMilliamps', 'messageColor']) {
         if (body[field] === undefined || body[field] === null) continue;
         settings[field] = body[field];
     }

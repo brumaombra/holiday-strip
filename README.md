@@ -41,7 +41,7 @@ This project started from a 72x12 LED matrix pulled from a truck sign. Its proto
 
 The firmware runs on an ESP32 and:
 
-- Plays the scenes of a holiday: the one the calendar picks (New Year's Eve from December 27 to January 1, Christmas the rest of the year), or the one you choose.
+- Plays the scenes of a holiday: the one the calendar picks (New Year's Eve from December 27 to January 1, Christmas the rest of the year), or the one you choose. Or, any day, just your custom message, in the color you choose.
 - Rotates through the scenes every 20 seconds, with a 1-second crossfade, and fades to the next holiday when the date changes.
 - Scrolls a message per holiday, counts the days to Christmas from late October, and counts down to midnight on December 31 (in the last minute of the year it switches to the countdown by itself).
 - Serves a dashboard on your network to switch it on and off, set the brightness, watch a live preview, pick a holiday and a scene, and edit the messages.
@@ -65,6 +65,10 @@ The firmware runs on an ESP32 and:
 3. **Fireworks**: rockets launch and burst into colored sparks over a dim gold year number. From November on, it shows the coming year.
 4. **Champagne**: a bottle shakes and pops its cork, foam sprays out, then two glasses fill with bubbles, slide together and clink.
 5. **Sparklers**: a sparkler writes the coming year in the air. The trail cools from white-hot to an orange glow while sparks spit from the tip, then it fades and starts over.
+
+### 💬 Custom message
+
+Picked like a holiday (the calendar never picks it), for any day of the year: your own message scrolling on black, in the color you choose on the dashboard (white, warm white, red, green, blue, gold, or a rainbow drifting through the letters).
 
 Every scene can be watched on your computer, without a board: `microcontroller/tools/scene_video/render.sh` builds the real scene code for your computer and records it to an MP4 (see [Scene videos](#scene-videos)).
 
@@ -207,7 +211,7 @@ The firmware is split into focused modules under `microcontroller/src/`:
 Every response has the OpenGizmo shape `{ errorId, errorMessage, data }`, and only requests from the dashboard's own page are accepted:
 
 - `GET /api/state` returns the settings (with one message per holiday in `messages`), the holidays and their scenes (`holidays`, each with an `id`, a `name` and its `scenes`), the holiday and the scene on screen (`activeHoliday`, `currentScene`), the estimated current, the limits, the uptime and the saved network.
-- `POST /api/settings` changes any of `on`, `brightness`, `holiday`, `scene`, `maxMilliamps`, `countdown` and `messages`, and answers with the new state. A holiday of `-1` follows the calendar, and a scene of `-1` rotates all the scenes of the holiday. Another holiday without a scene rotates its scenes; a scene chosen while the calendar picks the holiday keeps the holiday playing now. `messages` has one entry per holiday, `null` to leave one as it is. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
+- `POST /api/settings` changes any of `on`, `brightness`, `holiday`, `scene`, `maxMilliamps`, `countdown`, `messages` and `messageColor` (0 to 6: white, warm white, red, green, blue, gold, rainbow, for the custom message), and answers with the new state. A holiday of `-1` follows the calendar, and a scene of `-1` rotates all the scenes of the holiday. Another holiday without a scene rotates its scenes; a scene chosen while the calendar picks the holiday keeps the holiday playing now. `messages` has one entry per holiday, `null` to leave one as it is. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
 - `GET /api/frame` returns the raw RGB bytes of the last frame (72x12, row by row, before gamma and brightness), for the live preview.
 - `GET /api/networks`, `POST /api/connect` and `GET /api/check-connection` are the Wi-Fi setup API of gizmo-common.
 
@@ -242,13 +246,13 @@ npm test
 microcontroller/tools/scene_video/render.sh 1 0 24 countdown.mp4 2026-12-31T23:59:47
 ```
 
-This records the New Year's Eve countdown from 13 seconds before midnight. Without a date, the scenes see a clock that isn't set yet, like a board before it's online.
+This records the New Year's Eve countdown from 13 seconds before midnight. `MESSAGE_COLOR=6` in front of the command records the custom message (holiday 2) in rainbow colors. Without a date, the scenes see a clock that isn't set yet, like a board before it's online.
 
 ### 📱 Web App Overview
 
 The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps:
 
-- **Home**: switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), and for Christmas the countdown.
+- **Home**: switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), for Christmas the countdown, and for the custom message its text color.
 - **Settings**: the power limit, the language (English or Italian), and the device info.
 - **Wi-Fi**: change the network, and the setup page the hotspot opens.
 

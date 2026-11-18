@@ -67,6 +67,11 @@ int main(int argc, char **argv) {
 		rendererClockStart = parseLocalTime(argv[4]);
 	}
 
+	// Color of the custom message, from MESSAGE_COLOR (0 white to 6 rainbow, like the dashboard)
+	if (getenv("MESSAGE_COLOR") != nullptr) {
+		setMessageColor((uint8_t)atoi(getenv("MESSAGE_COLOR")));
+	}
+
 	// Pick the scene
 	const int holidayIndex = atoi(argv[1]), sceneIndex = atoi(argv[2]);
 	const float seconds = atof(argv[3]);

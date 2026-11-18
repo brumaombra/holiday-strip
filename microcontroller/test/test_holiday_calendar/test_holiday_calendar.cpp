@@ -53,6 +53,16 @@ void test_christmas_before_the_clock_is_set() {
 	TEST_ASSERT_EQUAL_INT(CHRISTMAS, getHolidayForDate(makeTime(1970, 1, 1)));
 }
 
+// The calendar never picks the custom message, on any day of the year
+void test_calendar_never_picks_the_custom_message() {
+	for (int month = 1; month <= 12; month++) {
+		for (int day = 1; day <= 28; day += 3) {
+			TEST_ASSERT_NOT_EQUAL(CUSTOM, getHolidayForDate(makeTime(2026, month, day)));
+		}
+	}
+	TEST_ASSERT_EQUAL_INT(CUSTOM, getActiveHoliday(CUSTOM, makeTime(2026, 12, 31)));
+}
+
 // A chosen holiday plays whatever the date
 void test_chosen_holiday_wins_over_the_date() {
 	TEST_ASSERT_EQUAL_INT(NEW_YEAR, getActiveHoliday(NEW_YEAR, makeTime(2026, 7, 1)));
@@ -90,6 +100,7 @@ int main() {
 	RUN_TEST(test_christmas_until_boxing_day);
 	RUN_TEST(test_new_year_from_december_27_to_january_1);
 	RUN_TEST(test_christmas_before_the_clock_is_set);
+	RUN_TEST(test_calendar_never_picks_the_custom_message);
 	RUN_TEST(test_chosen_holiday_wins_over_the_date);
 	RUN_TEST(test_seconds_to_new_year);
 	RUN_TEST(test_seconds_to_new_year_from_summer_time);

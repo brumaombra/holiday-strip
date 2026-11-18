@@ -20,6 +20,7 @@ import DeviceStateGate from '~/components/device/DeviceStateGate.vue';
 import MatrixPreview from '~/components/matrix/MatrixPreview.vue';
 import HolidayPicker from '~/components/holidays/HolidayPicker.vue';
 import CustomMessageRow from '~/components/message/CustomMessageRow.vue';
+import MessageColorPicker from '~/components/message/MessageColorPicker.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
 
 const STATE_REFRESH_MS = 2000; // How often the scene on screen and the current are read again
@@ -65,6 +66,11 @@ const handleHolidayChange = holiday => {
 // Pick the scene to show, or -1 to rotate them all
 const handleSceneChange = scene => {
     applyDeviceSettings({ scene });
+};
+
+// Pick the color of the custom message
+const handleMessageColorChange = messageColor => {
+    applyDeviceSettings({ messageColor });
 };
 
 // Turn the Christmas countdown on or off right away
@@ -131,8 +137,11 @@ definePageMeta({
 
                 <!-- The settings of the holiday shown, in a group of its own named after it: its scene, its custom message, and what only that holiday has -->
                 <ListGroup v-if="device.holidays.length" :title="shownHolidayName" :data-testid="`holiday-settings-${shownHolidayId}`">
-                    <ScenePicker :scenes="activeScenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
+                    <ScenePicker v-if="activeScenes.length > 1" :scenes="activeScenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
                     <CustomMessageRow :holiday-index="shownHoliday" />
+
+                    <!-- Custom message: the color of the text -->
+                    <MessageColorPicker v-if="shownHolidayId === 'custom'" :model-value="device.messageColor" @update:model-value="handleMessageColorChange" />
 
                     <!-- Christmas: the countdown after the greeting -->
                     <ListRow v-if="shownHolidayId === 'christmas'" :label="t('pages.message.countdown.label')" :description="t('pages.message.countdown.note', { days: COUNTDOWN_DAYS })" :icon="HourglassIcon" label-for="countdown">

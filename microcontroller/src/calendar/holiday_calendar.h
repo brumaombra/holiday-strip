@@ -5,12 +5,13 @@
 
 // Which holiday the calendar picks, and the New Year midnight, kept free of the hardware so the native tests can check them
 
-// The holidays, in the order of the web app
+// The holidays, in the order of the web app (the custom message is picked like a holiday, but the calendar never picks it)
 enum HolidayIndex {
 	CHRISTMAS = 0,
-	NEW_YEAR = 1
+	NEW_YEAR = 1,
+	CUSTOM = 2
 };
-constexpr int HOLIDAY_COUNT = 2;
+constexpr int HOLIDAY_COUNT = 3;
 constexpr int AUTOMATIC_HOLIDAY = -1; // The chosen holiday when the calendar picks it
 
 int getHolidayForDate(const struct tm &now);

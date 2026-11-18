@@ -41,6 +41,12 @@ const HOLIDAYS = [{
         { id: 'champagne', name: 'Champagne' },
         { id: 'sparklers', name: 'Sparklers' }
     ]
+}, {
+    id: 'custom',
+    name: 'Custom message',
+    scenes: [
+        { id: 'message', name: 'Message' }
+    ]
 }];
 const buildDeviceState = () => ({
     on: true,
@@ -50,7 +56,8 @@ const buildDeviceState = () => ({
     scene: -1,
     maxMilliamps: 3000,
     countdown: true,
-    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR'],
+    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
+    messageColor: 0,
     holidays: HOLIDAYS,
     currentScene: 2,
     estimatedMilliamps: 1200,
@@ -194,7 +201,7 @@ describe('applyDeviceSettings', () => {
     it('takes the messages as the device stored them', async () => {
         await loadDeviceState();
         await applyDeviceSettings({ messages: [null, 'ciao anno'] });
-        expect(useGlobalStore().value.device.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'CIAO ANNO']);
+        expect(useGlobalStore().value.device.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'CIAO ANNO', 'CIAO! * HELLO!']);
     });
 
     // A new holiday plays its own scenes, so the page shows the rotation at once (like the device does)
@@ -333,7 +340,7 @@ describe('home page', () => {
 
     // A scene id the app doesn't know shows the name of the device
     it('falls back to the name of the device for an unknown scene', async () => {
-        deviceState = { ...deviceState, holidays: [{ id: 'christmas', name: 'Christmas', scenes: [{ id: 'mystery', name: 'Mystery show' }] }], currentScene: 0 };
+        deviceState = { ...deviceState, holidays: [{ id: 'christmas', name: 'Christmas', scenes: [{ id: 'mystery', name: 'Mystery show' }, { id: 'snow', name: 'Snow' }] }], currentScene: 0 };
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
         expect(wrapper.find('[data-testid="scene-row"]').text()).toContain('On screen: Mystery show');
@@ -354,11 +361,12 @@ describe('home page', () => {
         const wrapper = await mountPage(HomePage);
         await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
         await flushPromises();
-        expect(sceneCards()).toHaveLength(3);
+        expect(sceneCards()).toHaveLength(4);
         expect(sceneCards()[0].getAttribute('data-state')).toBe('checked');
         expect(sceneCards()[0].textContent).toContain('Now: Christmas');
         expect(sceneCards()[1].textContent).toContain('Christmas');
         expect(sceneCards()[2].textContent).toContain('New Year\'s Eve');
+        expect(sceneCards()[3].textContent).toContain('Custom message');
     });
 
     // Picking a holiday sends it, and the scenes follow the new holiday
@@ -484,7 +492,7 @@ describe('custom message editor', () => {
         await typeMessage(wrapper, 'Felice anno nuovo', 'new-year');
         expect(savedBodies).toEqual([]);
         await wrapper.find('form').trigger('submit');
-        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo'] }]));
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo', null] }]));
 
         // The field then shows the message in capitals, like the device stored it, and the dialog is told to close
         await vi.waitFor(() => expect(wrapper.find('#message-new-year').element.value).toBe('FELICE ANNO NUOVO'));
@@ -568,6 +576,37 @@ describe('holiday settings on the home page', () => {
         pickerOptions()[2].click();
         await vi.waitFor(() => expect(wrapper.find('[data-testid="message-row-new-year"]').exists()).toBe(true));
         expect(wrapper.find('#countdown').exists()).toBe(false);
+    });
+
+    // The custom message has no scene to pick, only its message and its color
+    it('shows the message and its color for the custom message, without a scene', async () => {
+        deviceState = { ...buildDeviceState(), holiday: 2, activeHoliday: 2, currentScene: 0, messageColor: 6 };
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        const group = wrapper.find('[data-testid="holiday-settings-custom"]');
+        expect(group.find('[data-testid="scene-row"]').exists()).toBe(false);
+        expect(group.find('[data-testid="message-row-custom"]').text()).toContain('CIAO! * HELLO!');
+        expect(group.find('[data-testid="message-color-row"]').text()).toContain('Rainbow');
+        expect(group.find('#countdown').exists()).toBe(false);
+    });
+
+    // Picking a color sends it right away
+    it('sends the color of the custom message that is picked', async () => {
+        deviceState = { ...buildDeviceState(), holiday: 2, activeHoliday: 2, currentScene: 0 };
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        await wrapper.find('[data-testid="message-color-row"] button').trigger('click');
+        await flushPromises();
+        pickerOptions()[2].click(); // Red
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ messageColor: 2 }]));
+        await vi.waitFor(() => expect(wrapper.find('[data-testid="message-color-row"]').text()).toContain('Red'));
+    });
+
+    // The color is a setting of the custom message only
+    it('shows no text color with the holidays', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(HomePage);
+        expect(wrapper.find('[data-testid="message-color-row"]').exists()).toBe(false);
     });
 
     // The picker has its group, and the settings of the holiday shown have their own group under it, named after the holiday

@@ -55,7 +55,8 @@
             "holidayAutomaticNow": "Ora: {holiday}",
             "holidayNames": {
                 "christmas": "Natale",
-                "new-year": "Capodanno"
+                "new-year": "Capodanno",
+                "custom": "Messaggio personalizzato"
             },
             "sceneNames": {
                 "greeting": "Saluto",
@@ -70,7 +71,8 @@
                 "confetti": "Coriandoli",
                 "fireworks": "Fuochi d'artificio",
                 "champagne": "Champagne",
-                "sparklers": "Stelline"
+                "sparklers": "Stelline",
+                "message": "Messaggio"
             },
             "sceneLabel": "Scena",
             "onScreenScene": "In onda: {scene}"
@@ -87,6 +89,16 @@
             "countdown": {
                 "label": "Conto alla rovescia per Natale",
                 "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche \"MANCANO N GIORNI A NATALE!\" (N sono i giorni rimasti). Il conto alla rovescia è sempre in italiano."
+            },
+            "colorLabel": "Colore del testo",
+            "colors": {
+                "white": "Bianco",
+                "warmWhite": "Bianco caldo",
+                "red": "Rosso",
+                "green": "Verde",
+                "blue": "Blu",
+                "gold": "Oro",
+                "rainbow": "Arcobaleno"
             }
         },
         "settings": {

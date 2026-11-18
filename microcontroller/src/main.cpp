@@ -22,6 +22,7 @@ namespace {
 			setHolidayMessage(i, settings.messages[i]);
 		}
 		setCountdownEnabled(settings.countdown);
+		setMessageColor(settings.messageColor);
 	}
 }
 

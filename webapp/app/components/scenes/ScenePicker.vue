@@ -43,7 +43,8 @@ const sceneIcons = {
     confetti: PartyIcon,
     fireworks: FireworksIcon,
     champagne: DrinkIcon,
-    sparklers: SparklesIcon
+    sparklers: SparklesIcon,
+    message: MessageSquareTextIcon
 };
 
 // Name of a scene in the language of the app (the name sent by the device is the fallback for a scene this app doesn't know)

@@ -88,15 +88,16 @@ describe('mock state', () => {
             scene: -1,
             maxMilliamps: 3000,
             countdown: true,
-            messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR'],
+            messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
+            messageColor: 0,
             holidays: HOLIDAYS,
             minMaxMilliamps: 1000,
             maxMaxMilliamps: 8000,
             maxMessageLength: 200,
             ssid: 'BrumaLab WiFi'
         });
-        expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year']);
-        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([8, 5]);
+        expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year', 'custom']);
+        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([8, 5, 1]);
         expect(response.data.scenes).toBeUndefined();
         expect(response.data.message).toBeUndefined();
         expect(response.data.currentScene).toBeGreaterThanOrEqual(0);
@@ -182,20 +183,28 @@ describe('mock settings validation', () => {
     // The device stores the messages in capitals
     it('stores the messages in capitals', async () => {
         const { response } = await send({ messages: ['Merry Christmas <3', 'Happy new year'] });
-        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR']);
+        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR', 'CIAO! * HELLO!']);
     });
 
     // A null leaves the message of that holiday as it is
     it('leaves the message of a holiday that gets null', async () => {
         const { response } = await send({ messages: [null, 'Happy new year'] });
-        expect(response.data.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'HAPPY NEW YEAR']);
+        expect(response.data.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'HAPPY NEW YEAR', 'CIAO! * HELLO!']);
     });
 
     // The list may be shorter than the holidays: the missing ones are not touched
     it('accepts a messages list shorter than the holidays', async () => {
         const { statusCode, response } = await send({ messages: ['Ciao'] });
         expect(statusCode).toBe(200);
-        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO * HAPPY NEW YEAR']);
+        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!']);
+    });
+
+    // The custom message is picked like a holiday, with its own message and color, and the calendar never picks it
+    it('plays the custom message with its message and color', async () => {
+        const { statusCode, response } = await send({ holiday: 2, messages: [null, null, 'saldi!'], messageColor: 6 });
+        expect(statusCode).toBe(200);
+        expect(response.data).toMatchObject({ holiday: 2, activeHoliday: 2, scene: -1, messageColor: 6 });
+        expect(response.data.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'SALDI!']);
     });
 
     // Changing the holiday without a scene goes back to rotating
@@ -297,7 +306,9 @@ describe('mock settings validation', () => {
         ['brightness', -1],
         ['brightness', 256],
         ['holiday', -2],
-        ['holiday', 2],
+        ['holiday', 3],
+        ['messageColor', -1],
+        ['messageColor', 7],
         ['scene', -2],
         ['scene', 8],
         ['maxMilliamps', 999],
@@ -334,7 +345,7 @@ describe('mock settings validation', () => {
 
     // One message per holiday, no more
     it('refuses more messages than holidays', async () => {
-        const { response } = await send({ messages: ['A', 'B', 'C'] });
+        const { response } = await send({ messages: ['A', 'B', 'C', 'D'] });
         expect(response.errorMessage).toBe('messages');
     });
 

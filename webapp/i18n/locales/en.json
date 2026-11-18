@@ -55,7 +55,8 @@
             "holidayAutomaticNow": "Now: {holiday}",
             "holidayNames": {
                 "christmas": "Christmas",
-                "new-year": "New Year's Eve"
+                "new-year": "New Year's Eve",
+                "custom": "Custom message"
             },
             "sceneNames": {
                 "greeting": "Greeting",
@@ -70,7 +71,8 @@
                 "confetti": "Confetti",
                 "fireworks": "Fireworks",
                 "champagne": "Champagne",
-                "sparklers": "Sparklers"
+                "sparklers": "Sparklers",
+                "message": "Message"
             },
             "sceneLabel": "Scene",
             "onScreenScene": "On screen: {scene}"
@@ -87,6 +89,16 @@
             "countdown": {
                 "label": "Christmas countdown",
                 "note": "In the {days} days before Christmas the strip also scrolls \"MANCANO N GIORNI A NATALE!\" (N is the number of days left). The countdown is always in Italian."
+            },
+            "colorLabel": "Text color",
+            "colors": {
+                "white": "White",
+                "warmWhite": "Warm white",
+                "red": "Red",
+                "green": "Green",
+                "blue": "Blue",
+                "gold": "Gold",
+                "rainbow": "Rainbow"
             }
         },
         "settings": {

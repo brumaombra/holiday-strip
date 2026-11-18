@@ -23,8 +23,12 @@ Scene &getFireworksScene();
 Scene &getChampagneScene();
 Scene &getSparklersScene();
 
+// Custom message
+Scene &getCustomMessageScene();
+
 // Settings of the greeting scenes
 const String &getHolidayMessage(int holiday);
 bool isCountdownEnabled();
+uint8_t getMessageColor();
 
 #endif

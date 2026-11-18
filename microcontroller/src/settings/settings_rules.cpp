@@ -20,6 +20,11 @@ void sanitizeHolidayScene(long holiday, long scene, const int *sceneCounts, int 
 	sceneOutput = holidayOutput >= 0 ? sanitizeScene(scene, sceneCounts[holidayOutput]) : -1;
 }
 
+// Keep a valid color of the custom message, or the default one
+uint8_t sanitizeMessageColor(long color) {
+	return (color >= 0 && color < config::MESSAGE_COLOR_COUNT) ? (uint8_t)color : config::DEFAULT_MESSAGE_COLOR;
+}
+
 // Keep the power limit within the allowed range
 uint32_t sanitizeMaxMilliamps(long maxMilliamps) {
 	if (maxMilliamps < (long)config::MIN_MAX_MILLIAMPS) {

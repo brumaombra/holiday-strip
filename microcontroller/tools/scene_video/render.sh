@@ -3,6 +3,7 @@
 # Usage: tools/scene_video/render.sh HOLIDAY SCENE SECONDS OUTPUT.mp4 [YYYY-MM-DDTHH:MM:SS]
 #   HOLIDAY and SCENE are indexes (0 Christmas, 1 New Year's Eve; the scenes in the order of scenes.cpp)
 #   the date sets the clock the scenes read (the countdown, the year); without it the clock is unknown
+#   MESSAGE_COLOR=0..6 sets the color of the custom message (white, warm white, red, green, blue, gold, rainbow)
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 SRC="$HERE/../../src"

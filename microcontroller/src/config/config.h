@@ -40,6 +40,9 @@ namespace config {
 	extern const bool DEFAULT_COUNTDOWN;
 	extern const char DEFAULT_MESSAGE[];
 	extern const char DEFAULT_NEW_YEAR_MESSAGE[];
+	extern const char DEFAULT_CUSTOM_MESSAGE[];
+	extern const uint8_t DEFAULT_MESSAGE_COLOR;
+	constexpr uint8_t MESSAGE_COLOR_COUNT = 7; // Colors of the custom message: white, warm white, red, green, blue, gold, rainbow (in the header, because it sizes the checks)
 	extern const uint32_t MIN_MAX_MILLIAMPS;
 	extern const uint32_t MAX_MAX_MILLIAMPS;
 	constexpr size_t MAX_MESSAGE_LENGTH = 200; // In the header, because it sizes the message buffers

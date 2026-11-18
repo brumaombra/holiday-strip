@@ -44,6 +44,7 @@ void writeSettingsToJson(JsonObject json, const Settings &settings) {
 	json["scene"] = settings.scene;
 	json["maxMilliamps"] = settings.maxMilliamps;
 	json["countdown"] = settings.countdown;
+	json["messageColor"] = settings.messageColor;
 
 	// The greeting of each holiday, in the order of the holidays
 	JsonArray messages = json["messages"].to<JsonArray>();
@@ -97,6 +98,13 @@ const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, cons
 		// Another holiday without a scene: rotate through its scenes
 		updated.scene = -1;
 	}
+
+	// Read the color of the custom message
+	long messageColor = updated.messageColor;
+	if (!readIntegerField(json["messageColor"], 0, config::MESSAGE_COLOR_COUNT - 1, messageColor)) {
+		return "messageColor";
+	}
+	updated.messageColor = (uint8_t)messageColor;
 
 	// Read the power limit
 	long maxMilliamps = updated.maxMilliamps;

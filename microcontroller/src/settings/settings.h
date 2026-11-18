@@ -15,7 +15,8 @@ struct Settings {
 	int scene; // -1 rotates through all the scenes of the holiday; a chosen scene always comes with a chosen holiday
 	uint32_t maxMilliamps;
 	bool countdown; // The Christmas countdown after the Christmas greeting
-	char messages[HOLIDAY_COUNT][config::MAX_MESSAGE_LENGTH + 1]; // The greeting of each holiday, in capitals
+	char messages[HOLIDAY_COUNT][config::MAX_MESSAGE_LENGTH + 1]; // The greeting of each holiday, and the custom message, in capitals
+	uint8_t messageColor; // Color of the custom message (0 to MESSAGE_COLOR_COUNT - 1)
 };
 
 // Load the saved settings (call once in setup, before the web server starts; sceneCounts has one entry per holiday)

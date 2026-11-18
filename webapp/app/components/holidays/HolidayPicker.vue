@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue';
 import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
+import MessageSquareTextIcon from '@hugeicons/core-free-icons/MessageSquareTextIcon';
 import PineTreeIcon from '@hugeicons/core-free-icons/PineTreeIcon';
 import StarIcon from '@hugeicons/core-free-icons/StarIcon';
 import { ListRow } from '@brumaombra/ui-vintage/list';
@@ -23,7 +24,8 @@ const { t, te } = useI18n();
 // Icon of each holiday by id
 const holidayIcons = {
     christmas: PineTreeIcon,
-    'new-year': FireworksIcon
+    'new-year': FireworksIcon,
+    custom: MessageSquareTextIcon
 };
 
 // Name of the holiday the calendar picked now

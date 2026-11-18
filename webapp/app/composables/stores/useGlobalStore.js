@@ -13,6 +13,7 @@ export const useGlobalStore = () => useState('global', () => ({
         maxMilliamps: 3000,
         countdown: true,
         messages: [],
+        messageColor: 0,
         holidays: [],
         currentScene: 0,
         estimatedMilliamps: 0,

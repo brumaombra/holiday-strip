@@ -56,6 +56,13 @@ void test_saved_fireworks_rotates_christmas() {
 	TEST_ASSERT_EQUAL_INT(-1, scene);
 }
 
+// A color of the custom message that doesn't exist goes back to the default one (white)
+void test_unknown_message_color_is_white() {
+	TEST_ASSERT_EQUAL_UINT8(6, sanitizeMessageColor(6));
+	TEST_ASSERT_EQUAL_UINT8(config::DEFAULT_MESSAGE_COLOR, sanitizeMessageColor(config::MESSAGE_COLOR_COUNT));
+	TEST_ASSERT_EQUAL_UINT8(config::DEFAULT_MESSAGE_COLOR, sanitizeMessageColor(-3));
+}
+
 /******************************** Numbers ********************************/
 
 // A scene that doesn't exist goes back to the rotation
@@ -108,6 +115,7 @@ int main() {
 	RUN_TEST(test_unknown_holiday_follows_the_calendar);
 	RUN_TEST(test_scene_stays_within_its_holiday);
 	RUN_TEST(test_saved_fireworks_rotates_christmas);
+	RUN_TEST(test_unknown_message_color_is_white);
 	RUN_TEST(test_unknown_scene_rotates_all_scenes);
 	RUN_TEST(test_power_limit_is_kept_in_range);
 	RUN_TEST(test_message_is_in_capitals);
