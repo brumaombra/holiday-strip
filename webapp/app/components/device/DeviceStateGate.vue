@@ -2,27 +2,17 @@
 import Alert02Icon from '@hugeicons/core-free-icons/Alert02Icon';
 import RefreshIcon from '@hugeicons/core-free-icons/RefreshIcon';
 import { HugeiconsIcon } from '@hugeicons/vue';
-import { setBusy } from '@brumaombra/ui-vintage/busy-indicator';
 import { Button } from '@brumaombra/ui-vintage/button';
 import { EmptyStateCard } from '@brumaombra/ui-vintage/empty-state-card';
 import { LoadingStateCard } from '@brumaombra/ui-vintage/loading-state-card';
-import { loadDeviceState } from '~/composables/useDeviceState.js';
+import { syncDeviceState } from '~/composables/useDeviceState.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 
 const { t } = useI18n();
 const globalStore = useGlobalStore();
 
 // Load the device state again after a failed load
-const handleRetryLoadPress = async () => {
-    try {
-        setBusy(true, { label: t('common.syncingDevice') });
-        await loadDeviceState();
-    } catch (error) {
-        handleBackendErrors({ error, defaultMessage: t('app.loadError'), showDialog: true });
-    } finally {
-        setBusy(false);
-    }
-};
+const handleRetryLoadPress = () => syncDeviceState();
 </script>
 
 <template>

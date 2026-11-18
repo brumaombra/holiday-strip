@@ -3,7 +3,7 @@ import { readBody } from 'h3';
 import { flushPromises } from '@vue/test-utils';
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime';
 import StripPage from '~/pages/strip.vue';
-import MessageEditor from '~/components/message/MessageEditor.vue';
+import MessageEditor from '~/components/strip/MessageEditor.vue';
 import DevicePage from '~/pages/device.vue';
 import { applyDeviceSettings, createSettingsSaver, loadDeviceState, refreshLiveState } from '~/composables/useDeviceState.js';
 import { FRAME_BYTES } from '~/composables/useFrame.js';
@@ -181,9 +181,9 @@ describe('loadDeviceState', () => {
         await loadDeviceState();
         const globalStore = useGlobalStore();
         globalStore.value.device.brightness = 200;
-        deviceState = { ...deviceState, brightness: 10, activeHoliday: 1, currentScene: 5, estimatedMilliamps: 777, uptimeSeconds: 99999 };
+        deviceState = { ...deviceState, brightness: 10, activeHoliday: 1, currentScene: 5, estimatedMilliamps: 777 };
         await refreshLiveState();
-        expect(globalStore.value.device).toMatchObject({ brightness: 200, activeHoliday: 1, currentScene: 5, estimatedMilliamps: 777, uptimeSeconds: 99999 });
+        expect(globalStore.value.device).toMatchObject({ brightness: 200, activeHoliday: 1, currentScene: 5, estimatedMilliamps: 777 });
     });
 });
 
@@ -428,7 +428,7 @@ describe('home page', () => {
         await loadDeviceState();
         const wrapper = await mountPage(StripPage);
         expect(wrapper.text()).toContain('1200 / 3000 mA');
-        expect(wrapper.text()).toContain('Limit 3000 mA');
+        expect(wrapper.text()).toContain('3000mA');
         expect(wrapper.text()).not.toContain('Power limit reached');
     });
 
@@ -630,12 +630,15 @@ describe('holiday settings on the home page', () => {
 });
 
 // Device page: the power limit, then the device card of the gizmo-common layer
-describe('device page', () => {
+describe('power on the strip page', () => {
+    // The power limit slider, after the brightness one
+    const findPowerSlider = wrapper => wrapper.findAll('[role="slider"]')[1];
+
     // The slider covers the range the device announces, in steps of 100
     it('limits the power slider to the range of the device', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(DevicePage);
-        const slider = wrapper.find('[role="slider"]');
+        const wrapper = await mountPage(StripPage);
+        const slider = findPowerSlider(wrapper);
         expect(slider.attributes('aria-valuemin')).toBe('1000');
         expect(slider.attributes('aria-valuemax')).toBe('8000');
         expect(wrapper.text()).toContain('3000mA');
@@ -645,9 +648,20 @@ describe('device page', () => {
     // The slider sends one request when it rests
     it('saves the power limit once the slider rests', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(DevicePage);
-        await wrapper.find('[role="slider"]').trigger('keydown', { key: 'ArrowRight' });
+        const wrapper = await mountPage(StripPage);
+        await findPowerSlider(wrapper).trigger('keydown', { key: 'ArrowRight' });
         await vi.waitFor(() => expect(savedBodies).toEqual([{ maxMilliamps: 3100 }]), { timeout: 3000 });
+    });
+});
+
+// Device page: only the device card of the gizmo-common layer, the same in every OpenGizmo app
+describe('device page', () => {
+    // Nothing of the strip on it: the power limit is on the strip page
+    it('has only the device card', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(DevicePage);
+        expect(wrapper.find('[role="slider"]').exists()).toBe(false);
+        expect(wrapper.text()).not.toContain('Power limit');
     });
 
     // The device rows come from the card of the gizmo-common layer, which reads GET /api/device
@@ -668,7 +682,6 @@ describe('device page', () => {
         await expect(loadDeviceState()).rejects.toThrow();
         const wrapper = await mountPage(DevicePage);
         await vi.waitFor(() => expect(findButton(wrapper, 'Restart')).toBeDefined());
-        expect(wrapper.text()).toContain('Try again');
     });
 
     // The language is picked in the top bar only, like in every OpenGizmo app

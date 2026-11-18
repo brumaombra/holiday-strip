@@ -94,8 +94,7 @@ describe('mock state', () => {
             holidays: HOLIDAYS,
             minMaxMilliamps: 1000,
             maxMaxMilliamps: 8000,
-            maxMessageLength: 200,
-            ssid: 'BrumaLab WiFi'
+            maxMessageLength: 200
         });
         expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year', 'custom']);
         expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([8, 5, 1]);
@@ -103,7 +102,8 @@ describe('mock state', () => {
         expect(response.data.message).toBeUndefined();
         expect(response.data.currentScene).toBeGreaterThanOrEqual(0);
         expect(response.data.currentScene).toBeLessThan(response.data.holidays[response.data.activeHoliday].scenes.length);
-        expect(response.data.uptimeSeconds).toBeGreaterThanOrEqual(0);
+        expect(response.data.uptimeSeconds).toBeUndefined(); // The device info is GET /api/device, read by the device card
+        expect(response.data.ssid).toBeUndefined();
     });
 
     // A chosen scene is the one on screen, while the rotation moves on by itself
@@ -288,11 +288,11 @@ describe('mock settings validation', () => {
     // The mock used to save any field it got, while the firmware ignores the unknown ones
     it('ignores the fields it does not know', async () => {
         const { response } = await send({ ssid: 'elsewhere', uptimeSeconds: 99999, scenes: [], message: 'OLD', activeHoliday: 1, currentScene: 8 });
-        expect(response.data.ssid).toBe('BrumaLab WiFi');
+        expect(response.data.ssid).toBeUndefined();
         expect(response.data.scenes).toBeUndefined();
         expect(response.data.messages[0]).toBe('BUON NATALE!');
         expect(response.data.activeHoliday).toBe(0);
-        expect(response.data.uptimeSeconds).toBeLessThan(99999);
+        expect(response.data.uptimeSeconds).toBeUndefined();
     });
 
     // Every field refuses the wrong type, with its name in the error
@@ -433,13 +433,6 @@ describe('mock frame', () => {
 
 // The Wi-Fi routes (/api/networks, /api/connect, /api/check-connection) and the device routes come from the gizmo-common layer, which tests them
 describe('mock Wi-Fi state shared with the layer', () => {
-    // The state endpoint reads the saved network of the layer's mock, so a network saved by the layer's routes shows up here
-    it('shows the network saved by the Wi-Fi routes of the layer', async () => {
-        getEspMockState().savedSsid = 'Warehouse Guest';
-        const { response } = await callHandler(getState);
-        expect(response.data.ssid).toBe('Warehouse Guest');
-    });
-
     // The strip adds its settings to the state of the layer once, and keeps them
     it('keeps the settings of the strip in the state of the layer', async () => {
         await callHandler(postSettings, buildEvent({ brightness: 99 }));

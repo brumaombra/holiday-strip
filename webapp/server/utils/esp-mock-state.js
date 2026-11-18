@@ -240,8 +240,6 @@ export const buildStatePayload = ({ state, now = Date.now() }) => {
         estimatedMilliamps: estimateMilliamps({ frame, brightness: state.settings.brightness, maxMilliamps: state.settings.maxMilliamps }),
         minMaxMilliamps: MIN_MAX_MILLIAMPS,
         maxMaxMilliamps: MAX_MAX_MILLIAMPS,
-        maxMessageLength: MAX_MESSAGE_LENGTH,
-        uptimeSeconds: Math.floor((now - state.startedAt) / 1000),
-        ssid: state.savedSsid
+        maxMessageLength: MAX_MESSAGE_LENGTH
     };
 };

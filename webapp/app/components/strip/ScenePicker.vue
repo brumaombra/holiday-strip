@@ -16,6 +16,7 @@ import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon';
 import StarIcon from '@hugeicons/core-free-icons/StarIcon';
 import { ListRow } from '@brumaombra/ui-vintage/list';
 import { OptionPickerDialog } from '@brumaombra/ui-vintage/option-picker-dialog';
+import { getSceneName } from '~/composables/useHolidays.js';
 
 // Props: the scenes of the holiday playing ({ id, name } in the order of the device), the chosen scene (-1 rotates them all) and the one on screen now
 const props = defineProps({
@@ -47,16 +48,10 @@ const sceneIcons = {
     message: MessageSquareTextIcon
 };
 
-// Name of a scene in the language of the app (the name sent by the device is the fallback for a scene this app doesn't know)
-const getSceneName = ({ id, name }) => {
-    const key = `pages.strip.sceneNames.${id}`;
-    return te(key) ? t(key) : name;
-};
-
 // Options to pick from: rotate them all, then one per scene
 const options = computed(() => [
     { value: -1, label: t('pages.strip.rotateAll'), description: t('pages.strip.rotateAllDescription'), icon: RepeatIcon },
-    ...props.scenes.map((scene, index) => ({ value: index, label: getSceneName(scene), description: '', icon: sceneIcons[scene.id] || StarIcon }))
+    ...props.scenes.map((scene, index) => ({ value: index, label: getSceneName({ scene, t, te }), description: '', icon: sceneIcons[scene.id] || StarIcon }))
 ]);
 
 // Whether the scene picker is open

@@ -39,8 +39,6 @@
                 "note": "Quanto brillano i LED. Abbassala in una stanza buia, o per assorbire meno corrente."
             },
             "current": {
-                "title": "Corrente assorbita",
-                "limit": "Limite {milliamps} mA",
                 "limitedTitle": "Limite di potenza raggiunto",
                 "limitedDescription": "Il dispositivo sta abbassando i LED per restare sotto il limite. Riduci la luminosità, oppure alza il limite nelle Impostazioni se il tuo alimentatore lo regge.",
                 "label": "Corrente stimata",
@@ -76,39 +74,39 @@
                 "message": "Messaggio"
             },
             "sceneLabel": "Scena",
-            "onScreenScene": "In onda: {scene}"
-        },
-        "message": {
-            "label": "Messaggio personalizzato",
-            "placeholder": "Scrivi il tuo saluto",
-            "counter": "{length} / {max}",
-            "allowedHint": "La matrice sa disegnare {letters}, spazi e {punctuation}. Scrivi {heart} per un cuore. Le minuscole vengono mostrate in maiuscolo.",
-            "unsupportedTitle": "Alcuni caratteri non si possono disegnare",
-            "unsupportedDescription": "Il font della matrice non ha {characters}. La matrice li mostra come punti di domanda (le lettere accentate come due).",
-            "saveAction": "Salva messaggio",
-            "saveSuccess": "Il messaggio è stato salvato!",
-            "countdown": {
-                "label": "Conto alla rovescia per Natale",
-                "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche i giorni rimasti (per esempio \"MANCANO 12 GIORNI A NATALE!\"), nella lingua di questa app."
+            "onScreenScene": "In onda: {scene}",
+            "message": {
+                "label": "Messaggio personalizzato",
+                "placeholder": "Scrivi il tuo saluto",
+                "counter": "{length} / {max}",
+                "allowedHint": "La matrice sa disegnare {letters}, spazi e {punctuation}. Scrivi {heart} per un cuore. Le minuscole vengono mostrate in maiuscolo.",
+                "unsupportedTitle": "Alcuni caratteri non si possono disegnare",
+                "unsupportedDescription": "Il font della matrice non ha {characters}. La matrice li mostra come punti di domanda (le lettere accentate come due).",
+                "saveAction": "Salva messaggio",
+                "saveSuccess": "Il messaggio è stato salvato!",
+                "countdown": {
+                    "label": "Conto alla rovescia per Natale",
+                    "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche i giorni rimasti (per esempio \"MANCANO 12 GIORNI A NATALE!\"), nella lingua di questa app."
+                },
+                "colorLabel": "Colore del testo",
+                "colors": {
+                    "white": "Bianco",
+                    "warmWhite": "Bianco caldo",
+                    "red": "Rosso",
+                    "green": "Verde",
+                    "blue": "Blu",
+                    "gold": "Oro",
+                    "rainbow": "Arcobaleno"
+                }
             },
-            "colorLabel": "Colore del testo",
-            "colors": {
-                "white": "Bianco",
-                "warmWhite": "Bianco caldo",
-                "red": "Rosso",
-                "green": "Verde",
-                "blue": "Blu",
-                "gold": "Oro",
-                "rainbow": "Arcobaleno"
-            }
-        },
-        "device": {
-            "title": "Dispositivo",
             "powerTitle": "Alimentazione",
             "maxMilliamps": {
                 "label": "Limite di potenza",
                 "note": "La corrente massima che i LED possono assorbire; il dispositivo li abbassa per restare sotto il limite. Impostalo a circa l'80% di quello che il tuo alimentatore da 5 V può erogare."
             }
+        },
+        "device": {
+            "title": "Dispositivo"
         }
     }
 }

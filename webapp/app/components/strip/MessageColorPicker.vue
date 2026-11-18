@@ -21,7 +21,7 @@ const COLOR_KEYS = ['white', 'warmWhite', 'red', 'green', 'blue', 'gold', 'rainb
 // Options to pick from: one per color
 const options = computed(() => COLOR_KEYS.map((key, index) => ({
     value: index,
-    label: t(`pages.message.colors.${key}`),
+    label: t(`pages.strip.message.colors.${key}`),
     description: '',
     icon: key === 'rainbow' ? ColorsIcon : PaintBoardIcon
 })));
@@ -40,8 +40,8 @@ const handleSelect = value => {
 
 <template>
     <!-- The color of the custom message: a row with the chosen color, opening the picker -->
-    <ListRow :label="t('pages.message.colorLabel')" :value="selectedOption.label" :icon="selectedOption.icon" action data-testid="message-color-row" @click="isPickerOpen = true" />
+    <ListRow :label="t('pages.strip.message.colorLabel')" :value="selectedOption.label" :icon="selectedOption.icon" action data-testid="message-color-row" @click="isPickerOpen = true" />
 
     <!-- The colors to pick from -->
-    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.message.colorLabel')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
+    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.strip.message.colorLabel')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
 </template>

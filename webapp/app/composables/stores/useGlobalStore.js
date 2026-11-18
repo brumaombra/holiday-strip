@@ -1,8 +1,5 @@
 // Shared device and UI state for the webapp
 export const useGlobalStore = () => useState('global', () => ({
-    // Cached WiFi scan results
-    networksList: [],
-
     // Cached device state (what GET /api/state answers, with the defaults of the firmware until it is read)
     device: {
         on: true,
@@ -20,9 +17,7 @@ export const useGlobalStore = () => useState('global', () => ({
         estimatedMilliamps: 0,
         minMaxMilliamps: 1000,
         maxMaxMilliamps: 8000,
-        maxMessageLength: 200,
-        uptimeSeconds: 0,
-        ssid: ''
+        maxMessageLength: 200
     },
 
     // Flag to track whether the device state has been fetched at least once

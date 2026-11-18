@@ -210,7 +210,7 @@ The firmware is split into focused modules under `microcontroller/src/`:
 
 Every response has the OpenGizmo shape `{ errorId, errorMessage, data }`, and only requests from the dashboard's own page are accepted:
 
-- `GET /api/state` returns the settings (with one message per holiday in `messages`), the holidays and their scenes (`holidays`, each with an `id`, a `name` and its `scenes`), the holiday and the scene on screen (`activeHoliday`, `currentScene`), the estimated current, the limits, the uptime and the saved network.
+- `GET /api/state` returns the settings (with one message per holiday in `messages`), the holidays and their scenes (`holidays`, each with an `id`, a `name` and its `scenes`), the holiday and the scene on screen (`activeHoliday`, `currentScene`), the estimated current and the limits. The device info (firmware, uptime, saved network, address) is `GET /api/device` of gizmo-common.
 - `POST /api/settings` changes any of `on`, `brightness`, `holiday`, `scene`, `maxMilliamps`, `countdown`, `messages`, `messageColor` (0 to 6: white, warm white, red, green, blue, gold, rainbow, for the custom message) and `language` (`it` or `en`, the texts on the matrix; the greetings still at their default follow it), and answers with the new state. A holiday of `-1` follows the calendar, and a scene of `-1` rotates all the scenes of the holiday. Another holiday without a scene rotates its scenes; a scene chosen while the calendar picks the holiday keeps the holiday playing now. `messages` has one entry per holiday, `null` to leave one as it is. A field with the wrong type or out of range is refused with `invalid_settings_field`, and nothing changes.
 - `GET /api/frame` returns the raw RGB bytes of the last frame (72x12, row by row, before gamma and brightness), for the live preview.
 - `GET /api/networks`, `POST /api/connect` and `GET /api/check-connection` are the Wi-Fi setup API of gizmo-common.
@@ -252,8 +252,8 @@ This records the New Year's Eve countdown from 13 seconds before midnight. `MESS
 
 The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps, and their pages in the same order (the strip, then Device, then WiFi):
 
-- **Strip** (`/strip`, where the app opens): switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), for Christmas the countdown, and for the custom message its text color.
-- **Device**: the power limit, then the device card of gizmo-common (info, network, restart and forget network).
+- **Strip** (`/strip`, where the app opens): switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), for Christmas the countdown, and for the custom message its text color. Last, the power: the estimated current and the power limit.
+- **Device**: the device card of gizmo-common (info, network, restart and forget network), the same page as in every OpenGizmo app.
 - **WiFi**: change the network, and the setup page the hotspot opens.
 
 The language (English or Italian) is picked in the top bar, like in every OpenGizmo app. The strip follows it: the dashboard sends it when it changes, and the Christmas countdown and the greetings still at their default (`BUON NATALE!` or `MERRY CHRISTMAS!`, and so on) switch language on the matrix. A greeting you wrote yourself never changes. A new board starts in Italian.

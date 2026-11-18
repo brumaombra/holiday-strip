@@ -1,7 +1,6 @@
 #include "server.h"
 
 #include <gizmo/device.h>
-#include <gizmo/wifi_setup.h>
 
 #include "config/config.h"
 #include "display/display.h"
@@ -45,12 +44,6 @@ JsonDocument buildStateData() {
 	data["minMaxMilliamps"] = config::MIN_MAX_MILLIAMPS;
 	data["maxMaxMilliamps"] = config::MAX_MAX_MILLIAMPS;
 	data["maxMessageLength"] = config::MAX_MESSAGE_LENGTH;
-
-	// Add the device info and the saved network (stored by gizmo-common)
-	char ssid[gizmo::WIFI_SSID_SIZE];
-	gizmo::getSavedWifiSsid(ssid, sizeof(ssid));
-	data["uptimeSeconds"] = millis() / 1000;
-	data["ssid"] = ssid;
 
 	// Return the built JSON document
 	return doc;

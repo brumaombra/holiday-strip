@@ -1,9 +1,10 @@
+import { setBusy } from '@brumaombra/ui-vintage/busy-indicator';
 import { getState, saveSettings } from '~/composables/useDeviceApi.js';
 import { createDebounced } from '~/composables/useUtils.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
 
 // Fields the device changes by itself, and the page only reads
-const LIVE_FIELDS = ['activeHoliday', 'currentScene', 'estimatedMilliamps', 'uptimeSeconds'];
+const LIVE_FIELDS = ['activeHoliday', 'currentScene', 'estimatedMilliamps'];
 
 // Load the device state into the store, and remember a failure (so the pages never show or save the store defaults)
 export const loadDeviceState = async () => {
@@ -27,7 +28,19 @@ export const loadDeviceState = async () => {
     }
 };
 
-// Refresh only what the device changes by itself (the holiday playing, the scene on screen, the estimated current, the uptime), so a setting being edited is never overwritten
+// Load the device state with the busy indicator, and tell the user when the device doesn't answer (the app shell and the retry button use it)
+export const syncDeviceState = async () => {
+    try {
+        setBusy(true, { label: translate('common.syncingDevice') });
+        await loadDeviceState();
+    } catch (error) {
+        handleBackendErrors({ error, defaultMessage: translate('app.loadError'), showDialog: true });
+    } finally {
+        setBusy(false);
+    }
+};
+
+// Refresh only what the device changes by itself (the holiday playing, the scene on screen, the estimated current), so a setting being edited is never overwritten
 export const refreshLiveState = async () => {
     const globalStore = useGlobalStore();
     const state = await getState();

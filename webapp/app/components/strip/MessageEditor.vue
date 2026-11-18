@@ -60,7 +60,7 @@ const handleSave = async () => {
         // Show the message as the device stored it, in capitals
         if (isSaved) {
             draft.value = deviceMessage.value;
-            showMessageToast({ type: 'success', icon: CheckmarkCircle02Icon, message: t('pages.message.saveSuccess') });
+            showMessageToast({ type: 'success', icon: CheckmarkCircle02Icon, message: t('pages.strip.message.saveSuccess') });
             emits('saved');
         }
     } finally {
@@ -73,28 +73,28 @@ const handleSave = async () => {
     <form class="space-y-4" @submit.prevent="handleSave">
         <div>
             <!-- Message -->
-            <Textarea :id="fieldId" v-model="draft" rows="3" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.message.placeholder')" :aria-label="t('pages.message.label')" :aria-invalid="isTooLong || undefined" />
+            <Textarea :id="fieldId" v-model="draft" rows="3" autocapitalize="characters" spellcheck="false" :placeholder="t('pages.strip.message.placeholder')" :aria-label="t('pages.strip.message.label')" :aria-invalid="isTooLong || undefined" />
 
             <!-- Counter against the limit of the device -->
             <p class="mt-2 text-right text-xs tabular-nums" :class="isTooLong ? 'font-semibold text-destructive' : 'text-muted-foreground'" :data-testid="`message-counter-${holiday.id}`">
-                {{ t('pages.message.counter', { length: draftLength, max: device.maxMessageLength }) }}
+                {{ t('pages.strip.message.counter', { length: draftLength, max: device.maxMessageLength }) }}
             </p>
 
             <!-- The characters the matrix can draw -->
-            <p class="text-xs text-muted-foreground">{{ t('pages.message.allowedHint', { letters: MESSAGE_LETTERS_AND_DIGITS, punctuation: MESSAGE_PUNCTUATION, heart: MESSAGE_HEART }) }}</p>
+            <p class="text-xs text-muted-foreground">{{ t('pages.strip.message.allowedHint', { letters: MESSAGE_LETTERS_AND_DIGITS, punctuation: MESSAGE_PUNCTUATION, heart: MESSAGE_HEART }) }}</p>
         </div>
 
         <!-- Characters the font can't draw -->
         <Alert v-if="unsupportedCharacters.length" color="yellow">
             <HugeiconsIcon :icon="Alert02Icon" />
-            <AlertTitle>{{ t('pages.message.unsupportedTitle') }}</AlertTitle>
-            <AlertDescription>{{ t('pages.message.unsupportedDescription', { characters: unsupportedList }) }}</AlertDescription>
+            <AlertTitle>{{ t('pages.strip.message.unsupportedTitle') }}</AlertTitle>
+            <AlertDescription>{{ t('pages.strip.message.unsupportedDescription', { characters: unsupportedList }) }}</AlertDescription>
         </Alert>
 
         <!-- Save button -->
         <Button variant="primary" type="submit" class="w-full" :data-testid="`message-save-${holiday.id}`" :loading="isSaving" :disabled="isTooLong || !hasChanges">
             <HugeiconsIcon :icon="SaveIcon" class="size-4" />
-            {{ t('pages.message.saveAction') }}
+            {{ t('pages.strip.message.saveAction') }}
         </Button>
     </form>
 </template>
