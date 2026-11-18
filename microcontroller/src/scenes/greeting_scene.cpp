@@ -98,7 +98,7 @@ namespace {
 			// Add the countdown, if there is one today
 			struct tm now;
 			char countdown[48]; // Room for the countdown text
-			if (getLocalTime(&now, 0) && formatChristmasCountdown(now, countdown, sizeof(countdown))) {
+			if (getLocalTime(&now, 0) && formatChristmasCountdown(now, countdown, sizeof(countdown), getMatrixLanguage())) {
 				result += countdown;
 			}
 

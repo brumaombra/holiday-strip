@@ -46,6 +46,19 @@ export const HOLIDAYS = [{
 // Colors of the custom message: white, warm white, red, green, blue, gold, rainbow
 export const MESSAGE_COLOR_COUNT = 7;
 
+// Languages of the texts on the matrix, and the default greeting of each holiday in each of them (like the firmware)
+export const LANGUAGES = ['it', 'en'];
+const DEFAULT_MESSAGES = {
+    it: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!'],
+    en: ['MERRY CHRISTMAS!', 'HAPPY NEW YEAR!', 'HELLO!']
+};
+
+// The two-language greetings, the defaults before the languages
+const LEGACY_MESSAGES = ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'];
+
+// Check whether a greeting is still a default one, so a change of language translates it
+const isDefaultMessage = ({ message, index }) => message === LEGACY_MESSAGES[index] || LANGUAGES.some(language => DEFAULT_MESSAGES[language][index] === message);
+
 // Indexes of the holidays the calendar picks between (it never picks the custom message)
 const CHRISTMAS_INDEX = 0;
 const NEW_YEAR_INDEX = 1;
@@ -61,8 +74,9 @@ const factorySettings = () => ({
     scene: -1,
     maxMilliamps: 3000,
     countdown: true,
-    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
-    messageColor: 0
+    messages: [...DEFAULT_MESSAGES.it],
+    messageColor: 0,
+    language: 'it'
 });
 
 // Get the mock device state: the one of the layer (Wi-Fi, uptime, kept across hot reloads) plus the settings of the strip
@@ -102,6 +116,7 @@ const settingsRules = {
     on: value => typeof value === 'boolean',
     countdown: value => typeof value === 'boolean',
     messageColor: value => isIntegerInRange(value, 0, MESSAGE_COLOR_COUNT - 1),
+    language: value => LANGUAGES.includes(value),
     brightness: value => isIntegerInRange(value, 0, 255),
     holiday: value => isIntegerInRange(value, -1, HOLIDAYS.length - 1),
     scene: (value, { state, body, now }) => isIntegerInRange(value, -1, HOLIDAYS[getResultingHoliday({ state, body, now })].scenes.length - 1),
@@ -140,6 +155,12 @@ export const applySettings = ({ state, body, now = Date.now() }) => {
     if (body.scene !== undefined && body.scene !== null) {
         settings.scene = body.scene;
         if (body.scene >= 0 && settings.holiday < 0) settings.holiday = activeHoliday;
+    }
+
+    // Change the language, translating the greetings still at their default (the ones written by hand stay)
+    if (body.language !== undefined && body.language !== null && body.language !== settings.language) {
+        settings.messages = settings.messages.map((message, index) => isDefaultMessage({ message, index }) ? DEFAULT_MESSAGES[body.language][index] : message);
+        settings.language = body.language;
     }
 
     // Change the messages of the holidays that have one (null leaves it as it is)

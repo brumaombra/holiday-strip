@@ -39,9 +39,6 @@ namespace config {
 	const int DEFAULT_SCENE = -1; // -1 rotates through all the scenes of the holiday
 	const uint32_t DEFAULT_MAX_MILLIAMPS = 3000;
 	const bool DEFAULT_COUNTDOWN = true;
-	const char DEFAULT_MESSAGE[] = "BUON NATALE * MERRY CHRISTMAS"; // Christmas greeting
-	const char DEFAULT_NEW_YEAR_MESSAGE[] = "BUON ANNO * HAPPY NEW YEAR"; // New Year's Eve greeting
-	const char DEFAULT_CUSTOM_MESSAGE[] = "CIAO! * HELLO!"; // The custom message, on any day
 	const uint8_t DEFAULT_MESSAGE_COLOR = 0; // White
 	const uint32_t MIN_MAX_MILLIAMPS = 1000;
 	const uint32_t MAX_MAX_MILLIAMPS = 8000; // Highest limit the web app can set: keep it at about 80% of what the 5 V power supply delivers

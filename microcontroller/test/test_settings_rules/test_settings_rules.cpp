@@ -63,6 +63,25 @@ void test_unknown_message_color_is_white() {
 	TEST_ASSERT_EQUAL_UINT8(config::DEFAULT_MESSAGE_COLOR, sanitizeMessageColor(-3));
 }
 
+// The languages are found by their code, and an unknown one goes back to the default (Italian)
+void test_languages_by_code() {
+	TEST_ASSERT_EQUAL_INT(ENGLISH, findLanguage("en"));
+	TEST_ASSERT_EQUAL_INT(ITALIAN, findLanguage("it"));
+	TEST_ASSERT_EQUAL_INT(-1, findLanguage("de"));
+	TEST_ASSERT_EQUAL_STRING("en", getLanguageCode(ENGLISH));
+	TEST_ASSERT_EQUAL_UINT8(DEFAULT_LANGUAGE, sanitizeLanguage(9));
+}
+
+// The default greetings are recognized in every language, and a message written by hand is not
+void test_default_greetings_are_recognized() {
+	TEST_ASSERT_EQUAL_STRING("BUON ANNO!", getDefaultMessage(NEW_YEAR, ITALIAN));
+	TEST_ASSERT_EQUAL_STRING("HELLO!", getDefaultMessage(CUSTOM, ENGLISH));
+	TEST_ASSERT_TRUE(isDefaultMessage(CHRISTMAS, "MERRY CHRISTMAS!"));
+	TEST_ASSERT_TRUE(isDefaultMessage(CHRISTMAS, "BUON NATALE * MERRY CHRISTMAS"));
+	TEST_ASSERT_FALSE(isDefaultMessage(CHRISTMAS, "BUON NATALE A TUTTI"));
+	TEST_ASSERT_FALSE(isDefaultMessage(NEW_YEAR, "MERRY CHRISTMAS!"));
+}
+
 /******************************** Numbers ********************************/
 
 // A scene that doesn't exist goes back to the rotation
@@ -116,6 +135,8 @@ int main() {
 	RUN_TEST(test_scene_stays_within_its_holiday);
 	RUN_TEST(test_saved_fireworks_rotates_christmas);
 	RUN_TEST(test_unknown_message_color_is_white);
+	RUN_TEST(test_languages_by_code);
+	RUN_TEST(test_default_greetings_are_recognized);
 	RUN_TEST(test_unknown_scene_rotates_all_scenes);
 	RUN_TEST(test_power_limit_is_kept_in_range);
 	RUN_TEST(test_message_is_in_capitals);

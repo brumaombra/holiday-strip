@@ -30,5 +30,6 @@ Scene &getCustomMessageScene();
 const String &getHolidayMessage(int holiday);
 bool isCountdownEnabled();
 uint8_t getMessageColor();
+uint8_t getMatrixLanguage();
 
 #endif

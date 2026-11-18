@@ -8,7 +8,7 @@ export const getState = async () => {
     return response.data || {};
 };
 
-// Send some of the settings ({ on, brightness, holiday, scene, maxMilliamps, countdown, messages, messageColor }, where messages has one entry per holiday: a string to change it, null to leave it) and get the state after the change
+// Send some of the settings ({ on, brightness, holiday, scene, maxMilliamps, countdown, messages, messageColor, language }, where messages has one entry per holiday: a string to change it, null to leave it) and get the state after the change
 export const saveSettings = async settings => {
     // Call the device API to save the settings
     const response = await fetchEsp('/api/settings', {

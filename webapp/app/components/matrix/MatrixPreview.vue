@@ -31,5 +31,5 @@ usePolling({ callback: refreshFrame, intervalMs: FRAME_REFRESH_MS });
 
 <template>
     <!-- Live preview of the matrix -->
-    <canvas ref="canvas" :width="width" :height="height" role="img" :aria-label="t('pages.home.previewLabel')" class="block h-auto w-full rounded" style="aspect-ratio: 6 / 1" />
+    <canvas ref="canvas" :width="width" :height="height" role="img" :aria-label="t('pages.strip.previewLabel')" class="block h-auto w-full rounded" style="aspect-ratio: 6 / 1" />
 </template>

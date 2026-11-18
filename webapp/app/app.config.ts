@@ -1,5 +1,5 @@
-import Home01Icon from '@hugeicons/core-free-icons/Home01Icon';
-import Settings01Icon from '@hugeicons/core-free-icons/Settings01Icon';
+import CpuIcon from '@hugeicons/core-free-icons/CpuIcon';
+import SparklesIcon from '@hugeicons/core-free-icons/SparklesIcon';
 
 // Name, logo and pages of the app, read by the layout and the pages of the gizmo-common layer
 export default defineAppConfig({
@@ -10,12 +10,12 @@ export default defineAppConfig({
         hostname: 'holiday-strip',
 
         logo: '/logo.svg',
-        homePath: '/',
+        homePath: '/strip',
 
-        // Pages of the dashboard, top to bottom in the sidebar and left to right in the bottom navigation ('wifi' is the page of the layer)
+        // Pages of the dashboard, top to bottom in the sidebar and left to right in the bottom navigation, in the order of every OpenGizmo app: the strip, then Device, then WiFi ('wifi' is the page of the layer)
         nav: [
-            { id: 'home', labelKey: 'nav.home.label', descriptionKey: 'nav.home.description', icon: Home01Icon, to: '/' },
-            { id: 'settings', labelKey: 'nav.settings.label', descriptionKey: 'nav.settings.description', icon: Settings01Icon, to: '/settings' },
+            { id: 'strip', labelKey: 'nav.strip.label', descriptionKey: 'nav.strip.description', icon: SparklesIcon, to: '/strip' },
+            { id: 'device', labelKey: 'nav.device.label', descriptionKey: 'nav.device.description', icon: CpuIcon, to: '/device' },
             'wifi'
         ]
     }

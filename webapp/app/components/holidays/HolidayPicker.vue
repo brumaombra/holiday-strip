@@ -36,7 +36,7 @@ const calendarHolidayName = computed(() => {
 
 // Options to pick from: Automatic (with the holiday of the calendar), then one per holiday
 const options = computed(() => [
-    { value: -1, label: t('pages.home.holidayAutomatic'), description: t('pages.home.holidayAutomaticNow', { holiday: calendarHolidayName.value }), icon: Calendar03Icon },
+    { value: -1, label: t('pages.strip.holidayAutomatic'), description: t('pages.strip.holidayAutomaticNow', { holiday: calendarHolidayName.value }), icon: Calendar03Icon },
     ...props.holidays.map((holiday, index) => ({ value: index, label: getHolidayName({ holiday, t, te }), description: '', icon: holidayIcons[holiday.id] || StarIcon }))
 ]);
 
@@ -47,7 +47,7 @@ const isPickerOpen = ref(false);
 const selectedOption = computed(() => options.value.find(option => option.value === props.modelValue) || options.value[0]);
 
 // The text under the row: the holiday playing now while Automatic is chosen
-const playingText = computed(() => props.modelValue < 0 ? t('pages.home.holidayAutomaticNow', { holiday: calendarHolidayName.value }) : '');
+const playingText = computed(() => props.modelValue < 0 ? t('pages.strip.holidayAutomaticNow', { holiday: calendarHolidayName.value }) : '');
 
 // Pick a holiday (a tap on the chosen one changes nothing)
 const handleSelect = value => {
@@ -57,8 +57,8 @@ const handleSelect = value => {
 
 <template>
     <!-- The holiday of the strip: a row of the holiday group, with the chosen holiday, opening the picker -->
-    <ListRow :label="t('pages.home.holidayLabel')" :value="selectedOption.label" :description="playingText" :icon="selectedOption.icon" action data-testid="holiday-row" @click="isPickerOpen = true" />
+    <ListRow :label="t('pages.strip.holidayLabel')" :value="selectedOption.label" :description="playingText" :icon="selectedOption.icon" action data-testid="holiday-row" @click="isPickerOpen = true" />
 
     <!-- The holidays to pick from: Automatic, then one per holiday -->
-    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.home.holidayLabel')" :description="t('pages.home.holidaysDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
+    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.strip.holidayLabel')" :description="t('pages.strip.holidaysDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
 </template>

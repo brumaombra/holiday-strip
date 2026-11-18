@@ -23,6 +23,7 @@ namespace {
 		}
 		setCountdownEnabled(settings.countdown);
 		setMessageColor(settings.messageColor);
+		setMatrixLanguage(settings.language);
 	}
 }
 

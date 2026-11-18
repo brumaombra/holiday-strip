@@ -24,7 +24,7 @@ namespace {
 
 // Start each test from the default settings
 void setUp() {
-	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, true, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO" }, 0 };
+	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, true, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO" }, 0, ITALIAN };
 	activeHoliday = CHRISTMAS;
 }
 
@@ -119,6 +119,41 @@ void test_custom_message_has_its_message_and_color() {
 	TEST_ASSERT_EQUAL_UINT8(6, settings.messageColor);
 }
 
+/******************************** Language ********************************/
+
+// The language changes the default greetings, and leaves the ones written by hand as they are
+void test_language_translates_only_the_default_greetings() {
+	strcpy(settings.messages[CHRISTMAS], "BUON NATALE!");
+	strcpy(settings.messages[NEW_YEAR], "AUGURI A TUTTI");
+	strcpy(settings.messages[CUSTOM], "CIAO!");
+	TEST_ASSERT_NULL(applyJson("{\"language\":\"en\"}"));
+	TEST_ASSERT_EQUAL_UINT8(ENGLISH, settings.language);
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS!", settings.messages[CHRISTMAS]);
+	TEST_ASSERT_EQUAL_STRING("AUGURI A TUTTI", settings.messages[NEW_YEAR]);
+	TEST_ASSERT_EQUAL_STRING("HELLO!", settings.messages[CUSTOM]);
+}
+
+// The two-language greetings from before the languages count as defaults too
+void test_language_translates_the_old_two_language_greetings() {
+	strcpy(settings.messages[CHRISTMAS], "BUON NATALE * MERRY CHRISTMAS");
+	TEST_ASSERT_NULL(applyJson("{\"language\":\"en\"}"));
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS!", settings.messages[CHRISTMAS]);
+}
+
+// A message sent with the language wins over the translated default
+void test_sent_message_wins_over_the_translation() {
+	strcpy(settings.messages[CHRISTMAS], "BUON NATALE!");
+	TEST_ASSERT_NULL(applyJson("{\"language\":\"en\",\"messages\":[\"ciao\"]}"));
+	TEST_ASSERT_EQUAL_STRING("CIAO", settings.messages[CHRISTMAS]);
+}
+
+// The same language again changes nothing
+void test_same_language_changes_nothing() {
+	strcpy(settings.messages[CHRISTMAS], "BUON NATALE!");
+	TEST_ASSERT_NULL(applyJson("{\"language\":\"it\"}"));
+	TEST_ASSERT_EQUAL_STRING("BUON NATALE!", settings.messages[CHRISTMAS]);
+}
+
 /******************************** Invalid changes ********************************/
 
 // A power limit above the supply's safe limit is refused (this used to be up to 60 A)
@@ -136,6 +171,8 @@ void test_invalid_fields_are_named() {
 	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":8}"));
 	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":3}"));
 	TEST_ASSERT_EQUAL_STRING("messageColor", applyJson("{\"messageColor\":7}"));
+	TEST_ASSERT_EQUAL_STRING("language", applyJson("{\"language\":\"fr\"}"));
+	TEST_ASSERT_EQUAL_STRING("language", applyJson("{\"language\":1}"));
 	TEST_ASSERT_EQUAL_STRING("messageColor", applyJson("{\"messageColor\":-1}"));
 	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":-2}"));
 	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":-2}"));
@@ -177,6 +214,7 @@ void test_settings_are_written_to_json() {
 	TEST_ASSERT_EQUAL_STRING("HAPPY NEW YEAR", output["messages"][1].as<const char *>());
 	TEST_ASSERT_EQUAL_STRING("CIAO", output["messages"][2].as<const char *>());
 	TEST_ASSERT_EQUAL_INT(0, output["messageColor"].as<int>());
+	TEST_ASSERT_EQUAL_STRING("it", output["language"].as<const char *>());
 }
 
 // Run all the settings JSON tests
@@ -192,6 +230,10 @@ int main() {
 	RUN_TEST(test_scene_is_checked_against_its_holiday);
 	RUN_TEST(test_automatic_holiday_rotates);
 	RUN_TEST(test_custom_message_has_its_message_and_color);
+	RUN_TEST(test_language_translates_only_the_default_greetings);
+	RUN_TEST(test_language_translates_the_old_two_language_greetings);
+	RUN_TEST(test_sent_message_wins_over_the_translation);
+	RUN_TEST(test_same_language_changes_nothing);
 	RUN_TEST(test_power_limit_above_the_maximum_is_refused);
 	RUN_TEST(test_invalid_fields_are_named);
 	RUN_TEST(test_long_message_is_refused);

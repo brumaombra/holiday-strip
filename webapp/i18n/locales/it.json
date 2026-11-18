@@ -7,16 +7,17 @@
         "saveError": "Si è verificato un errore durante il salvataggio delle impostazioni",
         "loadErrorTitle": "Impossibile leggere il dispositivo",
         "loadErrorDescription": "Il dispositivo non ha risposto. Controlla che sia acceso e sulla stessa rete, poi riprova.",
-        "loadRetryAction": "Riprova"
+        "loadRetryAction": "Riprova",
+        "redirectingStrip": "Apertura della striscia..."
     },
     "nav": {
-        "home": {
-            "label": "Home",
+        "strip": {
+            "label": "Striscia",
             "description": "Guarda l'anteprima della matrice, scegli una festività, e imposta la sua scena e il messaggio personalizzato"
         },
-        "settings": {
-            "label": "Impostazioni",
-            "description": "Limite di potenza, lingua e info sul dispositivo"
+        "device": {
+            "label": "Dispositivo",
+            "description": "Limite di corrente, info del dispositivo, rete e riavvio"
         }
     },
     "api": {
@@ -26,7 +27,7 @@
         }
     },
     "pages": {
-        "home": {
+        "strip": {
             "title": "Holiday Strip",
             "displayTitle": "Display",
             "previewLabel": "Anteprima dal vivo della matrice LED",
@@ -88,7 +89,7 @@
             "saveSuccess": "Il messaggio è stato salvato!",
             "countdown": {
                 "label": "Conto alla rovescia per Natale",
-                "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche \"MANCANO N GIORNI A NATALE!\" (N sono i giorni rimasti). Il conto alla rovescia è sempre in italiano."
+                "note": "Nei {days} giorni prima di Natale la striscia fa scorrere anche i giorni rimasti (per esempio \"MANCANO 12 GIORNI A NATALE!\"), nella lingua di questa app."
             },
             "colorLabel": "Colore del testo",
             "colors": {
@@ -101,17 +102,12 @@
                 "rainbow": "Arcobaleno"
             }
         },
-        "settings": {
-            "title": "Impostazioni",
+        "device": {
+            "title": "Dispositivo",
             "powerTitle": "Alimentazione",
             "maxMilliamps": {
                 "label": "Limite di potenza",
                 "note": "La corrente massima che i LED possono assorbire; il dispositivo li abbassa per restare sotto il limite. Impostalo a circa l'80% di quello che il tuo alimentatore da 5 V può erogare."
-            },
-            "languageTitle": "Lingua",
-            "language": {
-                "label": "Lingua",
-                "note": "La lingua di questa interfaccia web."
             }
         }
     }

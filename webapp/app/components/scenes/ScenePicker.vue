@@ -49,13 +49,13 @@ const sceneIcons = {
 
 // Name of a scene in the language of the app (the name sent by the device is the fallback for a scene this app doesn't know)
 const getSceneName = ({ id, name }) => {
-    const key = `pages.home.sceneNames.${id}`;
+    const key = `pages.strip.sceneNames.${id}`;
     return te(key) ? t(key) : name;
 };
 
 // Options to pick from: rotate them all, then one per scene
 const options = computed(() => [
-    { value: -1, label: t('pages.home.rotateAll'), description: t('pages.home.rotateAllDescription'), icon: RepeatIcon },
+    { value: -1, label: t('pages.strip.rotateAll'), description: t('pages.strip.rotateAllDescription'), icon: RepeatIcon },
     ...props.scenes.map((scene, index) => ({ value: index, label: getSceneName(scene), description: '', icon: sceneIcons[scene.id] || StarIcon }))
 ]);
 
@@ -68,7 +68,7 @@ const selectedOption = computed(() => options.value.find(option => option.value 
 // The scene on screen now, under the row (none while the display is off)
 const onScreenText = computed(() => {
     const option = options.value.find(item => item.value === props.currentScene && item.value >= 0);
-    return option ? t('pages.home.onScreenScene', { scene: option.label }) : '';
+    return option ? t('pages.strip.onScreenScene', { scene: option.label }) : '';
 });
 
 // Pick a scene (a tap on the chosen one changes nothing)
@@ -79,8 +79,8 @@ const handleSelect = value => {
 
 <template>
     <!-- The scene of the strip: a row of the holiday group, with the chosen scene and the one on screen, opening the picker -->
-    <ListRow :label="t('pages.home.sceneLabel')" :value="selectedOption.label" :description="onScreenText" :icon="selectedOption.icon" action data-testid="scene-row" @click="isPickerOpen = true" />
+    <ListRow :label="t('pages.strip.sceneLabel')" :value="selectedOption.label" :description="onScreenText" :icon="selectedOption.icon" action data-testid="scene-row" @click="isPickerOpen = true" />
 
     <!-- The scenes to pick from: the rotation, then one per scene -->
-    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.home.sceneLabel')" :description="t('pages.home.scenesDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
+    <OptionPickerDialog v-model:open="isPickerOpen" :title="t('pages.strip.sceneLabel')" :description="t('pages.strip.scenesDescription')" :options="options" :model-value="props.modelValue" @update:model-value="handleSelect" />
 </template>

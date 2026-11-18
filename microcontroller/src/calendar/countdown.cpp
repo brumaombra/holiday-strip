@@ -25,8 +25,9 @@ bool isClockSet(const struct tm &now) {
 	return now.tm_year >= CLOCK_SET_YEAR;
 }
 
-// Write the countdown to Christmas shown after the greeting, and return whether there is one (none after Christmas or more than 60 days before)
-bool formatChristmasCountdown(const struct tm &now, char *text, size_t length) {
+// Write the countdown to Christmas shown after the greeting, in the language of the matrix, and return whether there is one (none after Christmas or more than 60 days before)
+bool formatChristmasCountdown(const struct tm &now, char *text, size_t length, uint8_t language) {
+	const bool isEnglish = language == ENGLISH;
 	text[0] = '\0';
 	if (!isClockSet(now)) {
 		return false;
@@ -34,7 +35,7 @@ bool formatChristmasCountdown(const struct tm &now, char *text, size_t length) {
 
 	// Christmas day itself
 	if (now.tm_mon == DECEMBER && now.tm_mday == CHRISTMAS_DAY) {
-		snprintf(text, length, " * OGGI E' NATALE!");
+		snprintf(text, length, isEnglish ? " * IT'S CHRISTMAS DAY!" : " * OGGI E' NATALE!");
 		return true;
 	}
 
@@ -52,9 +53,9 @@ bool formatChristmasCountdown(const struct tm &now, char *text, size_t length) {
 
 	// One day, or several
 	if (days == 1) {
-		snprintf(text, length, " * MANCA 1 GIORNO A NATALE!");
+		snprintf(text, length, isEnglish ? " * 1 DAY TO CHRISTMAS!" : " * MANCA 1 GIORNO A NATALE!");
 	} else {
-		snprintf(text, length, " * MANCANO %ld GIORNI A NATALE!", days);
+		snprintf(text, length, isEnglish ? " * %ld DAYS TO CHRISTMAS!" : " * MANCANO %ld GIORNI A NATALE!", days);
 	}
 	return true;
 }

@@ -88,8 +88,9 @@ describe('mock state', () => {
             scene: -1,
             maxMilliamps: 3000,
             countdown: true,
-            messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
+            messages: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!'],
             messageColor: 0,
+            language: 'it',
             holidays: HOLIDAYS,
             minMaxMilliamps: 1000,
             maxMaxMilliamps: 8000,
@@ -183,20 +184,20 @@ describe('mock settings validation', () => {
     // The device stores the messages in capitals
     it('stores the messages in capitals', async () => {
         const { response } = await send({ messages: ['Merry Christmas <3', 'Happy new year'] });
-        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR', 'CIAO! * HELLO!']);
+        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR', 'CIAO!']);
     });
 
     // A null leaves the message of that holiday as it is
     it('leaves the message of a holiday that gets null', async () => {
         const { response } = await send({ messages: [null, 'Happy new year'] });
-        expect(response.data.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'HAPPY NEW YEAR', 'CIAO! * HELLO!']);
+        expect(response.data.messages).toEqual(['BUON NATALE!', 'HAPPY NEW YEAR', 'CIAO!']);
     });
 
     // The list may be shorter than the holidays: the missing ones are not touched
     it('accepts a messages list shorter than the holidays', async () => {
         const { statusCode, response } = await send({ messages: ['Ciao'] });
         expect(statusCode).toBe(200);
-        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!']);
+        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO!', 'CIAO!']);
     });
 
     // The custom message is picked like a holiday, with its own message and color, and the calendar never picks it
@@ -204,7 +205,23 @@ describe('mock settings validation', () => {
         const { statusCode, response } = await send({ holiday: 2, messages: [null, null, 'saldi!'], messageColor: 6 });
         expect(statusCode).toBe(200);
         expect(response.data).toMatchObject({ holiday: 2, activeHoliday: 2, scene: -1, messageColor: 6 });
-        expect(response.data.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'SALDI!']);
+        expect(response.data.messages).toEqual(['BUON NATALE!', 'BUON ANNO!', 'SALDI!']);
+    });
+
+    // The language translates the greetings still at their default, and leaves the ones written by hand
+    it('translates the default greetings when the language changes', async () => {
+        await send({ messages: [null, 'Auguri a tutti'] });
+        const { statusCode, response } = await send({ language: 'en' });
+        expect(statusCode).toBe(200);
+        expect(response.data.language).toBe('en');
+        expect(response.data.messages).toEqual(['MERRY CHRISTMAS!', 'AUGURI A TUTTI', 'HELLO!']);
+    });
+
+    // An unknown language is refused
+    it('refuses a language it does not have', async () => {
+        const { statusCode, response } = await send({ language: 'fr' });
+        expect(statusCode).toBe(400);
+        expect(response.errorMessage).toBe('language');
     });
 
     // Changing the holiday without a scene goes back to rotating
@@ -273,7 +290,7 @@ describe('mock settings validation', () => {
         const { response } = await send({ ssid: 'elsewhere', uptimeSeconds: 99999, scenes: [], message: 'OLD', activeHoliday: 1, currentScene: 8 });
         expect(response.data.ssid).toBe('BrumaLab WiFi');
         expect(response.data.scenes).toBeUndefined();
-        expect(response.data.messages[0]).toBe('BUON NATALE * MERRY CHRISTMAS');
+        expect(response.data.messages[0]).toBe('BUON NATALE!');
         expect(response.data.activeHoliday).toBe(0);
         expect(response.data.uptimeSeconds).toBeLessThan(99999);
     });
@@ -361,7 +378,7 @@ describe('mock settings validation', () => {
         const { response } = await callHandler(getState);
         expect(response.data.brightness).toBe(60);
         expect(getEspMockState().settings.scene).toBe(-1);
-        expect(getEspMockState().settings.messages[0]).toBe('BUON NATALE * MERRY CHRISTMAS');
+        expect(getEspMockState().settings.messages[0]).toBe('BUON NATALE!');
     });
 
     // Several wrong fields report the first one in the firmware order (on, countdown, brightness, holiday, scene, maxMilliamps, messages)

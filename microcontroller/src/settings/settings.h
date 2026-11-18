@@ -6,6 +6,7 @@
 
 #include "calendar/holiday_calendar.h"
 #include "config/config.h"
+#include "config/language.h"
 
 // Settings of the matrix, saved in flash
 struct Settings {
@@ -17,6 +18,7 @@ struct Settings {
 	bool countdown; // The Christmas countdown after the Christmas greeting
 	char messages[HOLIDAY_COUNT][config::MAX_MESSAGE_LENGTH + 1]; // The greeting of each holiday, and the custom message, in capitals
 	uint8_t messageColor; // Color of the custom message (0 to MESSAGE_COLOR_COUNT - 1)
+	uint8_t language; // Language of the texts on the matrix (Language), the one picked on the dashboard
 };
 
 // Load the saved settings (call once in setup, before the web server starts; sceneCounts has one entry per holiday)

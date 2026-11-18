@@ -45,6 +45,7 @@ void writeSettingsToJson(JsonObject json, const Settings &settings) {
 	json["maxMilliamps"] = settings.maxMilliamps;
 	json["countdown"] = settings.countdown;
 	json["messageColor"] = settings.messageColor;
+	json["language"] = getLanguageCode(settings.language);
 
 	// The greeting of each holiday, in the order of the holidays
 	JsonArray messages = json["messages"].to<JsonArray>();
@@ -112,6 +113,25 @@ const char *applySettingsFromJson(JsonObjectConst json, Settings &settings, cons
 		return "maxMilliamps";
 	}
 	updated.maxMilliamps = (uint32_t)maxMilliamps;
+
+	// Read the language of the matrix, by its code
+	JsonVariantConst languageField = json["language"];
+	if (!languageField.isNull()) {
+		const int language = languageField.is<const char *>() ? findLanguage(languageField.as<const char *>()) : -1;
+		if (language < 0) {
+			return "language";
+		}
+
+		// Translate the greetings that are still a default one (the ones written by hand stay as they are)
+		if (language != updated.language) {
+			for (int i = 0; i < HOLIDAY_COUNT; i++) {
+				if (isDefaultMessage(i, updated.messages[i])) {
+					sanitizeMessage(getDefaultMessage(i, (uint8_t)language), updated.messages[i], sizeof(updated.messages[i]));
+				}
+			}
+		}
+		updated.language = (uint8_t)language;
+	}
 
 	// Read the greetings, one per holiday (null leaves one as it is), stored in capitals
 	JsonVariantConst messages = json["messages"];

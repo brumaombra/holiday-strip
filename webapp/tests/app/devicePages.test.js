@@ -2,9 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { readBody } from 'h3';
 import { flushPromises } from '@vue/test-utils';
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime';
-import HomePage from '~/pages/index.vue';
+import StripPage from '~/pages/strip.vue';
 import MessageEditor from '~/components/message/MessageEditor.vue';
-import SettingsPage from '~/pages/settings.vue';
+import DevicePage from '~/pages/device.vue';
 import { applyDeviceSettings, createSettingsSaver, loadDeviceState, refreshLiveState } from '~/composables/useDeviceState.js';
 import { FRAME_BYTES } from '~/composables/useFrame.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
@@ -58,6 +58,7 @@ const buildDeviceState = () => ({
     countdown: true,
     messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
     messageColor: 0,
+    language: 'it',
     holidays: HOLIDAYS,
     currentScene: 2,
     estimatedMilliamps: 1200,
@@ -259,7 +260,7 @@ describe('applyDeviceSettings', () => {
 describe('home page', () => {
     // While the state is loading there is no control that could send defaults
     it('waits for the state before showing the controls', async () => {
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.find('canvas').exists()).toBe(false);
         expect(wrapper.text()).toContain('Syncing device');
     });
@@ -268,7 +269,7 @@ describe('home page', () => {
     it('offers to try again when the state failed to load', async () => {
         isDeviceAvailable = false;
         await loadDeviceState().catch(() => {});
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.text()).toContain('Couldn\'t read the device');
         expect(wrapper.find('canvas').exists()).toBe(false);
 
@@ -281,7 +282,7 @@ describe('home page', () => {
     // The preview draws the frames of the device on a canvas
     it('shows the live preview canvas and reads frames', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         const canvas = wrapper.find('canvas');
         expect(canvas.exists()).toBe(true);
         expect(canvas.attributes('width')).toBe('864');
@@ -292,7 +293,7 @@ describe('home page', () => {
     // Leaving the page must stop reading frames
     it('stops reading frames when the page is left', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await vi.waitFor(() => expect(frameCount).toBeGreaterThan(0));
         wrapper.unmount();
         await flushPromises();
@@ -307,7 +308,7 @@ describe('home page', () => {
     // The scene row shows the chosen scene and the one on screen, and opens the picker with the rotation and the nine scenes
     it('shows the chosen scene and the one on screen, and lists every scene in the picker', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         const sceneRow = wrapper.find('[data-testid="scene-row"]');
         expect(sceneRow.text()).toContain('Rotate all scenes');
         expect(sceneRow.text()).toContain('On screen: Christmas trees'); // The third scene (index 2) is on screen
@@ -324,7 +325,7 @@ describe('home page', () => {
     it('lists the scenes of the holiday playing', async () => {
         deviceState = { ...deviceState, holiday: 1, activeHoliday: 1, currentScene: 2 };
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.find('[data-testid="scene-row"]').text()).toContain('On screen: Fireworks');
         await wrapper.find('[data-testid="scene-row"] button').trigger('click');
         await flushPromises();
@@ -342,14 +343,14 @@ describe('home page', () => {
     it('falls back to the name of the device for an unknown scene', async () => {
         deviceState = { ...deviceState, holidays: [{ id: 'christmas', name: 'Christmas', scenes: [{ id: 'mystery', name: 'Mystery show' }, { id: 'snow', name: 'Snow' }] }], currentScene: 0 };
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.find('[data-testid="scene-row"]').text()).toContain('On screen: Mystery show');
     });
 
     // The holiday row shows Automatic with the holiday the calendar picked
     it('shows the Automatic holiday and the one the calendar picked', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         const holidayRow = wrapper.find('[data-testid="holiday-row"]');
         expect(holidayRow.text()).toContain('Automatic');
         expect(holidayRow.text()).toContain('Now: Christmas');
@@ -358,7 +359,7 @@ describe('home page', () => {
     // The picker lists Automatic and one option per holiday
     it('lists Automatic and every holiday in the holiday picker', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
         await flushPromises();
         expect(sceneCards()).toHaveLength(4);
@@ -372,7 +373,7 @@ describe('home page', () => {
     // Picking a holiday sends it, and the scenes follow the new holiday
     it('sends the holiday that is picked, and shows its scenes', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
         await flushPromises();
         sceneCards()[2].click();
@@ -385,7 +386,7 @@ describe('home page', () => {
     it('sends -1 to follow the calendar', async () => {
         deviceState = { ...deviceState, holiday: 1, activeHoliday: 1 };
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
         await flushPromises();
         sceneCards()[0].click();
@@ -395,7 +396,7 @@ describe('home page', () => {
     // Picking a scene sends it, and the row shows it as the chosen one
     it('sends the scene that is picked', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="scene-row"] button').trigger('click');
         await flushPromises();
         sceneCards()[5].click();
@@ -407,7 +408,7 @@ describe('home page', () => {
     it('sends -1 to rotate all the scenes', async () => {
         deviceState.scene = 3;
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="scene-row"] button').trigger('click');
         await flushPromises();
         sceneCards()[0].click();
@@ -417,7 +418,7 @@ describe('home page', () => {
     // The power switch applies at once
     it('switches the display off right away', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('#power').trigger('click');
         await vi.waitFor(() => expect(savedBodies).toEqual([{ on: false }]));
     });
@@ -425,7 +426,7 @@ describe('home page', () => {
     // The estimated current is shown against the limit
     it('shows the estimated current against the limit', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.text()).toContain('1200 / 3000 mA');
         expect(wrapper.text()).toContain('Limit 3000 mA');
         expect(wrapper.text()).not.toContain('Power limit reached');
@@ -435,7 +436,7 @@ describe('home page', () => {
     it('warns when the current reaches the limit', async () => {
         deviceState.estimatedMilliamps = 3000;
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.text()).toContain('Power limit reached');
     });
 });
@@ -544,7 +545,7 @@ describe('holiday settings on the home page', () => {
     // The custom message of the holiday playing sits under the holiday picker, named Custom message
     it('shows the custom message of the holiday playing while Automatic', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         const row = wrapper.find('[data-testid="message-row-christmas"]');
         expect(row.exists()).toBe(true);
         expect(row.text()).toContain('Custom message');
@@ -556,7 +557,7 @@ describe('holiday settings on the home page', () => {
     it('shows the settings of the holiday picked', async () => {
         deviceState = { ...buildDeviceState(), holiday: 1, activeHoliday: 1 };
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.find('[data-testid="message-row-new-year"]').text()).toContain('BUON ANNO * HAPPY NEW YEAR');
         expect(wrapper.find('[data-testid="message-row-christmas"]').exists()).toBe(false);
     });
@@ -564,8 +565,8 @@ describe('holiday settings on the home page', () => {
     // The countdown is a Christmas setting: it only shows with Christmas, and applies at once
     it('shows the Christmas countdown only with Christmas, and switches it right away', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
-        expect(wrapper.text()).toContain('MANCANO N GIORNI A NATALE!');
+        const wrapper = await mountPage(StripPage);
+        expect(wrapper.text()).toContain('12 DAYS TO CHRISTMAS!');
         expect(wrapper.text()).toContain('60 days');
         await wrapper.find('#countdown').trigger('click');
         await vi.waitFor(() => expect(savedBodies).toEqual([{ countdown: false }]));
@@ -582,7 +583,7 @@ describe('holiday settings on the home page', () => {
     it('shows the message and its color for the custom message, without a scene', async () => {
         deviceState = { ...buildDeviceState(), holiday: 2, activeHoliday: 2, currentScene: 0, messageColor: 6 };
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         const group = wrapper.find('[data-testid="holiday-settings-custom"]');
         expect(group.find('[data-testid="scene-row"]').exists()).toBe(false);
         expect(group.find('[data-testid="message-row-custom"]').text()).toContain('CIAO! * HELLO!');
@@ -594,7 +595,7 @@ describe('holiday settings on the home page', () => {
     it('sends the color of the custom message that is picked', async () => {
         deviceState = { ...buildDeviceState(), holiday: 2, activeHoliday: 2, currentScene: 0 };
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="message-color-row"] button').trigger('click');
         await flushPromises();
         pickerOptions()[2].click(); // Red
@@ -605,14 +606,14 @@ describe('holiday settings on the home page', () => {
     // The color is a setting of the custom message only
     it('shows no text color with the holidays', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         expect(wrapper.find('[data-testid="message-color-row"]').exists()).toBe(false);
     });
 
     // The picker has its group, and the settings of the holiday shown have their own group under it, named after the holiday
     it('puts the settings of the holiday in their own group under the picker', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(HomePage);
+        const wrapper = await mountPage(StripPage);
         const settingsGroup = wrapper.find('[data-testid="holiday-settings-christmas"]');
         expect(settingsGroup.text()).toContain('Christmas');
         expect(settingsGroup.find('[data-testid="holiday-row"]').exists()).toBe(false);
@@ -628,12 +629,12 @@ describe('holiday settings on the home page', () => {
     });
 });
 
-// Settings page: power limit, language and device info
-describe('settings page', () => {
+// Device page: the power limit, then the device card of the gizmo-common layer
+describe('device page', () => {
     // The slider covers the range the device announces, in steps of 100
     it('limits the power slider to the range of the device', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(SettingsPage);
+        const wrapper = await mountPage(DevicePage);
         const slider = wrapper.find('[role="slider"]');
         expect(slider.attributes('aria-valuemin')).toBe('1000');
         expect(slider.attributes('aria-valuemax')).toBe('8000');
@@ -644,7 +645,7 @@ describe('settings page', () => {
     // The slider sends one request when it rests
     it('saves the power limit once the slider rests', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(SettingsPage);
+        const wrapper = await mountPage(DevicePage);
         await wrapper.find('[role="slider"]').trigger('keydown', { key: 'ArrowRight' });
         await vi.waitFor(() => expect(savedBodies).toEqual([{ maxMilliamps: 3100 }]), { timeout: 3000 });
     });
@@ -652,7 +653,7 @@ describe('settings page', () => {
     // The device rows come from the card of the gizmo-common layer, which reads GET /api/device
     it('shows the device card with the details of the device', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(SettingsPage);
+        const wrapper = await mountPage(DevicePage);
         await vi.waitFor(() => expect(wrapper.text()).toContain('v2026.11.04.1'));
         expect(wrapper.text()).toContain('1d 2h 3m');
         expect(wrapper.text()).toContain('Home');
@@ -665,17 +666,41 @@ describe('settings page', () => {
     it('shows the device card even when the settings cannot be read', async () => {
         isDeviceAvailable = false;
         await expect(loadDeviceState()).rejects.toThrow();
-        const wrapper = await mountPage(SettingsPage);
+        const wrapper = await mountPage(DevicePage);
         await vi.waitFor(() => expect(findButton(wrapper, 'Restart')).toBeDefined());
         expect(wrapper.text()).toContain('Try again');
     });
 
-    // The language row opens a picker with both languages
-    it('offers both languages', async () => {
+    // The language is picked in the top bar only, like in every OpenGizmo app
+    it('has no language row', async () => {
         await loadDeviceState();
-        const wrapper = await mountPage(SettingsPage);
-        expect(wrapper.text()).toContain('English');
-        await findButton(wrapper, 'English').trigger('click');
-        await vi.waitFor(() => expect(document.body.textContent).toContain('Italiano'));
+        const wrapper = await mountPage(DevicePage);
+        expect(wrapper.text()).not.toContain('Language');
+    });
+});
+
+// The language of the app goes to the strip, so the texts on the matrix follow it
+describe('language of the matrix', () => {
+    // Switch back to English after each test
+    afterEach(async () => {
+        await useNuxtApp().$i18n.setLocale('en');
+        await flushPromises();
+    });
+
+    // A new language picked in the top bar is sent once the state of the strip is known
+    it('sends the language picked in the top bar to the strip', async () => {
+        deviceState = { ...buildDeviceState(), language: 'en' };
+        await loadDeviceState();
+        await useNuxtApp().$i18n.setLocale('it');
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ language: 'it' }]));
+        expect(useGlobalStore().value.device.language).toBe('it');
+    });
+
+    // Nothing is sent when the strip already has that language
+    it('sends nothing when the strip already has the language', async () => {
+        await loadDeviceState();
+        await useNuxtApp().$i18n.setLocale('it');
+        await flushPromises();
+        expect(savedBodies).toEqual([]);
     });
 });

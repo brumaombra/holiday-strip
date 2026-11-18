@@ -16,8 +16,8 @@ namespace {
 	const char MAX_MILLIAMPS_KEY[] = "maxma";
 	const char COUNTDOWN_KEY[] = "countdown";
 	const char *const MESSAGE_KEYS[HOLIDAY_COUNT] = { "message", "msg-newyear", "msg-custom" }; // One message per holiday ("message" is the Christmas one, from before the holidays)
-	const char *const DEFAULT_MESSAGES[HOLIDAY_COUNT] = { config::DEFAULT_MESSAGE, config::DEFAULT_NEW_YEAR_MESSAGE, config::DEFAULT_CUSTOM_MESSAGE };
 	const char MESSAGE_COLOR_KEY[] = "msg-color";
+	const char LANGUAGE_KEY[] = "language";
 
 	// Current settings and their revision (shared by the main loop and the web server task)
 	Settings currentSettings;
@@ -38,16 +38,17 @@ void loadSettings(const int *sceneCounts) {
 	currentSettings.maxMilliamps = sanitizeMaxMilliamps(preferences.getUInt(MAX_MILLIAMPS_KEY, config::DEFAULT_MAX_MILLIAMPS));
 	currentSettings.countdown = preferences.getBool(COUNTDOWN_KEY, config::DEFAULT_COUNTDOWN);
 	currentSettings.messageColor = sanitizeMessageColor(preferences.getUChar(MESSAGE_COLOR_KEY, config::DEFAULT_MESSAGE_COLOR));
+	currentSettings.language = sanitizeLanguage(preferences.getUChar(LANGUAGE_KEY, DEFAULT_LANGUAGE));
 
 	// Read the holiday and the scene: a scene saved before the holidays existed was a Christmas one, so it stays on Christmas
 	const long scene = preferences.getInt(SCENE_KEY, config::DEFAULT_SCENE);
 	const long holiday = preferences.isKey(HOLIDAY_KEY) ? preferences.getInt(HOLIDAY_KEY, config::DEFAULT_HOLIDAY) : (scene >= 0 ? CHRISTMAS : config::DEFAULT_HOLIDAY);
 	sanitizeHolidayScene(holiday, scene, sceneCounts, HOLIDAY_COUNT, currentSettings.holiday, currentSettings.scene);
 
-	// Read the greeting of each holiday, kept within the rules
+	// Read the greeting of each holiday, kept within the rules (one never saved is the default greeting, in the language of the matrix)
 	for (int i = 0; i < HOLIDAY_COUNT; i++) {
 		if (preferences.getString(MESSAGE_KEYS[i], savedMessage, sizeof(savedMessage)) == 0) {
-			gizmo::copyString(savedMessage, DEFAULT_MESSAGES[i], sizeof(savedMessage));
+			gizmo::copyString(savedMessage, getDefaultMessage(i, currentSettings.language), sizeof(savedMessage));
 		}
 		sanitizeMessage(savedMessage, currentSettings.messages[i], sizeof(currentSettings.messages[i]));
 	}
@@ -78,7 +79,7 @@ bool updateSettings(const Settings &settings) {
 	if (!preferences.begin(NAMESPACE, false)) {
 		return false;
 	}
-	bool isSaved = preferences.putBool(ON_KEY, settings.on) > 0 && preferences.putUChar(BRIGHTNESS_KEY, settings.brightness) > 0 && preferences.putInt(HOLIDAY_KEY, settings.holiday) > 0 && preferences.putInt(SCENE_KEY, settings.scene) > 0 && preferences.putUInt(MAX_MILLIAMPS_KEY, settings.maxMilliamps) > 0 && preferences.putBool(COUNTDOWN_KEY, settings.countdown) > 0 && preferences.putUChar(MESSAGE_COLOR_KEY, settings.messageColor) > 0;
+	bool isSaved = preferences.putBool(ON_KEY, settings.on) > 0 && preferences.putUChar(BRIGHTNESS_KEY, settings.brightness) > 0 && preferences.putInt(HOLIDAY_KEY, settings.holiday) > 0 && preferences.putInt(SCENE_KEY, settings.scene) > 0 && preferences.putUInt(MAX_MILLIAMPS_KEY, settings.maxMilliamps) > 0 && preferences.putBool(COUNTDOWN_KEY, settings.countdown) > 0 && preferences.putUChar(MESSAGE_COLOR_KEY, settings.messageColor) > 0 && preferences.putUChar(LANGUAGE_KEY, settings.language) > 0;
 	for (int i = 0; i < HOLIDAY_COUNT && isSaved; i++) {
 		isSaved = preferences.putString(MESSAGE_KEYS[i], settings.messages[i]) > 0 || settings.messages[i][0] == '\0'; // An empty message writes 0 bytes
 	}

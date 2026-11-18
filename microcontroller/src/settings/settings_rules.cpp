@@ -1,8 +1,24 @@
 #include "settings_rules.h"
 
 #include <ctype.h>
+#include <string.h>
 
 #include "config/config.h"
+
+namespace {
+	// The codes of the languages, in the order of Language
+	const char *const LANGUAGE_CODES[LANGUAGE_COUNT] = { "it", "en" };
+
+	// The default greeting of each holiday, in each language (Italian, English)
+	const char *const DEFAULT_MESSAGES[HOLIDAY_COUNT][LANGUAGE_COUNT] = {
+		{ "BUON NATALE!", "MERRY CHRISTMAS!" },
+		{ "BUON ANNO!", "HAPPY NEW YEAR!" },
+		{ "CIAO!", "HELLO!" }
+	};
+
+	// The two-language greetings, the defaults before the languages (still saved on the boards that never changed them)
+	const char *const LEGACY_MESSAGES[HOLIDAY_COUNT] = { "BUON NATALE * MERRY CHRISTMAS", "BUON ANNO * HAPPY NEW YEAR", "CIAO! * HELLO!" };
+}
 
 // Keep a valid scene index, or -1 (rotate through all the scenes)
 int sanitizeScene(long scene, int sceneCount) {
@@ -23,6 +39,44 @@ void sanitizeHolidayScene(long holiday, long scene, const int *sceneCounts, int 
 // Keep a valid color of the custom message, or the default one
 uint8_t sanitizeMessageColor(long color) {
 	return (color >= 0 && color < config::MESSAGE_COLOR_COUNT) ? (uint8_t)color : config::DEFAULT_MESSAGE_COLOR;
+}
+
+// Find a language by its code ("it", "en"), or -1 when it's unknown
+int findLanguage(const char *code) {
+	for (int i = 0; i < LANGUAGE_COUNT; i++) {
+		if (strcmp(code, LANGUAGE_CODES[i]) == 0) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+// Get the code of a language ("it", "en")
+const char *getLanguageCode(uint8_t language) {
+	return LANGUAGE_CODES[sanitizeLanguage(language)];
+}
+
+// Keep a valid language, or the default one
+uint8_t sanitizeLanguage(long language) {
+	return (language >= 0 && language < LANGUAGE_COUNT) ? (uint8_t)language : DEFAULT_LANGUAGE;
+}
+
+// Get the default greeting of a holiday in a language
+const char *getDefaultMessage(int holiday, uint8_t language) {
+	return DEFAULT_MESSAGES[holiday][sanitizeLanguage(language)];
+}
+
+// Check whether a greeting is still a default one (in any language, or the two-language one from before the languages)
+bool isDefaultMessage(int holiday, const char *message) {
+	if (strcmp(message, LEGACY_MESSAGES[holiday]) == 0) {
+		return true;
+	}
+	for (const char *defaultMessage : DEFAULT_MESSAGES[holiday]) {
+		if (strcmp(message, defaultMessage) == 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 // Keep the power limit within the allowed range

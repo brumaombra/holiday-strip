@@ -2,10 +2,12 @@
 
 #include "config/config.h"
 #include "scenes/scene_list.h"
+#include "settings/settings_rules.h"
 
 namespace {
 	// The greeting of each holiday, and the Christmas countdown switch
-	String holidayMessages[HOLIDAY_COUNT] = { config::DEFAULT_MESSAGE, config::DEFAULT_NEW_YEAR_MESSAGE, config::DEFAULT_CUSTOM_MESSAGE };
+	String holidayMessages[HOLIDAY_COUNT] = { getDefaultMessage(CHRISTMAS, DEFAULT_LANGUAGE), getDefaultMessage(NEW_YEAR, DEFAULT_LANGUAGE), getDefaultMessage(CUSTOM, DEFAULT_LANGUAGE) };
+	uint8_t matrixLanguage = DEFAULT_LANGUAGE;
 	bool countdownEnabled = config::DEFAULT_COUNTDOWN;
 	uint8_t messageColor = config::DEFAULT_MESSAGE_COLOR;
 
@@ -47,6 +49,16 @@ void setCountdownEnabled(bool enabled) {
 // Set the color of the custom message (0 to MESSAGE_COLOR_COUNT - 1)
 void setMessageColor(uint8_t color) {
 	messageColor = color;
+}
+
+// Set the language of the texts on the matrix (Language)
+void setMatrixLanguage(uint8_t language) {
+	matrixLanguage = language;
+}
+
+// Get the language of the texts on the matrix
+uint8_t getMatrixLanguage() {
+	return matrixLanguage;
 }
 
 // Get the color of the custom message

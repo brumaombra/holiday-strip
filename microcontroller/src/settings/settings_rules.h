@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "calendar/holiday_calendar.h"
+#include "config/language.h"
+
 // Limits of the settings, kept free of the hardware so the native tests can check them
 
 // Keep a valid scene index, or -1 (rotate through all the scenes)
@@ -17,6 +20,21 @@ void sanitizeHolidayScene(long holiday, long scene, const int *sceneCounts, int 
 
 // Keep a valid color of the custom message, or the default one
 uint8_t sanitizeMessageColor(long color);
+
+// Find a language by its code ("it", "en"), or -1 when it's unknown
+int findLanguage(const char *code);
+
+// Get the code of a language ("it", "en")
+const char *getLanguageCode(uint8_t language);
+
+// Keep a valid language, or the default one
+uint8_t sanitizeLanguage(long language);
+
+// Get the default greeting of a holiday in a language
+const char *getDefaultMessage(int holiday, uint8_t language);
+
+// Check whether a greeting is still a default one (in any language, or the two-language one from before the languages), so a change of language can translate it
+bool isDefaultMessage(int holiday, const char *message);
 
 // Keep the power limit within the allowed range
 uint32_t sanitizeMaxMilliamps(long maxMilliamps);

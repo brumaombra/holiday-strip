@@ -14,6 +14,7 @@ export const useGlobalStore = () => useState('global', () => ({
         countdown: true,
         messages: [],
         messageColor: 0,
+        language: 'it',
         holidays: [],
         currentScene: 0,
         estimatedMilliamps: 0,
