@@ -1,5 +1,10 @@
 <div align="center">
 
+<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/banner-dark.webp">
+    <img alt="Holiday Strip: hand-drawn holiday scenes on a 72x12 truck LED matrix, with a dashboard built into the firmware" src="docs/images/banner-light.webp" width="100%">
+</picture>
+
 # 🎄 Holiday Strip
 
 ### An ESP32-powered holiday show for a 72x12 LED matrix
@@ -124,6 +129,8 @@ microcontroller/tools/scene_video/render.sh 1 0 24 countdown.mp4 2026-12-31T23:5
 ```
 
 `MATRIX_LANGUAGE=en` records the texts in English, and `MESSAGE_COLOR=0` to `6` sets the custom message color.
+
+**README banner:** `tools/banner/make_banner.sh` draws `docs/images/banner-*.webp` again, with a real frame of the matrix (needs Playwright and `webapp/node_modules`).
 
 **Releasing:** versions follow [semver](https://semver.org) in `VERSION`.
 1. On `feature`, set the version in `VERSION` and in `webapp/` (`npm version X.Y.Z --no-git-tag-version`).
