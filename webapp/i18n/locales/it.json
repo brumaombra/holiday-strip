@@ -49,7 +49,7 @@
             "rotateAll": "Alterna tutte le scene",
             "rotateAllDescription": "Passa da una scena all'altra, una dopo l'altra",
             "holidaysTitle": "Festività",
-            "holidaysDescription": "Segui il calendario, oppure tieni sempre la stessa festività. Le righe sotto sono le impostazioni della festività mostrata sopra.",
+            "holidaysDescription": "Segui il calendario, oppure tieni sempre la stessa festività.",
             "holidayLabel": "Festività",
             "holidayAutomatic": "Automatica",
             "holidayAutomaticNow": "Ora: {holiday}",

@@ -248,7 +248,7 @@ This records the New Year's Eve countdown from 13 seconds before midnight. Witho
 
 The dashboard lives in `webapp/`. It's a Nuxt 4 app with the same structure, libraries and versions as the other OpenGizmo web apps:
 
-- **Home**: switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar, and under it the settings of the holiday shown (the one playing, while the calendar picks): its scene or the rotation, its custom message (edited in a sheet), and for Christmas the countdown.
+- **Home**: switch the matrix on and off, set the brightness, and watch the live preview. In the Holiday group, pick a holiday or the calendar. Under it, a group named after the holiday shown (the one playing, while the calendar picks) holds its settings: its scene or the rotation, its custom message (edited in a sheet), and for Christmas the countdown.
 - **Settings**: the power limit, the language (English or Italian), and the device info.
 - **Wi-Fi**: change the network, and the setup page the hotspot opens.
 

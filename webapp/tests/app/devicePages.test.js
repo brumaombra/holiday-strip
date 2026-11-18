@@ -570,14 +570,22 @@ describe('holiday settings on the home page', () => {
         expect(wrapper.find('#countdown').exists()).toBe(false);
     });
 
-    // The rows sit in one group: the holiday first, then its settings
-    it('lists the holiday, then its scene, its custom message and its countdown', async () => {
+    // The picker has its group, and the settings of the holiday shown have their own group under it, named after the holiday
+    it('puts the settings of the holiday in their own group under the picker', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(HomePage);
-        const html = wrapper.html();
-        expect(html.indexOf('holiday-row')).toBeLessThan(html.indexOf('scene-row'));
+        const settingsGroup = wrapper.find('[data-testid="holiday-settings-christmas"]');
+        expect(settingsGroup.text()).toContain('Christmas');
+        expect(settingsGroup.find('[data-testid="holiday-row"]').exists()).toBe(false);
+
+        // Its rows: the scene, the custom message, then the countdown
+        const html = settingsGroup.html();
         expect(html.indexOf('scene-row')).toBeLessThan(html.indexOf('message-row-christmas'));
         expect(html.indexOf('message-row-christmas')).toBeLessThan(html.indexOf('id="countdown"'));
+
+        // And it comes after the picker
+        expect(wrapper.html().indexOf('holiday-row')).toBeLessThan(wrapper.html().indexOf('holiday-settings-christmas'));
+        expect(wrapper.find('[data-testid="holiday-settings-new-year"]').exists()).toBe(false);
     });
 });
 

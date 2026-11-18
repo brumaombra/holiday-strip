@@ -49,7 +49,7 @@
             "rotateAll": "Rotate all scenes",
             "rotateAllDescription": "Cycle through every scene, one after the other",
             "holidaysTitle": "Holiday",
-            "holidaysDescription": "Follow the calendar, or keep one holiday all the time. The rows below are the settings of the holiday shown above.",
+            "holidaysDescription": "Follow the calendar, or keep one holiday all the time.",
             "holidayLabel": "Holiday",
             "holidayAutomatic": "Automatic",
             "holidayAutomaticNow": "Now: {holiday}",

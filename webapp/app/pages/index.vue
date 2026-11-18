@@ -12,6 +12,7 @@ import { Progress } from '@brumaombra/ui-vintage/progress';
 import { Slider } from '@brumaombra/ui-vintage/slider';
 import { Switch } from '@brumaombra/ui-vintage/switch';
 import { applyDeviceSettings, createSettingsSaver, refreshLiveState } from '~/composables/useDeviceState.js';
+import { getHolidayName } from '~/composables/useHolidays.js';
 import { COUNTDOWN_DAYS } from '~/composables/useMessage.js';
 import { usePolling } from '~/composables/usePolling.js';
 import { useGlobalStore } from '~/composables/stores/useGlobalStore.js';
@@ -22,7 +23,7 @@ import CustomMessageRow from '~/components/message/CustomMessageRow.vue';
 import ScenePicker from '~/components/scenes/ScenePicker.vue';
 
 const STATE_REFRESH_MS = 2000; // How often the scene on screen and the current are read again
-const { t } = useI18n();
+const { t, te } = useI18n();
 const globalStore = useGlobalStore();
 const saveBrightness = createSettingsSaver();
 
@@ -45,9 +46,13 @@ const handleBrightnessChange = ([brightness]) => {
     saveBrightness({ brightness });
 };
 
-// The holiday whose settings the group shows: the chosen one, or the one playing now while the calendar picks it
+// The holiday whose settings group is shown: the chosen one, or the one playing now while the calendar picks it
 const shownHoliday = computed(() => device.value.holiday >= 0 ? device.value.holiday : device.value.activeHoliday);
 const shownHolidayId = computed(() => device.value.holidays[shownHoliday.value]?.id);
+const shownHolidayName = computed(() => {
+    const holiday = device.value.holidays[shownHoliday.value];
+    return holiday ? getHolidayName({ holiday, t, te }) : '';
+});
 
 // Scenes of the holiday playing now (none until the device sends its holidays)
 const activeScenes = computed(() => device.value.holidays[device.value.activeHoliday]?.scenes || []);
@@ -119,9 +124,13 @@ definePageMeta({
                     </Alert>
                 </div>
 
-                <!-- The holiday, then the settings of the one shown: its scene, its custom message, and what only that holiday has -->
+                <!-- The holiday playing: the calendar, or one picked -->
                 <ListGroup v-if="device.holidays.length" :title="t('pages.home.holidaysTitle')" :hint="t('pages.home.holidaysDescription')">
                     <HolidayPicker :holidays="device.holidays" :model-value="device.holiday" :active-holiday="device.activeHoliday" @update:model-value="handleHolidayChange" />
+                </ListGroup>
+
+                <!-- The settings of the holiday shown, in a group of its own named after it: its scene, its custom message, and what only that holiday has -->
+                <ListGroup v-if="device.holidays.length" :title="shownHolidayName" :data-testid="`holiday-settings-${shownHolidayId}`">
                     <ScenePicker :scenes="activeScenes" :model-value="device.scene" :current-scene="device.on ? device.currentScene : -1" @update:model-value="handleSceneChange" />
                     <CustomMessageRow :holiday-index="shownHoliday" />
 
