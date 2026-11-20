@@ -1,16 +1,6 @@
 import { decodeFrame } from '~/composables/useFrame.js';
 
-// The request wrapper (fetchEsp) and the Wi-Fi and device calls come from the gizmo-common layer: only the calls of the Holiday Strip are here
-
-// Read the data of an answer, or throw when it isn't one: $fetch hands back the raw text of a body it can't parse as JSON, and taking that as an empty state would show (and save) the store defaults
-// The error has no message, so the caller's default message is the one shown
-const readData = response => {
-    const data = response?.data;
-    if (!data || typeof data !== 'object' || Array.isArray(data)) {
-        throw new Error();
-    }
-    return data;
-};
+// The request wrapper (fetchEsp), readData and the Wi-Fi and device calls come from the gizmo-common layer: only the calls of the Holiday Strip are here (readData throws when an answer has no data, so a broken answer is never taken as an empty state, which would show and save the store defaults)
 
 // Fetch the device state: the settings, plus what the device knows about itself
 export const getState = async () => {

@@ -5,6 +5,7 @@ What changed in each release. New notes go under **Unreleased** while the work i
 ## Unreleased
 
 - **Fix:** the dashboard could open without the holiday settings, and with the default power limit instead of yours: the device sent garbage in place of the greetings, which broke its answer. The greetings are sent as they are saved again, and when an answer can't be read the dashboard now says "Couldn't read the device" instead of showing the defaults. Flash the new firmware; your settings and greetings are kept.
+- gizmo-common v2.7.0: when the device sends an answer the web app can't read, it now shows an error ("The device sent an answer the app could not read.") instead of carrying on with empty values. Flash the new firmware to get it.
 
 ## v1.3.0 - 2026-11-20
 
