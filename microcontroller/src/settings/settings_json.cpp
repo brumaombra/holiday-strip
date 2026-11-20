@@ -46,10 +46,10 @@ void writeSettingsToJson(JsonObject json, const Settings &settings) {
 	json["messageColor"] = settings.messageColor;
 	json["language"] = getLanguageCode(settings.language);
 
-	// The greeting of each holiday, in the order of the holidays
+	// The greeting of each holiday, in the order of the holidays, copied into the document: ArduinoJson keeps a const char * as a pointer, and the settings are often a temporary copy (getSettings()) gone before the JSON is written
 	JsonArray messages = json["messages"].to<JsonArray>();
 	for (const auto &message : settings.messages) {
-		messages.add(message);
+		messages.add(JsonString(message, JsonString::Copied));
 	}
 }
 

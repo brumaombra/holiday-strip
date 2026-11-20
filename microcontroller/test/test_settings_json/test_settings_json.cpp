@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include <string.h>
 #include <unity.h>
 
 #include "config/config.h"
@@ -220,6 +221,18 @@ void test_settings_are_written_to_json() {
 	TEST_ASSERT_EQUAL_STRING("it", output["language"].as<const char *>());
 }
 
+// The messages were kept as pointers into the settings: the state is built from a temporary copy (getSettings()), so the JSON sent the memory that took its place
+void test_messages_outlive_the_settings() {
+	JsonDocument output;
+	Settings copy = settings;
+	writeSettingsToJson(output.to<JsonObject>(), copy);
+
+	// Overwrite the copy, like the stack after it's gone
+	memset(copy.messages, 'X', sizeof(copy.messages) - 1);
+	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", output["messages"][0].as<const char *>());
+	TEST_ASSERT_EQUAL_STRING("HAPPY EASTER", output["messages"][3].as<const char *>());
+}
+
 // Run all the settings JSON tests
 int main() {
 	UNITY_BEGIN();
@@ -242,5 +255,6 @@ int main() {
 	RUN_TEST(test_long_message_is_refused);
 	RUN_TEST(test_invalid_body_changes_nothing);
 	RUN_TEST(test_settings_are_written_to_json);
+	RUN_TEST(test_messages_outlive_the_settings);
 	return UNITY_END();
 }

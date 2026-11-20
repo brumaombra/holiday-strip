@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { readBody } from 'h3';
+import { readBody, setResponseHeader } from 'h3';
 import { flushPromises } from '@vue/test-utils';
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime';
 import StripPage from '~/pages/strip.vue';
@@ -93,14 +93,21 @@ const buildDeviceDetails = () => ({
 let deviceDetails;
 let deviceState;
 let isDeviceAvailable;
+let isStateUnparsable;
 let isSaveRefused;
 let savedBodies;
 let frameCount;
 
 // Answer like the device, or fail like a device that doesn't answer
 const registerDeviceEndpoints = () => {
-    registerEndpoint('/api/state', () => {
+    registerEndpoint('/api/state', event => {
         if (!isDeviceAvailable) throw createError({ statusCode: 500, data: { errorId: null, errorMessage: 'Unreachable', data: null } });
+
+        // A saved message with a raw control character, written unescaped: JSON that doesn't parse
+        if (isStateUnparsable) {
+            setResponseHeader(event, 'content-type', 'application/json');
+            return `{"errorId":null,"errorMessage":null,"data":{"messages":["A\u0014B"]}}`;
+        }
         return { errorId: null, errorMessage: null, data: deviceState };
     });
     registerEndpoint('/api/settings', {
@@ -146,6 +153,7 @@ beforeEach(() => {
     deviceState = buildDeviceState();
     deviceDetails = buildDeviceDetails();
     isDeviceAvailable = true;
+    isStateUnparsable = false;
     isSaveRefused = false;
     savedBodies = [];
     frameCount = 0;
@@ -177,6 +185,15 @@ describe('loadDeviceState', () => {
     // A failed load is remembered, and the store keeps its defaults marked as not loaded
     it('remembers a failed load', async () => {
         isDeviceAvailable = false;
+        await expect(loadDeviceState()).rejects.toThrow();
+        const globalStore = useGlobalStore();
+        expect(globalStore.value.deviceLoaded).toBe(false);
+        expect(globalStore.value.deviceLoadFailed).toBe(true);
+    });
+
+    // An answer that isn't valid JSON came back from $fetch as text, and was taken as an empty state: the page showed its defaults as loaded, without the holidays
+    it('fails on an answer that isn\'t valid JSON', async () => {
+        isStateUnparsable = true;
         await expect(loadDeviceState()).rejects.toThrow();
         const globalStore = useGlobalStore();
         expect(globalStore.value.deviceLoaded).toBe(false);
