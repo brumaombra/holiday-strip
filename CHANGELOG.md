@@ -4,6 +4,10 @@ What changed in each release. New notes go under **Unreleased** while the work i
 
 ## Unreleased
 
+## v1.3.0 - 2026-11-20
+
+Easter: a new holiday, with eight scenes between spring and the Resurrection.
+
 - **Easter**, a new holiday with eight scenes. On **Automatic** it plays from Palm Sunday to Easter Monday (March 21 to 29 in 2027), and you can pick it any day.
   - Spring: **Greeting** among blooming flowers, **Egg hunt** (a bunny hiding eggs in the meadow), **Painted eggs** and **Hatching chick**.
   - Religious: **Three crosses** on a hill at sunrise, **Empty tomb** (the stone rolls away, then `CRISTO E' RISORTO!` or `HE IS RISEN!`), **Dove of peace** with an olive branch, and **Easter bells**.
