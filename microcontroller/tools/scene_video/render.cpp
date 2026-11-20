@@ -8,6 +8,7 @@
 #include "config/config.h"
 #include "config/language.h"
 #include "scenes/scenes.h"
+#include "settings/settings_rules.h"
 
 // The clock of the stubbed getLocalTime: the date the video starts at, and how long it has played
 time_t rendererClockStart = 0;
@@ -73,9 +74,13 @@ int main(int argc, char **argv) {
 		setMessageColor((uint8_t)atoi(getenv("MESSAGE_COLOR")));
 	}
 
-	// Language of the texts on the matrix, from MATRIX_LANGUAGE (it or en)
+	// Language of the texts on the matrix, from MATRIX_LANGUAGE (it or en), with the default greetings in that language like on the board
 	if (getenv("MATRIX_LANGUAGE") != nullptr) {
-		setMatrixLanguage(strcmp(getenv("MATRIX_LANGUAGE"), "en") == 0 ? ENGLISH : ITALIAN);
+		const uint8_t language = strcmp(getenv("MATRIX_LANGUAGE"), "en") == 0 ? ENGLISH : ITALIAN;
+		setMatrixLanguage(language);
+		for (int i = 0; i < HOLIDAY_COUNT; i++) {
+			setHolidayMessage(i, getDefaultMessage(i, language));
+		}
 	}
 
 	// Pick the scene
