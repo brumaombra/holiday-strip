@@ -1,6 +1,14 @@
 <script setup>
 import { computed, ref } from 'vue';
+import BellRingIcon from '@hugeicons/core-free-icons/BellRingIcon';
+import BirdIcon from '@hugeicons/core-free-icons/BirdIcon';
+import ChurchIcon from '@hugeicons/core-free-icons/ChurchIcon';
 import DrinkIcon from '@hugeicons/core-free-icons/DrinkIcon';
+import EggIcon from '@hugeicons/core-free-icons/EggIcon';
+import PaintBrush01Icon from '@hugeicons/core-free-icons/PaintBrush01Icon';
+import RabbitIcon from '@hugeicons/core-free-icons/RabbitIcon';
+import SunriseIcon from '@hugeicons/core-free-icons/SunriseIcon';
+import TulipIcon from '@hugeicons/core-free-icons/TulipIcon';
 import FireIcon from '@hugeicons/core-free-icons/FireIcon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
 import GiftIcon from '@hugeicons/core-free-icons/GiftIcon';
@@ -47,7 +55,15 @@ const sceneIcons = {
     fireworks: FireworksIcon,
     champagne: DrinkIcon,
     sparklers: SparklesIcon,
-    message: MessageSquareTextIcon
+    message: MessageSquareTextIcon,
+    'easter-greeting': TulipIcon,
+    bunny: RabbitIcon,
+    'painted-eggs': PaintBrush01Icon,
+    chick: EggIcon,
+    crosses: SunriseIcon,
+    'empty-tomb': ChurchIcon,
+    dove: BirdIcon,
+    'easter-bells': BellRingIcon
 };
 
 // Options to pick from: rotate them all, then one per scene

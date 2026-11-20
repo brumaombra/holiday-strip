@@ -4,6 +4,12 @@ What changed in each release. New notes go under **Unreleased** while the work i
 
 ## Unreleased
 
+- **Easter**, a new holiday with eight scenes. On **Automatic** it plays from Palm Sunday to Easter Monday (March 21 to 29 in 2027), and you can pick it any day.
+  - Spring: **Greeting** among blooming flowers, **Egg hunt** (a bunny hiding eggs in the meadow), **Painted eggs** and **Hatching chick**.
+  - Religious: **Three crosses** on a hill at sunrise, **Empty tomb** (the stone rolls away, then `CRISTO E' RISORTO!` or `HE IS RISEN!`), **Dove of peace** with an olive branch, and **Easter bells**.
+  - Its own greeting, `BUONA PASQUA!` or `HAPPY EASTER!` following the language until you change it.
+  - Flash the new firmware; your settings and other greetings are kept.
+
 ## v1.2.0 - 2026-11-18
 
 Holidays: the strip now plays Christmas or New Year's Eve, picked by the calendar or by you, and runs on an ESP32 DevKit.

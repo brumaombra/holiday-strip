@@ -48,6 +48,13 @@ const HOLIDAYS = [{
     scenes: [
         { id: 'message', name: 'Message' }
     ]
+}, {
+    id: 'easter',
+    name: 'Easter',
+    scenes: [
+        { id: 'easter-greeting', name: 'Greeting' },
+        { id: 'bunny', name: 'Egg hunt' }
+    ]
 }];
 const buildDeviceState = () => ({
     on: true,
@@ -56,7 +63,7 @@ const buildDeviceState = () => ({
     activeHoliday: 0,
     scene: -1,
     maxMilliamps: 3000,
-    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'],
+    messages: ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!', 'BUONA PASQUA!'],
     messageColor: 0,
     language: 'it',
     holidays: HOLIDAYS,
@@ -202,7 +209,7 @@ describe('applyDeviceSettings', () => {
     it('takes the messages as the device stored them', async () => {
         await loadDeviceState();
         await applyDeviceSettings({ messages: [null, 'ciao anno'] });
-        expect(useGlobalStore().value.device.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'CIAO ANNO', 'CIAO! * HELLO!']);
+        expect(useGlobalStore().value.device.messages).toEqual(['BUON NATALE * MERRY CHRISTMAS', 'CIAO ANNO', 'CIAO! * HELLO!', 'BUONA PASQUA!']);
     });
 
     // A new holiday plays its own scenes, so the page shows the rotation at once (like the device does)
@@ -356,18 +363,29 @@ describe('home page', () => {
         expect(holidayRow.text()).toContain('Now: Christmas');
     });
 
-    // The picker lists Automatic and one option per holiday
+    // The picker lists Automatic and one option per holiday, the custom message last
     it('lists Automatic and every holiday in the holiday picker', async () => {
         await loadDeviceState();
         const wrapper = await mountPage(StripPage);
         await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
         await flushPromises();
-        expect(sceneCards()).toHaveLength(4);
+        expect(sceneCards()).toHaveLength(5);
         expect(sceneCards()[0].getAttribute('data-state')).toBe('checked');
         expect(sceneCards()[0].textContent).toContain('Now: Christmas');
         expect(sceneCards()[1].textContent).toContain('Christmas');
         expect(sceneCards()[2].textContent).toContain('New Year\'s Eve');
-        expect(sceneCards()[3].textContent).toContain('Custom message');
+        expect(sceneCards()[3].textContent).toContain('Easter');
+        expect(sceneCards()[4].textContent).toContain('Custom message');
+    });
+
+    // Picking Easter, listed before the custom message, sends its own index
+    it('sends the index of Easter, listed before the custom message', async () => {
+        await loadDeviceState();
+        const wrapper = await mountPage(StripPage);
+        await wrapper.find('[data-testid="holiday-row"] button').trigger('click');
+        await flushPromises();
+        sceneCards()[3].click();
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ holiday: 3 }]));
     });
 
     // Picking a holiday sends it, and the scenes follow the new holiday
@@ -493,7 +511,7 @@ describe('custom message editor', () => {
         await typeMessage(wrapper, 'Felice anno nuovo', 'new-year');
         expect(savedBodies).toEqual([]);
         await wrapper.find('form').trigger('submit');
-        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo', null] }]));
+        await vi.waitFor(() => expect(savedBodies).toEqual([{ messages: [null, 'Felice anno nuovo', null, null] }]));
 
         // The field then shows the message in capitals, like the device stored it, and the dialog is told to close
         await vi.waitFor(() => expect(wrapper.find('#message-new-year').element.value).toBe('FELICE ANNO NUOVO'));

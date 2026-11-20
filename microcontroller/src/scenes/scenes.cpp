@@ -6,7 +6,7 @@
 
 namespace {
 	// The greeting of each holiday
-	String holidayMessages[HOLIDAY_COUNT] = { getDefaultMessage(CHRISTMAS, DEFAULT_LANGUAGE), getDefaultMessage(NEW_YEAR, DEFAULT_LANGUAGE), getDefaultMessage(CUSTOM, DEFAULT_LANGUAGE) };
+	String holidayMessages[HOLIDAY_COUNT] = { getDefaultMessage(CHRISTMAS, DEFAULT_LANGUAGE), getDefaultMessage(NEW_YEAR, DEFAULT_LANGUAGE), getDefaultMessage(CUSTOM, DEFAULT_LANGUAGE), getDefaultMessage(EASTER, DEFAULT_LANGUAGE) };
 	uint8_t matrixLanguage = DEFAULT_LANGUAGE;
 	uint8_t messageColor = config::DEFAULT_MESSAGE_COLOR;
 
@@ -14,12 +14,14 @@ namespace {
 	Scene *const CHRISTMAS_SCENES[] = { &getGreetingScene(), &getSnowScene(), &getTreesScene(), &getSleighScene(), &getFireplaceScene(), &getGarlandScene(), &getGiftsScene(), &getCandyCaneScene(), &getChristmasCountdownScene() }; // The countdown last, so the scenes saved before it keep their place
 	Scene *const NEW_YEAR_SCENES[] = { &getMidnightCountdownScene(), &getConfettiScene(), &getFireworksScene(), &getChampagneScene(), &getSparklersScene() };
 	Scene *const CUSTOM_SCENES[] = { &getCustomMessageScene() };
+	Scene *const EASTER_SCENES[] = { &getEasterGreetingScene(), &getBunnyScene(), &getPaintedEggsScene(), &getChickScene(), &getCrossesScene(), &getEmptyTombScene(), &getDoveScene(), &getEasterBellsScene() }; // Spring first, then the religious scenes
 
 	// The holidays, in the order of HolidayIndex
 	const Holiday HOLIDAYS[HOLIDAY_COUNT] = {
 		{ "christmas", "Christmas", CHRISTMAS_SCENES, sizeof(CHRISTMAS_SCENES) / sizeof(CHRISTMAS_SCENES[0]) },
 		{ "new-year", "New Year's Eve", NEW_YEAR_SCENES, sizeof(NEW_YEAR_SCENES) / sizeof(NEW_YEAR_SCENES[0]) },
-		{ "custom", "Custom message", CUSTOM_SCENES, sizeof(CUSTOM_SCENES) / sizeof(CUSTOM_SCENES[0]) }
+		{ "custom", "Custom message", CUSTOM_SCENES, sizeof(CUSTOM_SCENES) / sizeof(CUSTOM_SCENES[0]) },
+		{ "easter", "Easter", EASTER_SCENES, sizeof(EASTER_SCENES) / sizeof(EASTER_SCENES[0]) }
 	};
 }
 

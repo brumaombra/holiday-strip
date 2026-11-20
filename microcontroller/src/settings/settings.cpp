@@ -14,7 +14,7 @@ namespace {
 	const char HOLIDAY_KEY[] = "holiday";
 	const char SCENE_KEY[] = "scene";
 	const char MAX_MILLIAMPS_KEY[] = "maxma";
-	const char *const MESSAGE_KEYS[HOLIDAY_COUNT] = { "message", "msg-newyear", "msg-custom" }; // One message per holiday ("message" is the Christmas one, from before the holidays)
+	const char *const MESSAGE_KEYS[HOLIDAY_COUNT] = { "message", "msg-newyear", "msg-custom", "msg-easter" }; // One message per holiday ("message" is the Christmas one, from before the holidays)
 	const char MESSAGE_COLOR_KEY[] = "msg-color";
 	const char LANGUAGE_KEY[] = "language";
 

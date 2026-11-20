@@ -55,7 +55,8 @@
             "holidayNames": {
                 "christmas": "Christmas",
                 "new-year": "New Year's Eve",
-                "custom": "Custom message"
+                "custom": "Custom message",
+                "easter": "Easter"
             },
             "sceneNames": {
                 "greeting": "Greeting",
@@ -72,7 +73,15 @@
                 "fireworks": "Fireworks",
                 "champagne": "Champagne",
                 "sparklers": "Sparklers",
-                "message": "Message"
+                "message": "Message",
+                "easter-greeting": "Greeting",
+                "bunny": "Egg hunt",
+                "painted-eggs": "Painted eggs",
+                "chick": "Hatching chick",
+                "crosses": "Three crosses",
+                "empty-tomb": "Empty tomb",
+                "dove": "Dove of peace",
+                "easter-bells": "Easter bells"
             },
             "sceneLabel": "Scene",
             "onScreenScene": "On screen: {scene}",

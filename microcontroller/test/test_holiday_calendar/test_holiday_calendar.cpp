@@ -63,11 +63,36 @@ void test_calendar_never_picks_the_custom_message() {
 	TEST_ASSERT_EQUAL_INT(CUSTOM, getActiveHoliday(CUSTOM, makeTime(2026, 12, 31)));
 }
 
+// Easter Sunday falls on the known dates, early and late ones included
+void test_easter_sunday_dates() {
+	const int expected[][3] = { { 2024, 3, 31 }, { 2025, 4, 20 }, { 2026, 4, 5 }, { 2027, 3, 28 }, { 2028, 4, 16 }, { 2038, 4, 25 }, { 2285, 3, 22 }, { 2000, 4, 23 } };
+	for (const auto &date : expected) {
+		int month = 0, day = 0;
+		getEasterSunday(date[0], month, day);
+		TEST_ASSERT_EQUAL_INT(date[1] - 1, month);
+		TEST_ASSERT_EQUAL_INT(date[2], day);
+	}
+}
+
+// Easter plays from Palm Sunday to Easter Monday, across the end of March too (Easter 2027 is on March 28)
+void test_easter_from_palm_sunday_to_easter_monday() {
+	TEST_ASSERT_EQUAL_INT(CHRISTMAS, getHolidayForDate(makeTime(2027, 3, 20, 23, 59)));
+	TEST_ASSERT_EQUAL_INT(EASTER, getHolidayForDate(makeTime(2027, 3, 21, 0, 0)));
+	TEST_ASSERT_EQUAL_INT(EASTER, getHolidayForDate(makeTime(2027, 3, 28, 3, 0))); // The night the clocks go forward
+	TEST_ASSERT_EQUAL_INT(EASTER, getHolidayForDate(makeTime(2027, 3, 29, 23, 59)));
+	TEST_ASSERT_EQUAL_INT(CHRISTMAS, getHolidayForDate(makeTime(2027, 3, 30, 0, 0)));
+	TEST_ASSERT_EQUAL_INT(EASTER, getHolidayForDate(makeTime(2026, 3, 29)));
+	TEST_ASSERT_EQUAL_INT(EASTER, getHolidayForDate(makeTime(2026, 4, 6)));
+	TEST_ASSERT_EQUAL_INT(CHRISTMAS, getHolidayForDate(makeTime(2026, 4, 7)));
+}
+
 // A chosen holiday plays whatever the date
 void test_chosen_holiday_wins_over_the_date() {
 	TEST_ASSERT_EQUAL_INT(NEW_YEAR, getActiveHoliday(NEW_YEAR, makeTime(2026, 7, 1)));
 	TEST_ASSERT_EQUAL_INT(CHRISTMAS, getActiveHoliday(CHRISTMAS, makeTime(2026, 12, 31)));
 	TEST_ASSERT_EQUAL_INT(NEW_YEAR, getActiveHoliday(AUTOMATIC_HOLIDAY, makeTime(2026, 12, 31)));
+	TEST_ASSERT_EQUAL_INT(EASTER, getActiveHoliday(EASTER, makeTime(2026, 12, 31)));
+	TEST_ASSERT_EQUAL_INT(EASTER, getActiveHoliday(AUTOMATIC_HOLIDAY, makeTime(2026, 4, 5)));
 }
 
 /******************************** Midnight ********************************/
@@ -101,6 +126,8 @@ int main() {
 	RUN_TEST(test_new_year_from_december_27_to_january_1);
 	RUN_TEST(test_christmas_before_the_clock_is_set);
 	RUN_TEST(test_calendar_never_picks_the_custom_message);
+	RUN_TEST(test_easter_sunday_dates);
+	RUN_TEST(test_easter_from_palm_sunday_to_easter_monday);
 	RUN_TEST(test_chosen_holiday_wins_over_the_date);
 	RUN_TEST(test_seconds_to_new_year);
 	RUN_TEST(test_seconds_to_new_year_from_summer_time);

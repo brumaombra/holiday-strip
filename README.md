@@ -9,7 +9,7 @@
 
 ### An ESP32-powered holiday show for a 72x12 LED matrix
 
-Holiday Strip turns a 72x12 truck LED matrix into an animated holiday display: hand-drawn scenes for Christmas and New Year's Eve, your own scrolling messages, and countdowns to both. It follows the calendar by itself, and a phone-friendly dashboard built into the firmware controls it all.
+Holiday Strip turns a 72x12 truck LED matrix into an animated holiday display: hand-drawn scenes for Christmas, New Year's Eve and Easter, your own scrolling messages, and countdowns to both. It follows the calendar by itself, and a phone-friendly dashboard built into the firmware controls it all.
 
 <p>
   <img alt="ESP32" src="https://img.shields.io/badge/esp32-ESP32-E7352C?logo=espressif&logoColor=white">
@@ -38,9 +38,10 @@ The matrix came from a truck sign; its protocol is in [docs/protocol.md](docs/pr
 
 - 🎄 **Christmas**: Greeting, Snowfall, Christmas trees, Santa's sleigh, Fireplace, Fairy lights, Gifts, Candy cane, and Countdown to Christmas (the days left, all year).
 - 🎆 **New Year's Eve**: Countdown (to midnight on December 31, then the new year bursting in), Confetti, Fireworks, Champagne and Sparklers.
+- 🐣 **Easter**: Greeting among spring flowers, Egg hunt, Painted eggs, Hatching chick, Three crosses at sunrise, Empty tomb ("He is risen!"), Dove of peace and Easter bells.
 - 💬 **Custom message**: just your text, in the color you pick, on any day.
 
-On **Automatic**, the calendar picks the holiday (New Year's Eve from December 27 to January 1, Christmas the rest of the year), and in the last minute of the year the strip jumps to the countdown. You can also pin a holiday or a single scene.
+On **Automatic**, the calendar picks the holiday (New Year's Eve from December 27 to January 1, Easter from Palm Sunday to Easter Monday, Christmas the rest of the year), and in the last minute of the year the strip jumps to the countdown. You can also pin a holiday or a single scene.
 
 The dashboard has three tabs, like every OpenGizmo app:
 
@@ -48,7 +49,7 @@ The dashboard has three tabs, like every OpenGizmo app:
 - **Device**: the device card of [gizmo-common](https://github.com/open-gizmo/gizmo-common): info, network, restart.
 - **WiFi**: change the network.
 
-The language (English or Italian) is picked in the top bar. The texts on the matrix follow it: the Christmas countdown, and the greetings you haven't changed.
+The language (English or Italian) is picked in the top bar. The texts on the matrix follow it: the Christmas countdown, "He is risen!", and the greetings you haven't changed.
 
 Also: Wi-Fi setup from your phone through a hotspot, settings saved in flash, a per-frame power limiter, and a factory reset (hold BOOT for 10 seconds).
 
@@ -93,7 +94,7 @@ cd microcontroller && pio run --target upload
 | `display/` | LED chain mapping, gamma, power limiter, RMT output |
 | `scenes/` | One file per scene, and the holidays with their scenes (`scenes.cpp`) |
 | `player/` | Follows the holiday, rotates and crossfades its scenes |
-| `calendar/` | Holiday of the date, Christmas countdown, New Year's midnight |
+| `calendar/` | Holiday of the date (Easter included), Christmas countdown, New Year's midnight |
 | `settings/` | Saved settings (NVS), and the checks of the dashboard's JSON |
 | `server/` | The dashboard and its API, one file per endpoint |
 | `config/` | Pins, timings, power figures, defaults, languages |

@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import Calendar03Icon from '@hugeicons/core-free-icons/Calendar03Icon';
+import EggsIcon from '@hugeicons/core-free-icons/EggsIcon';
 import FireworksIcon from '@hugeicons/core-free-icons/FireworksIcon';
 import MessageSquareTextIcon from '@hugeicons/core-free-icons/MessageSquareTextIcon';
 import PineTreeIcon from '@hugeicons/core-free-icons/PineTreeIcon';
@@ -25,7 +26,8 @@ const { t, te } = useI18n();
 const holidayIcons = {
     christmas: PineTreeIcon,
     'new-year': FireworksIcon,
-    custom: MessageSquareTextIcon
+    custom: MessageSquareTextIcon,
+    easter: EggsIcon
 };
 
 // Name of the holiday the calendar picked now
@@ -34,11 +36,15 @@ const calendarHolidayName = computed(() => {
     return holiday ? getHolidayName({ holiday, t, te }) : '';
 });
 
-// Options to pick from: Automatic (with the holiday of the calendar), then one per holiday
-const options = computed(() => [
-    { value: -1, label: t('pages.strip.holidayAutomatic'), description: t('pages.strip.holidayAutomaticNow', { holiday: calendarHolidayName.value }), icon: Calendar03Icon },
-    ...props.holidays.map((holiday, index) => ({ value: index, label: getHolidayName({ holiday, t, te }), description: '', icon: holidayIcons[holiday.id] || StarIcon }))
-]);
+// Options to pick from: Automatic (with the holiday of the calendar), then one per holiday, the custom message last (the device keeps the holidays in the order they were added)
+const options = computed(() => {
+    const holidays = props.holidays.map((holiday, index) => ({ value: index, label: getHolidayName({ holiday, t, te }), description: '', icon: holidayIcons[holiday.id] || StarIcon, isCustom: holiday.id === 'custom' }));
+    return [
+        { value: -1, label: t('pages.strip.holidayAutomatic'), description: t('pages.strip.holidayAutomaticNow', { holiday: calendarHolidayName.value }), icon: Calendar03Icon },
+        ...holidays.filter(holiday => !holiday.isCustom),
+        ...holidays.filter(holiday => holiday.isCustom)
+    ];
+});
 
 // Whether the holiday picker is open
 const isPickerOpen = ref(false);

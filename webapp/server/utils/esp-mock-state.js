@@ -42,6 +42,19 @@ export const HOLIDAYS = [{
     scenes: [
         { id: 'message', name: 'Message' }
     ]
+}, {
+    id: 'easter',
+    name: 'Easter',
+    scenes: [
+        { id: 'easter-greeting', name: 'Greeting' },
+        { id: 'bunny', name: 'Egg hunt' },
+        { id: 'painted-eggs', name: 'Painted eggs' },
+        { id: 'chick', name: 'Hatching chick' },
+        { id: 'crosses', name: 'Three crosses' },
+        { id: 'empty-tomb', name: 'Empty tomb' },
+        { id: 'dove', name: 'Dove of peace' },
+        { id: 'easter-bells', name: 'Easter bells' }
+    ]
 }];
 
 // Colors of the custom message: white, warm white, red, green, blue, gold, rainbow
@@ -50,12 +63,12 @@ export const MESSAGE_COLOR_COUNT = 7;
 // Languages of the texts on the matrix, and the default greeting of each holiday in each of them (like the firmware)
 export const LANGUAGES = ['it', 'en'];
 const DEFAULT_MESSAGES = {
-    it: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!'],
-    en: ['MERRY CHRISTMAS!', 'HAPPY NEW YEAR!', 'HELLO!']
+    it: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!', 'BUONA PASQUA!'],
+    en: ['MERRY CHRISTMAS!', 'HAPPY NEW YEAR!', 'HELLO!', 'HAPPY EASTER!']
 };
 
 // The two-language greetings, the defaults before the languages
-const LEGACY_MESSAGES = ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!'];
+const LEGACY_MESSAGES = ['BUON NATALE * MERRY CHRISTMAS', 'BUON ANNO * HAPPY NEW YEAR', 'CIAO! * HELLO!', null]; // Easter came after the languages
 
 // Check whether a greeting is still a default one, so a change of language translates it
 const isDefaultMessage = ({ message, index }) => message === LEGACY_MESSAGES[index] || LANGUAGES.some(language => DEFAULT_MESSAGES[language][index] === message);
@@ -63,6 +76,25 @@ const isDefaultMessage = ({ message, index }) => message === LEGACY_MESSAGES[ind
 // Indexes of the holidays the calendar picks between (it never picks the custom message)
 const CHRISTMAS_INDEX = 0;
 const NEW_YEAR_INDEX = 1;
+const EASTER_INDEX = 3;
+
+// Days of the Easter window around Easter Sunday: from Palm Sunday to Easter Monday
+const EASTER_FIRST_DAY = -7;
+const EASTER_LAST_DAY = 1;
+const DAY_MS = 86400000;
+
+// Get the date of Easter Sunday in a year, like the firmware (the anonymous Gregorian algorithm), as a local date
+export const getEasterSunday = year => {
+    const a = year % 19, b = Math.floor(year / 100), c = year % 100;
+    const d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3);
+    const h = (19 * a + b - d - g + 15) % 30;
+    const i = Math.floor(c / 4), k = c % 4;
+    const l = (32 + 2 * e + 2 * i - h - k) % 7;
+    const m = Math.floor((a + 11 * h + 22 * l) / 451);
+    const month = Math.floor((h + l - 7 * m + 114) / 31) - 1;
+    const day = (h + l - 7 * m + 114) % 31 + 1;
+    return new Date(year, month, day);
+};
 
 // Time each scene stays on screen when the device rotates them all
 export const SCENE_DURATION_MS = 15000;
@@ -86,13 +118,18 @@ export const getEspMockState = () => {
     return state;
 };
 
-// Get the holiday the calendar picks: New Year's Eve from December 27 to January 1 included, Christmas the rest of the year
+// Get the holiday the calendar picks: New Year's Eve from December 27 to January 1 included, Easter from Palm Sunday to Easter Monday, Christmas the rest of the year
 export const getCalendarHoliday = (now = Date.now()) => {
     const date = new Date(now);
     const month = date.getMonth(); // 0 is January
     const day = date.getDate();
     const isNewYearPeriod = (month === 11 && day >= 27) || (month === 0 && day === 1);
-    return isNewYearPeriod ? NEW_YEAR_INDEX : CHRISTMAS_INDEX;
+    if (isNewYearPeriod) return NEW_YEAR_INDEX;
+    const noon = new Date(date.getFullYear(), month, day, 12);
+    const easter = getEasterSunday(date.getFullYear());
+    easter.setHours(12);
+    const days = Math.round((noon - easter) / DAY_MS); // Rounded: a day can be 23 or 25 hours long
+    return days >= EASTER_FIRST_DAY && days <= EASTER_LAST_DAY ? EASTER_INDEX : CHRISTMAS_INDEX;
 };
 
 // Get the holiday playing now: the chosen one, or the one of the calendar when the choice is Automatic (-1)

@@ -17,7 +17,7 @@ vi.hoisted(() => {
 const { default: getState } = await import('../../server/api/state/index.get.js');
 const { default: postSettings } = await import('../../server/api/settings/index.post.js');
 const { default: getFrame } = await import('../../server/api/frame/index.get.js');
-const { HOLIDAYS, getEspMockState } = await import('../../server/utils/esp-mock-state.js');
+const { HOLIDAYS, getCalendarHoliday, getEasterSunday, getEspMockState } = await import('../../server/utils/esp-mock-state.js');
 const { default: nameMockDevice } = await import('../../server/plugins/gizmo-mock.js');
 const { buildDevicePayload, resetGizmoMockState } = await import('gizmo-common/web/server/utils/gizmo-mock.js');
 
@@ -87,7 +87,7 @@ describe('mock state', () => {
             holiday: -1,
             scene: -1,
             maxMilliamps: 3000,
-            messages: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!'],
+            messages: ['BUON NATALE!', 'BUON ANNO!', 'CIAO!', 'BUONA PASQUA!'],
             messageColor: 0,
             language: 'it',
             holidays: HOLIDAYS,
@@ -95,8 +95,8 @@ describe('mock state', () => {
             maxMaxMilliamps: 8000,
             maxMessageLength: 200
         });
-        expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year', 'custom']);
-        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([9, 5, 1]);
+        expect(response.data.holidays.map(holiday => holiday.id)).toEqual(['christmas', 'new-year', 'custom', 'easter']);
+        expect(response.data.holidays.map(holiday => holiday.scenes.length)).toEqual([9, 5, 1, 8]);
         expect(response.data.scenes).toBeUndefined();
         expect(response.data.message).toBeUndefined();
         expect(response.data.currentScene).toBeGreaterThanOrEqual(0);
@@ -183,20 +183,20 @@ describe('mock settings validation', () => {
     // The device stores the messages in capitals
     it('stores the messages in capitals', async () => {
         const { response } = await send({ messages: ['Merry Christmas <3', 'Happy new year'] });
-        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR', 'CIAO!']);
+        expect(response.data.messages).toEqual(['MERRY CHRISTMAS <3', 'HAPPY NEW YEAR', 'CIAO!', 'BUONA PASQUA!']);
     });
 
     // A null leaves the message of that holiday as it is
     it('leaves the message of a holiday that gets null', async () => {
         const { response } = await send({ messages: [null, 'Happy new year'] });
-        expect(response.data.messages).toEqual(['BUON NATALE!', 'HAPPY NEW YEAR', 'CIAO!']);
+        expect(response.data.messages).toEqual(['BUON NATALE!', 'HAPPY NEW YEAR', 'CIAO!', 'BUONA PASQUA!']);
     });
 
     // The list may be shorter than the holidays: the missing ones are not touched
     it('accepts a messages list shorter than the holidays', async () => {
         const { statusCode, response } = await send({ messages: ['Ciao'] });
         expect(statusCode).toBe(200);
-        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO!', 'CIAO!']);
+        expect(response.data.messages).toEqual(['CIAO', 'BUON ANNO!', 'CIAO!', 'BUONA PASQUA!']);
     });
 
     // The custom message is picked like a holiday, with its own message and color, and the calendar never picks it
@@ -204,7 +204,7 @@ describe('mock settings validation', () => {
         const { statusCode, response } = await send({ holiday: 2, messages: [null, null, 'saldi!'], messageColor: 6 });
         expect(statusCode).toBe(200);
         expect(response.data).toMatchObject({ holiday: 2, activeHoliday: 2, scene: -1, messageColor: 6 });
-        expect(response.data.messages).toEqual(['BUON NATALE!', 'BUON ANNO!', 'SALDI!']);
+        expect(response.data.messages).toEqual(['BUON NATALE!', 'BUON ANNO!', 'SALDI!', 'BUONA PASQUA!']);
     });
 
     // The language translates the greetings still at their default, and leaves the ones written by hand
@@ -213,7 +213,7 @@ describe('mock settings validation', () => {
         const { statusCode, response } = await send({ language: 'en' });
         expect(statusCode).toBe(200);
         expect(response.data.language).toBe('en');
-        expect(response.data.messages).toEqual(['MERRY CHRISTMAS!', 'AUGURI A TUTTI', 'HELLO!']);
+        expect(response.data.messages).toEqual(['MERRY CHRISTMAS!', 'AUGURI A TUTTI', 'HELLO!', 'HAPPY EASTER!']);
     });
 
     // An unknown language is refused
@@ -320,7 +320,7 @@ describe('mock settings validation', () => {
         ['brightness', -1],
         ['brightness', 256],
         ['holiday', -2],
-        ['holiday', 3],
+        ['holiday', 4],
         ['messageColor', -1],
         ['messageColor', 7],
         ['scene', -2],
@@ -359,7 +359,7 @@ describe('mock settings validation', () => {
 
     // One message per holiday, no more
     it('refuses more messages than holidays', async () => {
-        const { response } = await send({ messages: ['A', 'B', 'C', 'D'] });
+        const { response } = await send({ messages: ['A', 'B', 'C', 'D', 'E'] });
         expect(response.errorMessage).toBe('messages');
     });
 
@@ -444,5 +444,23 @@ describe('mock device name', () => {
     it('names the mock device like the app', () => {
         nameMockDevice();
         expect(buildDevicePayload({ state: getEspMockState() }).name).toBe('Holiday Strip');
+    });
+});
+describe('mock calendar', () => {
+    // Easter Sunday falls on the same dates as in the firmware, early and late ones included
+    it('finds Easter Sunday', () => {
+        const dates = [[2026, 3, 5], [2027, 2, 28], [2038, 3, 25], [2285, 2, 22]];
+        for (const [year, month, day] of dates) {
+            expect(getEasterSunday(year)).toEqual(new Date(year, month, day));
+        }
+    });
+
+    // Easter plays from Palm Sunday to Easter Monday, New Year's Eve at the end of December, Christmas the rest of the year
+    it('picks the holiday of the date', () => {
+        expect(getCalendarHoliday(new Date(2027, 2, 20, 23, 59))).toBe(0);
+        expect(getCalendarHoliday(new Date(2027, 2, 21, 0, 0))).toBe(3);
+        expect(getCalendarHoliday(new Date(2027, 2, 29, 23, 59))).toBe(3);
+        expect(getCalendarHoliday(new Date(2027, 2, 30))).toBe(0);
+        expect(getCalendarHoliday(new Date(2026, 11, 31))).toBe(1);
     });
 });

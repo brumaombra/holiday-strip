@@ -7,7 +7,7 @@
 
 namespace {
 	// Number of scenes of each holiday (Christmas, New Year's Eve, the custom message), and the holiday playing now
-	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 9, 5, 1 };
+	constexpr int SCENE_COUNTS[HOLIDAY_COUNT] = { 9, 5, 1, 8 };
 	int activeHoliday = CHRISTMAS;
 
 	// Settings under test, and the JSON the web app sends
@@ -24,7 +24,7 @@ namespace {
 
 // Start each test from the default settings
 void setUp() {
-	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO" }, 0, ITALIAN };
+	settings = { true, 60, AUTOMATIC_HOLIDAY, -1, 3000, { "MERRY CHRISTMAS", "HAPPY NEW YEAR", "CIAO", "HAPPY EASTER" }, 0, ITALIAN };
 	activeHoliday = CHRISTMAS;
 }
 
@@ -126,11 +126,13 @@ void test_language_translates_only_the_default_greetings() {
 	strcpy(settings.messages[CHRISTMAS], "BUON NATALE!");
 	strcpy(settings.messages[NEW_YEAR], "AUGURI A TUTTI");
 	strcpy(settings.messages[CUSTOM], "CIAO!");
+	strcpy(settings.messages[EASTER], "BUONA PASQUA!");
 	TEST_ASSERT_NULL(applyJson("{\"language\":\"en\"}"));
 	TEST_ASSERT_EQUAL_UINT8(ENGLISH, settings.language);
 	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS!", settings.messages[CHRISTMAS]);
 	TEST_ASSERT_EQUAL_STRING("AUGURI A TUTTI", settings.messages[NEW_YEAR]);
 	TEST_ASSERT_EQUAL_STRING("HELLO!", settings.messages[CUSTOM]);
+	TEST_ASSERT_EQUAL_STRING("HAPPY EASTER!", settings.messages[EASTER]);
 }
 
 // The two-language greetings from before the languages count as defaults too
@@ -169,7 +171,7 @@ void test_invalid_fields_are_named() {
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":256}"));
 	TEST_ASSERT_EQUAL_STRING("brightness", applyJson("{\"brightness\":12.5}"));
 	TEST_ASSERT_EQUAL_STRING("scene", applyJson("{\"scene\":9}"));
-	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":3}"));
+	TEST_ASSERT_EQUAL_STRING("holiday", applyJson("{\"holiday\":4}"));
 	TEST_ASSERT_EQUAL_STRING("messageColor", applyJson("{\"messageColor\":7}"));
 	TEST_ASSERT_EQUAL_STRING("language", applyJson("{\"language\":\"fr\"}"));
 	TEST_ASSERT_EQUAL_STRING("language", applyJson("{\"language\":1}"));
@@ -179,7 +181,7 @@ void test_invalid_fields_are_named() {
 	TEST_ASSERT_EQUAL_STRING("on", applyJson("{\"on\":1}"));
 	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":\"HELLO\"}"));
 	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[42]}"));
-	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[\"A\",\"B\",\"C\",\"D\"]}"));
+	TEST_ASSERT_EQUAL_STRING("messages", applyJson("{\"messages\":[\"A\",\"B\",\"C\",\"D\",\"E\"]}"));
 }
 
 // A message longer than the matrix keeps is refused
@@ -213,6 +215,7 @@ void test_settings_are_written_to_json() {
 	TEST_ASSERT_EQUAL_STRING("MERRY CHRISTMAS", output["messages"][0].as<const char *>());
 	TEST_ASSERT_EQUAL_STRING("HAPPY NEW YEAR", output["messages"][1].as<const char *>());
 	TEST_ASSERT_EQUAL_STRING("CIAO", output["messages"][2].as<const char *>());
+	TEST_ASSERT_EQUAL_STRING("HAPPY EASTER", output["messages"][3].as<const char *>());
 	TEST_ASSERT_EQUAL_INT(0, output["messageColor"].as<int>());
 	TEST_ASSERT_EQUAL_STRING("it", output["language"].as<const char *>());
 }

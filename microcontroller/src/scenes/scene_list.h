@@ -27,6 +27,16 @@ Scene &getSparklersScene();
 // Custom message
 Scene &getCustomMessageScene();
 
+// Easter
+Scene &getEasterGreetingScene();
+Scene &getBunnyScene();
+Scene &getPaintedEggsScene();
+Scene &getChickScene();
+Scene &getCrossesScene();
+Scene &getEmptyTombScene();
+Scene &getDoveScene();
+Scene &getEasterBellsScene();
+
 // Settings of the greeting scenes
 const String &getHolidayMessage(int holiday);
 uint8_t getMessageColor();

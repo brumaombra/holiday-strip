@@ -13,11 +13,12 @@ namespace {
 	const char *const DEFAULT_MESSAGES[HOLIDAY_COUNT][LANGUAGE_COUNT] = {
 		{ "BUON NATALE!", "MERRY CHRISTMAS!" },
 		{ "BUON ANNO!", "HAPPY NEW YEAR!" },
-		{ "CIAO!", "HELLO!" }
+		{ "CIAO!", "HELLO!" },
+		{ "BUONA PASQUA!", "HAPPY EASTER!" }
 	};
 
 	// The two-language greetings, the defaults before the languages (still saved on the boards that never changed them)
-	const char *const LEGACY_MESSAGES[HOLIDAY_COUNT] = { "BUON NATALE * MERRY CHRISTMAS", "BUON ANNO * HAPPY NEW YEAR", "CIAO! * HELLO!" };
+	const char *const LEGACY_MESSAGES[HOLIDAY_COUNT] = { "BUON NATALE * MERRY CHRISTMAS", "BUON ANNO * HAPPY NEW YEAR", "CIAO! * HELLO!", nullptr }; // Easter came after the languages
 }
 
 // Keep a valid scene index, or -1 (rotate through all the scenes)
@@ -68,7 +69,7 @@ const char *getDefaultMessage(int holiday, uint8_t language) {
 
 // Check whether a greeting is still a default one (in any language, or the two-language one from before the languages)
 bool isDefaultMessage(int holiday, const char *message) {
-	if (strcmp(message, LEGACY_MESSAGES[holiday]) == 0) {
+	if (LEGACY_MESSAGES[holiday] != nullptr && strcmp(message, LEGACY_MESSAGES[holiday]) == 0) {
 		return true;
 	}
 	for (const char *defaultMessage : DEFAULT_MESSAGES[holiday]) {

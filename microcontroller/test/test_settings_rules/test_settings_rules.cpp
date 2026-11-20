@@ -89,6 +89,9 @@ void test_default_greetings_are_recognized() {
 	TEST_ASSERT_TRUE(isDefaultMessage(CHRISTMAS, "BUON NATALE * MERRY CHRISTMAS"));
 	TEST_ASSERT_FALSE(isDefaultMessage(CHRISTMAS, "BUON NATALE A TUTTI"));
 	TEST_ASSERT_FALSE(isDefaultMessage(NEW_YEAR, "MERRY CHRISTMAS!"));
+	TEST_ASSERT_EQUAL_STRING("BUONA PASQUA!", getDefaultMessage(EASTER, ITALIAN));
+	TEST_ASSERT_TRUE(isDefaultMessage(EASTER, "HAPPY EASTER!"));
+	TEST_ASSERT_FALSE(isDefaultMessage(EASTER, "BUONA PASQUA A TUTTI"));
 }
 
 /******************************** Numbers ********************************/

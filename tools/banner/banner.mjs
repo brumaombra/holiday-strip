@@ -29,6 +29,7 @@ const icons = {
 	check: await loadIcon('CheckmarkCircle02Icon'),
 	tree: await loadIcon('PineTreeIcon'),
 	fireworks: await loadIcon('FireworksIcon'),
+	eggs: await loadIcon('EggsIcon'),
 	chevron: await loadIcon('ArrowRight01Icon')
 };
 const logo = readFileSync(path.join(HERE, '../../webapp/public/logo.svg'), 'utf8');
@@ -127,9 +128,10 @@ const page = theme => `<!doctype html>
 	</div>
 
 	<!-- The holidays -->
-	<div class="card stats" style="left: 1040px; top: 334px; transform: rotate(0.8deg);">
+	<div class="card stats" style="left: 930px; top: 334px; transform: rotate(0.8deg);">
 		<div><span class="icon">${icons.tree}</span><b>9</b><span>scenes</span></div>
 		<div><span class="icon">${icons.fireworks}</span><b>5</b><span>scenes</span></div>
+		<div><span class="icon">${icons.eggs}</span><b>8</b><span>scenes</span></div>
 	</div>
 
 	<div class="accent"></div>

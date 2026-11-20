@@ -55,7 +55,8 @@
             "holidayNames": {
                 "christmas": "Natale",
                 "new-year": "Capodanno",
-                "custom": "Messaggio personalizzato"
+                "custom": "Messaggio personalizzato",
+                "easter": "Pasqua"
             },
             "sceneNames": {
                 "greeting": "Saluto",
@@ -72,7 +73,15 @@
                 "fireworks": "Fuochi d'artificio",
                 "champagne": "Champagne",
                 "sparklers": "Stelline",
-                "message": "Messaggio"
+                "message": "Messaggio",
+                "easter-greeting": "Auguri",
+                "bunny": "Caccia alle uova",
+                "painted-eggs": "Uova dipinte",
+                "chick": "Pulcino",
+                "crosses": "Tre croci",
+                "empty-tomb": "Sepolcro vuoto",
+                "dove": "Colomba della pace",
+                "easter-bells": "Campane di Pasqua"
             },
             "sceneLabel": "Scena",
             "onScreenScene": "In onda: {scene}",
