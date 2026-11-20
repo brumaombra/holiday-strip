@@ -128,10 +128,11 @@ const page = theme => `<!doctype html>
 	</div>
 
 	<!-- The holidays -->
-	<div class="card stats" style="left: 930px; top: 334px; transform: rotate(0.8deg);">
-		<div><span class="icon">${icons.tree}</span><b>9</b><span>scenes</span></div>
-		<div><span class="icon">${icons.fireworks}</span><b>5</b><span>scenes</span></div>
-		<div><span class="icon">${icons.eggs}</span><b>8</b><span>scenes</span></div>
+	<div class="card stats" style="left: 1034px; top: 334px; transform: rotate(0.8deg);">
+		<div><span>scenes</span></div>
+		<div><span class="icon">${icons.tree}</span><b>9</b></div>
+		<div><span class="icon">${icons.fireworks}</span><b>5</b></div>
+		<div><span class="icon">${icons.eggs}</span><b>8</b></div>
 	</div>
 
 	<div class="accent"></div>
